@@ -4,10 +4,11 @@ A personal Warframe damage calculator and build optimizer. Runs locally, no inst
 
 ## Use it
 
-- **Desktop app:** run `dist/WarframeDamageCalc-Setup-0.1.0.exe` once to install. It adds Start menu and desktop shortcuts.
+- **Desktop app:** run `dist/WarframeDamageCalc-Setup-0.2.0.exe` once to install. It adds Start menu and desktop shortcuts.
   The installer is unsigned, so Windows SmartScreen may say "Windows protected your PC": click **More info > Run anyway**.
   Use the **Update game data** button (top right) after a patch; downloaded data is stored in `%APPDATA%\Warframe Damage Calc`.
-- **Browser version:** double-click `index.html`. Same calculator, works offline.
+- **Web version:** https://warframe.hardn.net (or double-click `index.html`). Same calculator.
+- **Interface:** arsenal-style layout with weapon, Warframe and arcane browsers, drag-and-drop mod cards and a filterable mod grid. Item images load from the warframestat.us CDN; without internet they fall back to text placeholders.
 - **CLI (needs Node 18+):**
   - `node cli.js calc examples/soma-prime-grineer.json`
   - `node cli.js optimize examples/optimize-soma-steelpath.json`

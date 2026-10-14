@@ -45,6 +45,9 @@ function slimWeapon(w) {
     disposition: w.disposition || null,
     polarities: w.polarities || [],
     isPrime: !!w.isPrime,
+    incarnon: (w.attacks || []).some(a => /incarnon/i.test(a.name || '')),
+    mastery: w.masteryReq || 0,
+    image: w.imageName || null,
     url: w.wikiaUrl || null,
     attacks
   };
@@ -92,6 +95,7 @@ function buildData(load, version) {
       exilus: !!m.isExilus,
       augment: !!m.isAugment,
       set: m.modSet || null,
+      image: m.imageName || null,
       stats,
       effects: parsed.effects,
       unparsed: parsed.unparsed,
@@ -107,13 +111,21 @@ function buildData(load, version) {
   }).map(a => {
     const stats = maxStats(a);
     const parsed = WF.parser.parseStats(stats, { name: a.name });
-    return { name: a.name, type: a.type, rarity: a.rarity, stats, effects: parsed.effects, unparsed: parsed.unparsed, url: a.wikiaUrl || null };
+    return { name: a.name, type: a.type, rarity: a.rarity, image: a.imageName || null, stats, effects: parsed.effects, unparsed: parsed.unparsed, url: a.wikiaUrl || null };
   }).filter(a => a.effects.length || a.type !== 'Warframe Arcane')
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const frames = load('Warframes.json')
     .filter(f => f.productCategory === 'Suits')
-    .map(f => ({ name: f.name, abilities: (f.abilities || []).map(a => a.name), url: f.wikiaUrl || null }))
+    .map(f => ({
+      name: f.name,
+      image: f.imageName || null,
+      isPrime: !!f.isPrime,
+      health: f.health, shield: f.shield, armor: f.armor, energy: f.power,
+      passive: f.passiveDescription ? WF.parser.clean(f.passiveDescription) : null,
+      abilities: (f.abilities || []).map(a => ({ name: a.name, description: a.description || '', image: a.imageName || null })),
+      url: f.wikiaUrl || null
+    }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
   return {
