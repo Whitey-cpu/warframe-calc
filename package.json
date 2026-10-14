@@ -1,0 +1,66 @@
+{
+  "name": "warframe-calc",
+  "productName": "Warframe Damage Calc",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal Warframe damage calculator and build optimizer",
+  "author": "Ethan",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "sync": "node scripts/sync-data.js",
+    "test": "node test/test.js",
+    "calc": "node cli.js calc",
+    "optimize": "node cli.js optimize",
+    "dist:win": "electron-builder --win nsis --x64"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "electron": "44.7.2",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "net.hardn.warframecalc",
+    "productName": "Warframe Damage Calc",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "index.html",
+      "ui/**",
+      "src/**",
+      "data/game-data.json",
+      "data/game-data.js",
+      "electron/**",
+      "build/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Warframe Damage Calc",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "artifactName": "WarframeDamageCalc-Setup-${version}.exe"
+    },
+    "publish": null
+  }
+}

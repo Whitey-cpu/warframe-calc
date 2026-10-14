@@ -1,0 +1,7 @@
+{
+  "weapon": "Soma Prime",
+  "metric": "sustainedTotal",
+  "buffs": [],
+  "conditions": { "assumeMax": true, "statusTypes": 3 },
+  "enemy": { "faction": "Grineer", "armor": 2700, "headshotRate": 0 }
+}

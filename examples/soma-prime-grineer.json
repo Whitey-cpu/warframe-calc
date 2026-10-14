@@ -1,0 +1,9 @@
+{
+  "weapon": "Soma Prime",
+  "attack": 0,
+  "mods": ["Serration", "Split Chamber", "Vital Sense", "Point Strike", "Hellfire", "Stormbringer", "Primed Bane of Grineer", "Hammer Shot"],
+  "arcanes": ["Primary Merciless"],
+  "buffs": [{ "id": "roar", "strength": 1.3 }],
+  "conditions": { "assumeMax": true },
+  "enemy": { "faction": "Grineer", "armor": 1500, "headshotRate": 0.2, "corrosiveStacks": 0, "viralStacks": 0 }
+}

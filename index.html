@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Warframe Damage Calc</title>
+<link rel="stylesheet" href="ui/style.css">
+</head>
+<body>
+<header>
+  <h1>Warframe Damage Calc</h1>
+  <span id="dataInfo" class="muted"></span>
+  <button type="button" id="updateData" class="ghost" hidden>Update game data</button>
+  <a id="downloadApp" class="btnlink" href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Download Windows app</a>
+</header>
+
+<main>
+  <section class="panel" id="weaponPanel">
+    <h2>Weapon</h2>
+    <label>Weapon <input id="weapon" list="weaponList" placeholder="Type to search, e.g. Soma Prime" autocomplete="off"></label>
+    <datalist id="weaponList"></datalist>
+    <label>Attack <select id="attack"></select></label>
+    <div id="weaponInfo" class="muted small"></div>
+    <details>
+      <summary>Base stat overrides (Incarnon, kitguns, data errors)</summary>
+      <div class="grid2">
+        <label>Multishot <input type="number" step="any" data-ov="multishot"></label>
+        <label>Fire rate <input type="number" step="any" data-ov="fireRate"></label>
+        <label>Crit chance (0-1+) <input type="number" step="any" data-ov="critChance"></label>
+        <label>Crit multiplier <input type="number" step="any" data-ov="critMult"></label>
+        <label>Status chance (0-1) <input type="number" step="any" data-ov="statusChance"></label>
+        <label>Magazine <input type="number" step="any" data-ov="magazine"></label>
+        <label>Reload (s) <input type="number" step="any" data-ov="reload"></label>
+        <label>Charge time (s) <input type="number" step="any" data-ov="chargeTime"></label>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel" id="modPanel">
+    <h2>Mods <span class="muted small">(slot order matters for elements: top-left first)</span></h2>
+    <datalist id="modList"></datalist>
+    <datalist id="exilusList"></datalist>
+    <div id="slots" class="slots"></div>
+    <h3>Arcanes</h3>
+    <datalist id="arcaneList"></datalist>
+    <div class="grid2">
+      <label>Weapon arcane <input id="arcane1" list="arcaneList" autocomplete="off"></label>
+      <label>Warframe arcane <input id="arcane2" list="arcaneList" autocomplete="off"></label>
+    </div>
+    <h3>Riven</h3>
+    <div id="riven"></div>
+    <button type="button" id="addRiven" class="ghost">+ Riven stat</button>
+  </section>
+
+  <section class="panel" id="framePanel">
+    <h2>Warframe and buffs</h2>
+    <label>Warframe <input id="frame" list="frameList" autocomplete="off" placeholder="Optional"></label>
+    <datalist id="frameList"></datalist>
+    <div id="frameAbilities" class="muted small"></div>
+    <div id="abilities"></div>
+    <h3>Custom buffs</h3>
+    <p class="muted small">For anything not built in (Incarnon perks, other abilities, Archon shards). Values are decimals: 0.5 = +50%.</p>
+    <div id="custom"></div>
+    <button type="button" id="addCustom" class="ghost">+ Custom buff</button>
+    <h3>Conditions</h3>
+    <div class="grid2">
+      <label class="check"><input type="checkbox" id="assumeMax" checked> Conditional buffs at max stacks</label>
+      <label class="check"><input type="checkbox" id="aiming" checked> Aiming</label>
+      <label>Melee combo multiplier <input type="number" id="combo" value="1" min="1" step="0.5"></label>
+      <label>Status types on target <input type="number" id="statusTypes" value="0" min="0" step="1"></label>
+    </div>
+    <div id="stacks"></div>
+  </section>
+
+  <section class="panel" id="enemyPanel">
+    <h2>Enemy</h2>
+    <div class="grid2">
+      <label>Faction <select id="faction"></select></label>
+      <label>Armor (net, before strip) <input type="number" id="armor" value="0" min="0"></label>
+      <label>Headshot rate (%) <input type="number" id="headshotRate" value="0" min="0" max="100"></label>
+      <label>Weak point multiplier <input type="number" id="weakPointMult" step="any" placeholder="auto"></label>
+      <label>Viral stacks <input type="number" id="viralStacks" value="0" min="0" max="10"></label>
+      <label>Corrosive stacks <input type="number" id="corrosiveStacks" value="0" min="0" max="10"></label>
+      <label>Other armor strip (%) <input type="number" id="armorStripPct" value="0" min="0" max="100"></label>
+      <label class="check"><input type="checkbox" id="heatStrip"> Heat armor strip (50%)</label>
+    </div>
+    <p class="muted small">Shields and Overguard are not modeled yet.</p>
+  </section>
+
+  <section class="panel results" id="resultPanel">
+    <h2>Results</h2>
+    <div id="tiles" class="tiles"></div>
+    <div id="breakdown"></div>
+  </section>
+
+  <section class="panel" id="optPanel">
+    <h2>Optimizer</h2>
+    <p class="muted small">Uses the weapon, attack, arcanes (warframe arcane is kept fixed), riven, buffs, conditions and enemy above. Locked slots stay as they are.</p>
+    <div class="grid2">
+      <label>Optimize for <select id="metric">
+        <option value="sustainedTotal">Sustained DPS (with reloads)</option>
+        <option value="burstTotal">Burst DPS</option>
+        <option value="burstDirect">Burst DPS, direct hits only</option>
+        <option value="perShotVsEnemy">Damage per shot</option>
+      </select></label>
+      <label class="check"><input type="checkbox" id="optArcane" checked> Also pick weapon arcane</label>
+      <label class="check"><input type="checkbox" id="optExilus" checked> Use exilus slot</label>
+    </div>
+    <label>Exclude mods (comma separated) <input id="excluded" placeholder="e.g. Vile Acceleration, Hunter Munitions"></label>
+    <button type="button" id="runOpt">Find best build</button>
+    <div id="optOut" class="small"></div>
+  </section>
+
+  <section class="panel" id="savePanel">
+    <h2>Builds</h2>
+    <div class="row">
+      <input id="buildName" placeholder="Build name">
+      <button type="button" id="saveBuild">Save</button>
+      <select id="savedBuilds"><option value="">Load saved...</option></select>
+      <button type="button" id="deleteBuild" class="ghost">Delete</button>
+    </div>
+    <div class="row">
+      <button type="button" id="copyJson" class="ghost">Copy build JSON (for Claude / CLI)</button>
+      <button type="button" id="pasteJson" class="ghost">Load from JSON</button>
+    </div>
+    <textarea id="jsonBox" rows="6" spellcheck="false" placeholder="Build JSON appears here"></textarea>
+  </section>
+</main>
+
+<footer class="muted small">
+  Formulas: <a href="https://wiki.warframe.com/w/Damage_calculation" target="_blank" rel="noopener">WARFRAME Wiki</a>.
+  Data: <a href="https://www.npmjs.com/package/@wfcd/items" target="_blank" rel="noopener">@wfcd/items</a>.
+  Lines marked ASSUMPTION in the notes are modeling choices the wiki does not state outright.
+  <br>A free fan-made tool by <a href="https://hardn.net" target="_blank" rel="noopener">hardn</a>
+  (<a href="https://github.com/Whitey-cpu/warframe-calc" target="_blank" rel="noopener">source</a>).
+  Not affiliated with or endorsed by Digital Extremes. Warframe and all related names are trademarks of Digital Extremes Ltd.
+</footer>
+
+<script src="data/game-data.js"></script>
+<script src="src/static.js"></script>
+<script src="src/parser.js"></script>
+<script src="src/engine.js"></script>
+<script src="src/optimizer.js"></script>
+<script src="ui/app.js"></script>
+</body>
+</html>
