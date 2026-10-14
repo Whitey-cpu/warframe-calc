@@ -36,7 +36,10 @@
       "data/game-data.js",
       "electron/**",
       "build/icon.png",
-      "package.json"
+      "package.json",
+      "favicon.svg",
+      "favicon-32.png",
+      "favicon.ico"
     ],
     "win": {
       "target": [
