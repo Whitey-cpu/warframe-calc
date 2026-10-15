@@ -1,0 +1,13 @@
+{
+  "name": "warframe-calc-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test/api.test.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "miniflare": "4.20260730.0",
+    "wrangler": "4.144.0"
+  }
+}

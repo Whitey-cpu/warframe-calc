@@ -229,3 +229,21 @@ footer { padding: 8px 16px 24px; max-width: 1700px; margin: 0 auto; }
 .arc-slot img.broken { display: none; }
 .arc-slot .thumb { color: var(--accent); font-weight: 700; }
 [hidden] { display: none !important; }
+
+/* ---------- accounts ---------- */
+.btn.discord { background: #5865f2; color: #fff; }
+.btn.danger { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, var(--border)); }
+.acct { position: relative; }
+.acct > summary { list-style: none; display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px 8px; border: 1px solid var(--border); border-radius: 999px; color: var(--text); margin: 0; }
+.acct > summary::-webkit-details-marker { display: none; }
+.acct img { width: 24px; height: 24px; border-radius: 50%; }
+.acct-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; display: grid; gap: 8px; min-width: 240px; padding: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 30px rgb(0 0 0 / .4); }
+.own { all: unset; cursor: pointer; font-size: 14px; line-height: 1; color: var(--muted); opacity: .55; padding: 0 2px; }
+.own:hover { opacity: 1; }
+.own.on { color: var(--r-rare); opacity: 1; }
+.own:focus-visible { outline: 2px solid var(--accent); border-radius: 3px; }
+.owned-count { color: var(--r-rare); }
+.share-list { margin: 4px 0; padding-left: 18px; font-size: .8rem; display: grid; gap: 3px; }
+.linkbtn { all: unset; cursor: pointer; color: var(--warn); font-size: .75rem; }
+.linkbtn:focus-visible { outline: 2px solid var(--accent); }
+#buildMsg:empty { display: none; }

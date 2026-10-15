@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Privacy - Warframe Damage Calc</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  :root { color-scheme: dark light; --bg: light-dark(#f4f5f7, #0b0d12); --text: light-dark(#161a22, #e7e9f0); --muted: light-dark(#5b6374, #8f97a8); --accent: light-dark(#8a5a00, #e0b04a); }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.5rem; } h2 { font-size: 1.1rem; margin-top: 1.6rem; color: var(--accent); }
+  a { color: var(--accent); } .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <p><a href="./">&larr; Back to the calculator</a></p>
+  <h1>Privacy</h1>
+  <p class="muted">Warframe Damage Calc (warframe.hardn.net) is a free fan-made tool by hardn. Last updated October 14, 2026.</p>
+
+  <h2>Without an account</h2>
+  <p>You can use everything without signing in. Your builds, owned-mods list and last build are stored only in your own browser (local storage). Nothing is sent to us.</p>
+
+  <h2>If you sign in with Discord</h2>
+  <p>We ask Discord only for the <code>identify</code> permission. We store:</p>
+  <ul>
+    <li>Your Discord user ID, username, display name and avatar ID (to show who is signed in). We do not receive your email address.</li>
+    <li>Builds you save to your account, your owned-mods list, and share links you create.</li>
+    <li>A sign-in session. Your browser keeps a random session token in a secure, HttpOnly cookie for 30 days. We store only a one-way hash of it.</li>
+  </ul>
+  <p>Data is stored in a Cloudflare D1 database and served by a Cloudflare Worker at warframe-api.hardn.net. We do not sell or share your data, and we do not use analytics or advertising trackers.</p>
+
+  <h2>Share links</h2>
+  <p>A share link makes that one build readable by anyone who has the link. It does not show your Discord name. You can delete your share links at any time from the Builds panel.</p>
+
+  <h2>Images and other services</h2>
+  <p>Item images load from the community image server cdn.warframestat.us, and Discord avatars load from cdn.discordapp.com. Those services receive your IP address when your browser requests an image, under their own privacy policies.</p>
+
+  <h2>Deleting your data</h2>
+  <p>Signed in, open your name in the top right and choose <b>Delete account and data</b>. This permanently removes your account, cloud builds, owned-mods list, share links and sessions. To remove data stored in your browser, clear this site's data in your browser settings. You can also revoke the app's access in Discord under User Settings &gt; Authorized Apps.</p>
+
+  <h2>Contact</h2>
+  <p>Questions: <a href="mailto:Info@hardn.net">Info@hardn.net</a></p>
+
+  <p class="muted">Not affiliated with or endorsed by Digital Extremes. Warframe and all related names and images are trademarks and property of Digital Extremes Ltd.</p>
+</main>
+</body>
+</html>

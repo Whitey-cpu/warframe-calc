@@ -1,0 +1,94 @@
+name: Deploy API
+
+# Deploys the accounts API (api/) to Cloudflare Workers + D1 at https://warframe-api.hardn.net
+# Required repository secrets (Settings > Secrets and variables > Actions):
+#   CLOUDFLARE_API_TOKEN   - token with "Edit Cloudflare Workers" + Account > D1 > Edit
+#   CLOUDFLARE_ACCOUNT_ID  - your Cloudflare account ID
+#   DISCORD_CLIENT_ID      - from the Discord developer portal (OAuth2 page)
+#   DISCORD_CLIENT_SECRET  - from the Discord developer portal (OAuth2 page)
+on:
+  push:
+    branches: [main]
+    paths: ["api/**", ".github/workflows/deploy-api.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Check secrets are set
+        id: check
+        working-directory: .
+        env:
+          HAS_DISCORD_ID: ${{ secrets.DISCORD_CLIENT_ID != '' }}
+          HAS_DISCORD_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET != '' }}
+        run: |
+          missing=""
+          [ -z "$CLOUDFLARE_API_TOKEN" ] && missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -z "$CLOUDFLARE_ACCOUNT_ID" ] && missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ "$HAS_DISCORD_ID" != "true" ] && missing="$missing DISCORD_CLIENT_ID"
+          [ "$HAS_DISCORD_SECRET" != "true" ] && missing="$missing DISCORD_CLIENT_SECRET"
+          if [ -n "$missing" ]; then
+            echo "::warning::Skipping API deploy. Missing repository secrets:$missing"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ok == 'true'
+        with:
+          node-version: 22
+      - name: Install
+        if: steps.check.outputs.ok == 'true'
+        run: npm install --no-audit --no-fund
+      - name: Test (local Worker runtime, mocked Discord)
+        if: steps.check.outputs.ok == 'true'
+        run: npm test
+      - name: Ensure D1 database exists
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          id=$(npx wrangler d1 list --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const l=JSON.parse(s);const d=l.find(x=>x.name==="warframe-calc");process.stdout.write(d?d.uuid:"")})')
+          if [ -z "$id" ]; then
+            npx wrangler d1 create warframe-calc
+            id=$(npx wrangler d1 list --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const l=JSON.parse(s);const d=l.find(x=>x.name==="warframe-calc");process.stdout.write(d?d.uuid:"")})')
+          fi
+          [ -n "$id" ] || { echo "::error::Could not find or create the D1 database"; exit 1; }
+          sed -i "s/__D1_DATABASE_ID__/$id/" wrangler.toml
+      - name: Apply database schema
+        if: steps.check.outputs.ok == 'true'
+        run: npx wrangler d1 execute warframe-calc --remote --file=schema.sql --yes
+      - name: Deploy Worker
+        if: steps.check.outputs.ok == 'true'
+        run: npx wrangler deploy
+      - name: Set Worker secrets
+        if: steps.check.outputs.ok == 'true'
+        env:
+          DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
+          DISCORD_CLIENT_SECRET: ${{ secrets.DISCORD_CLIENT_SECRET }}
+        run: |
+          node -e 'require("fs").writeFileSync("/tmp/secrets.json", JSON.stringify({DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET}))'
+          npx wrangler secret bulk /tmp/secrets.json
+          rm -f /tmp/secrets.json
+      - name: Smoke test
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -fsS https://warframe-api.hardn.net/health; then echo; exit 0; fi
+            sleep 20
+          done
+          echo "::warning::API did not answer yet; the custom domain certificate can take a few minutes."

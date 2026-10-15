@@ -47,6 +47,17 @@ Mod text the parser does not understand is listed under "Not modeled" so nothing
 - Hand-maintained constants (factions, abilities, incompatible mods) live in `src/static.js` with a source link on each.
 - Anything the wiki does not state outright is tagged **ASSUMPTION** in the code and shown in the results notes.
 
+## Accounts (warframe.hardn.net only)
+
+Optional Discord sign-in syncs saved builds and the owned-mods list, and lets you create share links
+(`https://warframe.hardn.net/#share=ID`). Without signing in, everything is stored in the browser.
+The desktop app and local `index.html` keep using local storage.
+
+- API: `api/` (Cloudflare Worker + D1) served at `https://warframe-api.hardn.net`. Deployed by `.github/workflows/deploy-api.yml`.
+- Repository secrets it needs: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`.
+- Tests: `cd api && npm install && npm test` (runs the Worker locally with a mocked Discord).
+- Privacy policy: `privacy.html`.
+
 ## Rebuilding the desktop app
 
 Needs Node 18+. `npm install` then `npm start` (run in a window) or `npm run dist:win` (build the installer into `dist/`).
@@ -59,6 +70,7 @@ index.html, ui/        Browser UI
 cli.js                 Command line
 electron/              Desktop app shell (window, data updater)
 build/                 App icon
+api/                   Accounts API (Cloudflare Worker + D1)
 src/static.js          Hand-maintained constants with sources
 src/parser.js          Mod/arcane text -> structured effects
 src/engine.js          Damage math

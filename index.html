@@ -22,6 +22,7 @@
   <span class="spacer"></span>
   <a id="downloadApp" class="btn ghost" href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Download Windows app</a>
   <button type="button" id="updateData" class="btn ghost" hidden>Update game data</button>
+  <div id="account"></div>
 </header>
 
 <main class="layout">
@@ -90,7 +91,7 @@
         </select>
       </div>
       <div class="chips" id="modChips"></div>
-      <div class="muted small" id="modCount"></div>
+      <div class="muted small"><span id="modCount"></span> <span id="ownedCount" class="owned-count"></span></div>
       <div id="modGrid" class="card-grid mods-grid"></div>
     </div>
   </section>
@@ -160,6 +161,7 @@
         <label>Exclude mods <input id="excluded" placeholder="comma separated"></label>
         <label class="check"><input type="checkbox" id="optArcane" checked> Pick weapon arcane</label>
         <label class="check"><input type="checkbox" id="optExilus" checked> Use exilus slot</label>
+        <label class="check" title="Star the mods you own in the mod browser"><input type="checkbox" id="optOwned"> Only mods I own</label>
       </div>
       <p class="muted small">Locked slots are kept. Mod capacity and forma are not modeled.</p>
       <button type="button" id="runOpt" class="btn">Find best build</button>
@@ -168,6 +170,7 @@
 
     <section class="panel">
       <h2>Builds</h2>
+      <p class="muted small" id="cloudNote"></p>
       <div class="row">
         <input id="buildName" placeholder="Build name">
         <button type="button" id="saveBuild" class="btn sm">Save</button>
@@ -176,6 +179,12 @@
         <select id="savedBuilds"><option value="">Load saved...</option></select>
         <button type="button" id="deleteBuild" class="btn ghost sm">Delete</button>
       </div>
+      <div class="row">
+        <button type="button" id="shareBuild" class="btn ghost sm" hidden>Create share link</button>
+        <button type="button" id="uploadLocal" class="btn ghost sm" hidden></button>
+      </div>
+      <p class="small" id="buildMsg" role="status" aria-live="polite"></p>
+      <details id="myShares" hidden><summary>My share links</summary><ul class="share-list" id="shareList"></ul></details>
       <div class="row">
         <button type="button" id="copyJson" class="btn ghost sm">Copy build JSON</button>
         <button type="button" id="pasteJson" class="btn ghost sm">Load from JSON</button>
@@ -200,7 +209,7 @@
   Data: <a href="https://www.npmjs.com/package/@wfcd/items" target="_blank" rel="noopener">@wfcd/items</a>; images via the warframestat.us CDN.
   Lines marked ASSUMPTION in the notes are modeling choices the wiki does not state outright.
   <br>A free fan-made tool by <a href="https://hardn.net" target="_blank" rel="noopener">hardn</a>
-  (<a href="https://github.com/Whitey-cpu/warframe-calc" target="_blank" rel="noopener">source</a>).
+  (<a href="https://github.com/Whitey-cpu/warframe-calc" target="_blank" rel="noopener">source</a>, <a href="privacy.html">privacy</a>).
   Not affiliated with or endorsed by Digital Extremes. Warframe and all related names and images are trademarks and property of Digital Extremes Ltd.
 </footer>
 

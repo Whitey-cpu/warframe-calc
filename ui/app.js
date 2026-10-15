@@ -11,6 +11,11 @@
   const SLOT_COUNT = 8;
   const STORE_KEY = 'wfcalc.builds.v1';
   const LAST_KEY = 'wfcalc.last.v1';
+  const OWNED_KEY = 'wfcalc.owned.v1';
+  // Accounts API (Cloudflare Worker). Only used on the published site, where the session cookie works.
+  const SITE_ORIGIN = 'https://warframe.hardn.net';
+  const API = 'https://warframe-api.hardn.net';
+  const ACCOUNTS = location.origin === SITE_ORIGIN;
 
   if (!D) { document.body.innerHTML = '<p style="padding:20px">No game data found. Run <code>node cli.js sync</code> in this folder, then reload.</p>'; return; }
 
@@ -53,7 +58,7 @@
   function modCard(m, opts = {}) {
     const fx = esc(modFx(m));
     return `<div class="mod ${rarityClass(m.rarity)} ${opts.cls || ''}" draggable="true" data-mod="${esc(m.name)}" title="${fx}${m.unparsed.length ? '\n(part of this mod is not modeled)' : ''}">
-      <div class="mod-top"><span class="drain">${modDrain(m)}</span>${m.polarity ? `<span class="pol">${esc(m.polarity.slice(0, 3))}</span>` : ''}</div>
+      <div class="mod-top"><span class="drain">${modDrain(m)}</span>${opts.own ? `<button type="button" class="own${owned.has(m.name) ? ' on' : ''}" data-own="${esc(m.name)}" aria-pressed="${owned.has(m.name)}" title="${owned.has(m.name) ? 'You own this mod' : 'Mark as owned'}">&#9733;</button>` : ''}${m.polarity ? `<span class="pol">${esc(m.polarity.slice(0, 3))}</span>` : ''}</div>
       <div class="mod-img">${img(m.image, m.name)}<span class="ph">${initials(m.name)}</span></div>
       <div class="mod-name">${esc(m.name)}</div>
       <div class="mod-fx">${fx}${m.unparsed.length ? ' <span class="nm">*</span>' : ''}</div>
@@ -231,7 +236,7 @@
   // ---------- mod browser ----------
   const CATS = [
     ['all', 'All'], ['damage', 'Damage'], ['crit', 'Crit'], ['status', 'Status'], ['multishot', 'Multishot'], ['element', 'Elements'],
-    ['physical', 'IPS'], ['faction', 'Faction'], ['speed', 'Rate / Mag / Reload'], ['exilus', 'Exilus'], ['other', 'Not modeled']
+    ['physical', 'IPS'], ['faction', 'Faction'], ['speed', 'Rate / Mag / Reload'], ['exilus', 'Exilus'], ['owned', 'Owned'], ['other', 'Not modeled']
   ];
   let modCat = 'all';
   function modInCat(m, c) {
@@ -248,6 +253,7 @@
       case 'speed': return st.has('fireRate') || st.has('magazine') || st.has('reloadSpeed');
       case 'exilus': return m.exilus;
       case 'other': return !m.effects.length;
+      case 'owned': return owned.has(m.name);
       default: return true;
     }
   }
@@ -268,7 +274,7 @@
       (!q || m.name.toLowerCase().includes(q) || modFx(m).toLowerCase().includes(q)));
     list.sort((a, b) => sort === 'drain' ? modDrain(b) - modDrain(a) : sort === 'rarity' ? (RANK[b.rarity] || 0) - (RANK[a.rarity] || 0) || a.name.localeCompare(b.name) : a.name.localeCompare(b.name));
     $('modCount').textContent = `${list.length} of ${compatMods.length} mods for ${state.weapon.name}. Click to add, or drag onto a slot.`;
-    $('modGrid').innerHTML = list.map(m => modCard(m)).join('');
+    $('modGrid').innerHTML = list.map(m => modCard(m, { own: true })).join('');
     markUsed();
   }
   function markUsed() {
@@ -280,7 +286,11 @@
       c.classList.toggle('blocked', !used.has(n) && (roots.has(E.variantRoot(n)) || S.INCOMPATIBLE.some(([a, b]) => (n === a && used.has(b)) || (n === b && used.has(a)))));
     });
   }
-  $('modGrid').addEventListener('click', e => { const c = e.target.closest('.mod'); if (c) addMod(c.dataset.mod); });
+  $('modGrid').addEventListener('click', e => {
+    const own = e.target.closest('[data-own]');
+    if (own) { e.stopPropagation(); toggleOwned(own.dataset.own); return; }
+    const c = e.target.closest('.mod'); if (c) addMod(c.dataset.mod);
+  });
   ['modSearch', 'modRarity', 'modSort'].forEach(id => $(id).addEventListener('input', renderModBrowser));
 
   // ---------- picker dialog ----------
@@ -541,9 +551,11 @@
       const o = WF.optimizer.optimize(Object.assign({}, b, {
         metric: $('metric').value, locked, exilus: $('optExilus').checked, arcane: $('optArcane').checked,
         fixedArcanes: $('optArcane').checked ? [state.arcanes[1]].filter(Boolean) : b.arcanes,
+        ownedOnly: $('optOwned').checked, owned: [...owned],
         excluded: $('excluded').value.split(',').map(s => s.trim()).filter(Boolean)
       }), D);
       const ms = Math.round(performance.now() - t0);
+      if ($('optOwned').checked && !owned.size) { $('optOut').textContent = 'Mark the mods you own first (star on each mod card), or untick "Only mods I own".'; return; }
       state.mods = o.mods.slice(0, SLOT_COUNT).concat(new Array(SLOT_COUNT).fill(null)).slice(0, SLOT_COUNT).concat([o.exilus || null]);
       state.locks = state.mods.slice(0, SLOT_COUNT).map((n, i) => i < locked.length);
       if ($('optArcane').checked) state.arcanes[0] = o.arcane || null;
@@ -552,22 +564,160 @@
     }, 20);
   };
 
-  // ---------- save / load ----------
+  // ---------- account (Discord sign-in via the API) ----------
+  let user = null;
+  async function api(path, opts = {}) {
+    const res = await fetch(API + path, Object.assign({ credentials: 'include' }, opts, {
+      headers: Object.assign(opts.body ? { 'Content-Type': 'application/json' } : {}, opts.headers || {})
+    }));
+    let body = null; try { body = await res.json(); } catch (e) { /* empty */ }
+    if (!res.ok) { const err = new Error((body && body.error) || `HTTP ${res.status}`); err.status = res.status; throw err; }
+    return body;
+  }
+  function renderAccount() {
+    const el = $('account');
+    if (!ACCOUNTS) { el.innerHTML = ''; return; }
+    if (!user) {
+      el.innerHTML = `<a class="btn discord sm" href="${API}/auth/discord/login?return=${encodeURIComponent(location.href.split('#')[0])}">Sign in with Discord</a>`;
+    } else {
+      el.innerHTML = `<details class="acct"><summary>${user.avatarUrl ? `<img src="${esc(user.avatarUrl)}" alt="">` : ''}<span>${esc(user.displayName || user.username)}</span></summary>
+        <div class="acct-menu"><div class="muted small">Signed in with Discord as ${esc(user.username)}</div>
+        <button type="button" class="btn ghost sm" id="signOut">Sign out</button>
+        <button type="button" class="btn ghost sm danger" id="deleteAcct">Delete account and data</button>
+        <a class="small" href="privacy.html">Privacy</a></div></details>`;
+      $('signOut').onclick = async () => { try { await api('/auth/logout', { method: 'POST', body: '{}' }); } catch (e) { /* ignore */ } user = null; afterAuthChange(); };
+      $('deleteAcct').onclick = async () => {
+        const typed = prompt('This permanently deletes your account, cloud builds, owned-mods list and share links. Type DELETE to confirm.');
+        if (typed !== 'DELETE') return;
+        try { await api('/me', { method: 'DELETE' }); user = null; afterAuthChange(); flashMsg('Account deleted.'); } catch (e) { flashMsg('Delete failed: ' + e.message); }
+      };
+    }
+    $('cloudNote').textContent = user ? 'Builds are saved to your account and sync across devices.' : (ACCOUNTS ? 'Builds are saved in this browser. Sign in with Discord to sync them.' : 'Builds are saved on this device.');
+    $('shareBuild').hidden = !ACCOUNTS;
+    $('myShares').hidden = !user;
+  }
+  function flashMsg(t) { $('buildMsg').textContent = t; clearTimeout(flashMsg.t); flashMsg.t = setTimeout(() => { $('buildMsg').textContent = ''; }, 4000); }
+  async function afterAuthChange() {
+    renderAccount();
+    await refreshSaved();
+    if (user) await syncOwnedFromServer();
+    renderModBrowser();
+    if (user) refreshShares();
+  }
+
+  // ---------- builds: local storage or account ----------
+  let cloudBuilds = {};
   function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { return {}; } }
   function saveStore(o) { try { localStorage.setItem(STORE_KEY, JSON.stringify(o)); return true; } catch (e) { return false; } }
-  function refreshSaved() {
-    const s = loadStore();
-    $('savedBuilds').innerHTML = '<option value="">Load saved...</option>' + Object.keys(s).sort().map(k => `<option>${esc(k)}</option>`).join('');
+  async function refreshSaved() {
+    let names;
+    if (user) {
+      try { const r = await api('/builds'); cloudBuilds = {}; r.builds.forEach(b => { cloudBuilds[b.name] = b.data; }); } catch (e) { flashMsg('Could not load cloud builds: ' + e.message); }
+      names = Object.keys(cloudBuilds);
+    } else names = Object.keys(loadStore());
+    $('savedBuilds').innerHTML = '<option value="">Load saved...</option>' + names.sort().map(k => `<option>${esc(k)}</option>`).join('');
+    const local = Object.keys(loadStore());
+    $('uploadLocal').hidden = !(user && local.length);
+    $('uploadLocal').textContent = `Copy ${local.length} browser build${local.length === 1 ? '' : 's'} to account`;
   }
-  $('saveBuild').onclick = () => {
+  const getSaved = name => user ? cloudBuilds[name] : loadStore()[name];
+  $('saveBuild').onclick = async () => {
     const b = collect(); if (!b) return;
     const name = $('buildName').value.trim() || `${b.weapon} ${new Date().toLocaleString()}`;
-    const s = loadStore(); s[name] = b;
-    if (!saveStore(s)) $('jsonBox').value = 'Browser storage is unavailable here. Copy the JSON instead:\n' + JSON.stringify(b, null, 2);
-    refreshSaved(); $('savedBuilds').value = name;
+    if (user) {
+      try { await api('/builds/' + encodeURIComponent(name), { method: 'PUT', body: JSON.stringify({ data: b }) }); flashMsg('Saved to your account.'); }
+      catch (e) { flashMsg('Save failed: ' + e.message); return; }
+    } else {
+      const s = loadStore(); s[name] = b;
+      if (!saveStore(s)) { $('jsonBox').value = 'Browser storage is unavailable here. Copy the JSON instead:\n' + JSON.stringify(b, null, 2); return; }
+      flashMsg('Saved in this browser.');
+    }
+    await refreshSaved(); $('savedBuilds').value = name;
   };
-  $('savedBuilds').onchange = () => { const b = loadStore()[$('savedBuilds').value]; if (b) { $('buildName').value = $('savedBuilds').value; apply(b); } };
-  $('deleteBuild').onclick = () => { const s = loadStore(); delete s[$('savedBuilds').value]; saveStore(s); refreshSaved(); };
+  $('savedBuilds').onchange = () => { const n = $('savedBuilds').value; const b = getSaved(n); if (b) { $('buildName').value = n; apply(b); } };
+  $('deleteBuild').onclick = async () => {
+    const n = $('savedBuilds').value; if (!n) return;
+    if (user) { try { await api('/builds/' + encodeURIComponent(n), { method: 'DELETE' }); } catch (e) { flashMsg('Delete failed: ' + e.message); return; } }
+    else { const s = loadStore(); delete s[n]; saveStore(s); }
+    await refreshSaved(); flashMsg('Deleted.');
+  };
+  $('uploadLocal').onclick = async () => {
+    const local = loadStore(); let n = 0;
+    for (const [name, b] of Object.entries(local)) {
+      try { await api('/builds/' + encodeURIComponent(name), { method: 'PUT', body: JSON.stringify({ data: b }) }); n++; } catch (e) { flashMsg(`Stopped after ${n}: ${e.message}`); break; }
+    }
+    await refreshSaved(); if (n) flashMsg(`Copied ${n} build${n === 1 ? '' : 's'} to your account. They are still in this browser too.`);
+  };
+
+  // ---------- owned mods ----------
+  let owned = new Set();
+  try { owned = new Set(JSON.parse(localStorage.getItem(OWNED_KEY) || '[]')); } catch (e) { owned = new Set(); }
+  let ownedTimer = null;
+  function persistOwned() {
+    try { localStorage.setItem(OWNED_KEY, JSON.stringify([...owned])); } catch (e) { /* ignore */ }
+    if (user) {
+      clearTimeout(ownedTimer);
+      ownedTimer = setTimeout(() => api('/owned', { method: 'PUT', body: JSON.stringify({ mods: [...owned] }) }).catch(e => flashMsg('Owned list sync failed: ' + e.message)), 800);
+    }
+    $('ownedCount').textContent = owned.size ? `${owned.size} owned` : '';
+  }
+  function toggleOwned(name) {
+    owned.has(name) ? owned.delete(name) : owned.add(name);
+    persistOwned();
+    document.querySelectorAll(`#modGrid [data-own="${CSS.escape(name)}"]`).forEach(b => { b.classList.toggle('on', owned.has(name)); b.setAttribute('aria-pressed', owned.has(name)); });
+    if (modCat === 'owned') renderModBrowser();
+  }
+  async function syncOwnedFromServer() {
+    try {
+      const r = await api('/owned');
+      const before = owned.size;
+      r.mods.forEach(n => owned.add(n)); // merge: never lose marks made before signing in
+      if (owned.size !== r.mods.length) persistOwned(); else { try { localStorage.setItem(OWNED_KEY, JSON.stringify([...owned])); } catch (e) { /* ignore */ } }
+      $('ownedCount').textContent = owned.size ? `${owned.size} owned` : '';
+      void before;
+    } catch (e) { flashMsg('Could not load owned mods: ' + e.message); }
+  }
+  $('ownedCount').textContent = owned.size ? `${owned.size} owned` : '';
+
+  // ---------- share links ----------
+  function shareUrl(id) { return `${SITE_ORIGIN}/#share=${id}`; }
+  $('shareBuild').onclick = async () => {
+    const b = collect(); if (!b) return;
+    if (!user) { flashMsg('Sign in with Discord to create share links.'); return; }
+    try {
+      const out = Object.assign({}, b);
+      const r = await api('/shares', { method: 'POST', body: JSON.stringify({ data: out }) });
+      const link = shareUrl(r.id);
+      $('jsonBox').value = link;
+      try { await navigator.clipboard.writeText(link); flashMsg('Share link copied: ' + link); } catch (e) { flashMsg('Share link: ' + link); }
+      refreshShares();
+    } catch (e) { flashMsg('Could not create link: ' + e.message); }
+  };
+  async function refreshShares() {
+    if (!user) return;
+    try {
+      const r = await api('/shares');
+      $('shareList').innerHTML = r.shares.length ? r.shares.map(s => `<li><a href="${shareUrl(s.id)}">${esc(s.weapon)}</a> <span class="muted">${new Date(s.createdAt * 1000).toLocaleDateString()}</span> <button type="button" class="linkbtn" data-delshare="${esc(s.id)}">delete</button></li>`).join('') : '<li class="muted">No share links yet.</li>';
+    } catch (e) { $('shareList').innerHTML = `<li class="muted">${esc(e.message)}</li>`; }
+  }
+  $('shareList').addEventListener('click', async e => {
+    const b = e.target.closest('[data-delshare]'); if (!b) return;
+    try { await api('/shares/' + b.dataset.delshare, { method: 'DELETE' }); refreshShares(); } catch (err) { flashMsg(err.message); }
+  });
+  async function openShareFromHash() {
+    const m = location.hash.match(/share=([A-Za-z0-9]{6,16})/);
+    if (!m) return false;
+    try {
+      const r = await fetch(`${API}/shares/${m[1]}`);
+      if (!r.ok) throw new Error(r.status === 404 ? 'This share link does not exist (it may have been deleted).' : `HTTP ${r.status}`);
+      const j = await r.json();
+      apply(j.data);
+      flashMsg('Loaded a shared build. Save it to keep your own copy.');
+      return true;
+    } catch (e) { flashMsg('Could not open share link: ' + e.message); return false; }
+  }
+  window.addEventListener('hashchange', openShareFromHash);
+
   $('copyJson').onclick = async () => {
     const b = collect(); if (!b) return;
     const out = Object.assign({}, b); delete out.slotLayout; delete out.slotLocks; delete out.arcaneSlots;
@@ -578,9 +728,21 @@
   $('pasteJson').onclick = () => { try { apply(JSON.parse($('jsonBox').value)); } catch (e) { $('jsonBox').value = 'Could not read JSON: ' + e.message + '\n\n' + $('jsonBox').value; } };
 
   // ---------- start ----------
-  refreshSaved();
   renderFrame(); renderArcanes(); renderSlots(); renderModBrowser();
-  let last = null;
-  try { last = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch (e) { last = null; }
-  if (last && last.weapon) apply(last); else update();
+  renderAccount();
+  refreshSaved();
+  (async () => {
+    const err = location.hash.match(/login-error=([\w-]+)/);
+    if (err) { flashMsg('Discord sign-in did not complete (' + err[1] + '). Please try again.'); history.replaceState(null, '', location.pathname); }
+    const shared = await openShareFromHash();
+    if (!shared) {
+      let last = null;
+      try { last = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch (e) { last = null; }
+      if (last && last.weapon) apply(last); else update();
+    }
+    if (ACCOUNTS) {
+      try { user = (await api('/me')).user; } catch (e) { user = null; }
+      if (user) afterAuthChange(); else renderAccount();
+    }
+  })();
 })();
