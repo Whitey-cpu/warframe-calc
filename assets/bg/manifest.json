@@ -1,0 +1,396 @@
+{
+ "_readme": "Backgrounds from the official Warframe Fansite Kit published by Digital Extremes (https://www.warframe.com/community/fankit). Used under the Warframe Content Policy (non-commercial fan use, no logos): https://www.warframe.com/contentpolicy. Logo variants of key art are deliberately left out. scripts/fetch-art.js downloads these and writes assets/bg/<id>.webp and assets/bg/<id>.thumb.webp.",
+ "source": {
+  "name": "Warframe Fansite Kit (Digital Extremes)",
+  "url": "https://www.warframe.com/community/fankit",
+  "box": "https://digitalextremesltd.app.box.com/s/vh2u41yhdlgp3girffucbynadoi33173",
+  "policy": "https://www.warframe.com/contentpolicy"
+ },
+ "categories": {
+  "captura": "Captura wallpapers",
+  "keyart": "Update key art",
+  "skyboxes": "Skyboxes",
+  "scenes": "Scenes",
+  "concept": "Concept art"
+ },
+ "items": [
+  {
+   "id": "skyboxes-empyrean",
+   "category": "skyboxes",
+   "title": "Empyrean",
+   "boxFileId": "571776604834",
+   "kitPath": "Images/Skyboxes/Empyrean.jpg"
+  },
+  {
+   "id": "skyboxes-corpus-infested-space",
+   "category": "skyboxes",
+   "title": "Corpus Infested Space",
+   "boxFileId": "292847861277",
+   "kitPath": "Images/Skyboxes/CorpusInfestedSpace_Skybox_1920x1200.png"
+  },
+  {
+   "id": "skyboxes-grineer-queen-fortress",
+   "category": "skyboxes",
+   "title": "Grineer Queen Fortress",
+   "boxFileId": "292846669052",
+   "kitPath": "Images/Skyboxes/GrineerQueenFortress_Skybox_1920x1200.png"
+  },
+  {
+   "id": "skyboxes-orokin-moon-i",
+   "category": "skyboxes",
+   "title": "Orokin Moon I",
+   "boxFileId": "292846549450",
+   "kitPath": "Images/Skyboxes/OrokinMoon01.png"
+  },
+  {
+   "id": "skyboxes-orokin-moon-ii",
+   "category": "skyboxes",
+   "title": "Orokin Moon II",
+   "boxFileId": "292846580881",
+   "kitPath": "Images/Skyboxes/OrokinMoon02.png"
+  },
+  {
+   "id": "skyboxes-valkyr-prime",
+   "category": "skyboxes",
+   "title": "Valkyr Prime",
+   "boxFileId": "292846617170",
+   "kitPath": "Images/Skyboxes/ValkyrPrimeBG01.png"
+  },
+  {
+   "id": "skyboxes-the-war-within",
+   "category": "skyboxes",
+   "title": "The War Within",
+   "boxFileId": "292846609293",
+   "kitPath": "Images/Skyboxes/WarWithinBG01.png"
+  },
+  {
+   "id": "skyboxes-fortress-i",
+   "category": "skyboxes",
+   "title": "Fortress I",
+   "boxFileId": "292846376008",
+   "kitPath": "Images/Skyboxes/FortressBG01.png"
+  },
+  {
+   "id": "skyboxes-fortress-ii",
+   "category": "skyboxes",
+   "title": "Fortress II",
+   "boxFileId": "292847057751",
+   "kitPath": "Images/Skyboxes/FortressBG02.png"
+  },
+  {
+   "id": "skyboxes-ocean-i",
+   "category": "skyboxes",
+   "title": "Ocean I",
+   "boxFileId": "292846496343",
+   "kitPath": "Images/Skyboxes/OceanBG01.png"
+  },
+  {
+   "id": "skyboxes-ocean-ii",
+   "category": "skyboxes",
+   "title": "Ocean II",
+   "boxFileId": "292846988599",
+   "kitPath": "Images/Skyboxes/OceanBG02.png"
+  },
+  {
+   "id": "skyboxes-forest-day",
+   "category": "skyboxes",
+   "title": "Forest, day",
+   "boxFileId": "292846350108",
+   "kitPath": "Images/Skyboxes/ForestDay01.png"
+  },
+  {
+   "id": "skyboxes-forest-night",
+   "category": "skyboxes",
+   "title": "Forest, night",
+   "boxFileId": "292846352398",
+   "kitPath": "Images/Skyboxes/ForestNight01.png"
+  },
+  {
+   "id": "captura-intruder",
+   "category": "captura",
+   "title": "Intruder",
+   "boxFileId": "1383782250693",
+   "kitPath": "Images/Whispers in the Walls: Captura Wallpapers/Intruder.png"
+  },
+  {
+   "id": "captura-visages-from-the-past",
+   "category": "captura",
+   "title": "Visages from the Past",
+   "boxFileId": "1383775038613",
+   "kitPath": "Images/Whispers in the Walls: Captura Wallpapers/Visages from the Past.png"
+  },
+  {
+   "id": "captura-descent-into-the-labs",
+   "category": "captura",
+   "title": "Descent into the Labs",
+   "boxFileId": "1383785245860",
+   "kitPath": "Images/Whispers in the Walls: Captura Wallpapers/Descent into the Labs.png"
+  },
+  {
+   "id": "captura-a-stony-sentinel",
+   "category": "captura",
+   "title": "A Stony Sentinel",
+   "boxFileId": "1383781163301",
+   "kitPath": "Images/Whispers in the Walls: Captura Wallpapers/A Stony Sentinel.png"
+  },
+  {
+   "id": "captura-luminous-shadow",
+   "category": "captura",
+   "title": "Luminous Shadow",
+   "boxFileId": "1383778098068",
+   "kitPath": "Images/Whispers in the Walls: Captura Wallpapers/Luminous Shadow.png"
+  },
+  {
+   "id": "scenes-orbiter",
+   "category": "scenes",
+   "title": "Orbiter",
+   "boxFileId": "724172667940",
+   "kitPath": "Images/Zoom Backgrounds/WF_ZoomBackground_Orbiter.jpg"
+  },
+  {
+   "id": "scenes-helminth",
+   "category": "scenes",
+   "title": "Helminth",
+   "boxFileId": "724173758593",
+   "kitPath": "Images/Zoom Backgrounds/WF_ZoomBackground_Helminth.jpg"
+  },
+  {
+   "id": "scenes-helminth-chair",
+   "category": "scenes",
+   "title": "Helminth Chair",
+   "boxFileId": "724173055993",
+   "kitPath": "Images/Zoom Backgrounds/WF_ZoomBackground_HelminthChair.jpg"
+  },
+  {
+   "id": "scenes-deimos-sun-worm",
+   "category": "scenes",
+   "title": "Deimos Sun Worm",
+   "boxFileId": "724173032565",
+   "kitPath": "Images/Zoom Backgrounds/WF_ZoomBackground_DeimosSunWorm.jpg"
+  },
+  {
+   "id": "scenes-mother",
+   "category": "scenes",
+   "title": "Mother",
+   "boxFileId": "724173290365",
+   "kitPath": "Images/Zoom Backgrounds/WF_ZoomBackground_Mother.jpg"
+  },
+  {
+   "id": "scenes-the-new-war-concept-i",
+   "category": "scenes",
+   "title": "The New War concept I",
+   "boxFileId": "871844550590",
+   "kitPath": "Images/Zoom Backgrounds/Quest to Conquer Cancer - New War Concept Art Reveals/WF_NewWarConceptArt1.jpg"
+  },
+  {
+   "id": "scenes-the-new-war-concept-ii",
+   "category": "scenes",
+   "title": "The New War concept II",
+   "boxFileId": "871940929343",
+   "kitPath": "Images/Zoom Backgrounds/Quest to Conquer Cancer - New War Concept Art Reveals/WF_NewWarConceptArt2.jpg"
+  },
+  {
+   "id": "scenes-the-new-war-concept-iii",
+   "category": "scenes",
+   "title": "The New War concept III",
+   "boxFileId": "876007036964",
+   "kitPath": "Images/Zoom Backgrounds/Quest to Conquer Cancer - New War Concept Art Reveals/WF_NewWarConceptArt3.jpg"
+  },
+  {
+   "id": "keyart-sisters-of-parvos",
+   "category": "keyart",
+   "title": "Sisters of Parvos",
+   "boxFileId": "832956571859",
+   "kitPath": "Key Art/Updates Key Art/SistersofParvos_Keyart.png"
+  },
+  {
+   "id": "keyart-call-of-the-tempestarii",
+   "category": "keyart",
+   "title": "Call of the Tempestarii",
+   "boxFileId": "799032298245",
+   "kitPath": "Key Art/Updates Key Art/CallofTheTempestarii_Keyart.jpg"
+  },
+  {
+   "id": "keyart-railjack",
+   "category": "keyart",
+   "title": "Railjack",
+   "boxFileId": "790590060721",
+   "kitPath": "Key Art/Updates Key Art/NewRailjack_Keyart.png"
+  },
+  {
+   "id": "keyart-lavos",
+   "category": "keyart",
+   "title": "Lavos",
+   "boxFileId": "755206499812",
+   "kitPath": "Key Art/Updates Key Art/Lavos_Keyart.png"
+  },
+  {
+   "id": "keyart-deimos-arcana",
+   "category": "keyart",
+   "title": "Deimos: Arcana",
+   "boxFileId": "755201815548",
+   "kitPath": "Key Art/Updates Key Art/DeimosArcana_Keyart.png"
+  },
+  {
+   "id": "keyart-heart-of-deimos",
+   "category": "keyart",
+   "title": "Heart of Deimos",
+   "boxFileId": "713059231783",
+   "kitPath": "Key Art/Updates Key Art/HeartofDeimos_Keyart.png"
+  },
+  {
+   "id": "keyart-the-steel-path",
+   "category": "keyart",
+   "title": "The Steel Path",
+   "boxFileId": "713057448087",
+   "kitPath": "Key Art/Updates Key Art/TheSteelPath_Keyart.jpg"
+  },
+  {
+   "id": "keyart-the-deadlock-protocol",
+   "category": "keyart",
+   "title": "The Deadlock Protocol",
+   "boxFileId": "677557596469",
+   "kitPath": "Key Art/Updates Key Art/DeadlockProtocol_Keyart.png"
+  },
+  {
+   "id": "keyart-the-glassmaker",
+   "category": "keyart",
+   "title": "The Glassmaker",
+   "boxFileId": "664142444146",
+   "kitPath": "Key Art/Updates Key Art/TheGlassmaker_Keyart.png"
+  },
+  {
+   "id": "keyart-operation-scarlet-spear",
+   "category": "keyart",
+   "title": "Operation: Scarlet Spear",
+   "boxFileId": "633744095181",
+   "kitPath": "Key Art/Updates Key Art/OperationScarletSpear_Keyart.png"
+  },
+  {
+   "id": "keyart-empyrean",
+   "category": "keyart",
+   "title": "Empyrean",
+   "boxFileId": "575882777804",
+   "kitPath": "Key Art/Updates Key Art/Empyrean_Keyart.png"
+  },
+  {
+   "id": "keyart-the-old-blood",
+   "category": "keyart",
+   "title": "The Old Blood",
+   "boxFileId": "549526301643",
+   "kitPath": "Key Art/Updates Key Art/TheOldBlood_Keyart.png"
+  },
+  {
+   "id": "keyart-saint-of-altra",
+   "category": "keyart",
+   "title": "Saint of Altra",
+   "boxFileId": "533653272728",
+   "kitPath": "Key Art/Updates Key Art/SaintOfAltra_Keyart.png"
+  },
+  {
+   "id": "keyart-the-jovian-concord",
+   "category": "keyart",
+   "title": "The Jovian Concord",
+   "boxFileId": "462359938534",
+   "kitPath": "Key Art/Updates Key Art/TheJovianConcord_Keyart.png"
+  },
+  {
+   "id": "keyart-plains-of-eidolon",
+   "category": "keyart",
+   "title": "Plains of Eidolon",
+   "boxFileId": "434172303569",
+   "kitPath": "Key Art/Updates Key Art/PlainsOfEidolon_Remaster_Keyart.png"
+  },
+  {
+   "id": "keyart-wolf-of-saturn-six",
+   "category": "keyart",
+   "title": "Wolf of Saturn Six",
+   "boxFileId": "419412015749",
+   "kitPath": "Key Art/Updates Key Art/WolfOfSaturnSix_Keyart.png"
+  },
+  {
+   "id": "keyart-fortuna",
+   "category": "keyart",
+   "title": "Fortuna",
+   "boxFileId": "348620020654",
+   "kitPath": "Key Art/Updates Key Art/Fortuna_KeyArt_1080p.png"
+  },
+  {
+   "id": "keyart-the-sacrifice",
+   "category": "keyart",
+   "title": "The Sacrifice",
+   "boxFileId": "299080972096",
+   "kitPath": "Key Art/Updates Key Art/TheSacrifice_Keyart_1080p.png"
+  },
+  {
+   "id": "keyart-the-war-within",
+   "category": "keyart",
+   "title": "The War Within",
+   "boxFileId": "290708742991",
+   "kitPath": "Key Art/Updates Key Art/TheWarWithin_KeyArt.jpg"
+  },
+  {
+   "id": "keyart-harrow",
+   "category": "keyart",
+   "title": "Harrow",
+   "boxFileId": "290708800799",
+   "kitPath": "Key Art/Updates Key Art/Harrow_KeyArt.jpg"
+  },
+  {
+   "id": "keyart-khora",
+   "category": "keyart",
+   "title": "Khora",
+   "boxFileId": "290709438087",
+   "kitPath": "Key Art/Updates Key Art/Khora_KeyArt_1080p.png"
+  },
+  {
+   "id": "concept-asteroid-belt",
+   "category": "concept",
+   "title": "Asteroid Belt",
+   "boxFileId": "74340540494",
+   "kitPath": "Concept Art/Tile Sets/PlanetaryAsteroidBelt.jpg"
+  },
+  {
+   "id": "concept-grineer-interior-i",
+   "category": "concept",
+   "title": "Grineer Interior I",
+   "boxFileId": "74340521966",
+   "kitPath": "Concept Art/Tile Sets/GrineerInterior1.jpg"
+  },
+  {
+   "id": "concept-grineer-interior-ii",
+   "category": "concept",
+   "title": "Grineer Interior II",
+   "boxFileId": "74340526514",
+   "kitPath": "Concept Art/Tile Sets/GrineerInterior2.jpg"
+  },
+  {
+   "id": "concept-grineer-interior-vi",
+   "category": "concept",
+   "title": "Grineer Interior VI",
+   "boxFileId": "74340537682",
+   "kitPath": "Concept Art/Tile Sets/GrineerInterior6.jpg"
+  },
+  {
+   "id": "concept-corpus-robot-assembly",
+   "category": "concept",
+   "title": "Corpus Robot Assembly",
+   "boxFileId": "74340505106",
+   "kitPath": "Concept Art/Tile Sets/CorpusRobotAssembly1.jpg"
+  },
+  {
+   "id": "concept-corpus-robot-factory",
+   "category": "concept",
+   "title": "Corpus Robot Factory",
+   "boxFileId": "74340511890",
+   "kitPath": "Concept Art/Tile Sets/CorpusRobotFactory.jpg"
+  },
+  {
+   "id": "concept-orokin-era-grineer",
+   "category": "concept",
+   "title": "Orokin Era Grineer",
+   "boxFileId": "497619658598",
+   "kitPath": "Concept Art/Orokin Era Grineer.jpg"
+  }
+ ]
+}

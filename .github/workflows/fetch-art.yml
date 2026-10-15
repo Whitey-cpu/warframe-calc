@@ -1,0 +1,35 @@
+name: Fetch background art
+
+# Downloads the backgrounds listed in assets/bg/manifest.json from the official Warframe Fansite Kit
+# (Digital Extremes) and commits web-sized WebP copies. Run by hand after editing the manifest.
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Re-download everything"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  art:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install image tools
+        run: npm install --no-save sharp@0.34.4
+      - name: Download and resize
+        run: node scripts/fetch-art.js ${{ inputs.force && '--force' || '' }}
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- assets/ && [ -z "$(git ls-files --others --exclude-standard assets/)" ]; then echo "No art changes"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898729+github-actions[bot]@users.noreply.github.com"
+          git add assets/
+          git commit -m "Update background art from the Warframe Fansite Kit"
+          git push
