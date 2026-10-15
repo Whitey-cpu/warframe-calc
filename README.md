@@ -65,10 +65,14 @@ Public sources only. Nothing is read from the game client or a player account.
 
 ## Features
 
-- Arsenal-style builder: weapon/Warframe/arcane/enemy browsers, drag-and-drop mod cards, mod ranks, slot polarities
+- In-game arsenal layout: capacity bar, Config A-D per weapon (saved locally and to your account), 2x4 mod slots with
+  weapon arcane and exilus, game-style stat panel (Fire Rate, Multishot, Damage, radial attacks, Incarnon form) with
+  extra tabs for DPS/TTK, enemy, buffs, optimizer and builds. A "Classic view" toggle shows every panel at once.
+- Phone layout: bottom tab bar (Mods / Stats / Enemy / More) and a full-screen mod browser
+- Weapon/Warframe/arcane/enemy browsers, drag-and-drop mod cards, mod ranks, slot polarities
 - Mod value preview (what each equipped mod adds, what each mod in the browser would add), undo/redo (Ctrl+Z / Ctrl+Y, `/` focuses mod search)
 - Capacity and forma checker (Orokin Catalyst, matching/mismatched polarity drain)
-- Incarnon evolution presets (hand-entered per weapon in `src/incarnon.js`; currently Soma/Soma Prime and Laetum)
+- Incarnon evolutions for 53 weapons, generated from the wiki (`scripts/scrape-web.js`, `src/incarnon.js`)
 - Enemy units with level scaling and Steel Path (`src/enemy.js`), shields, Overguard, Magnetic, time to kill
 - Build compare (pin A vs current), weapon leaderboard (optionally quick-optimized per weapon)
 - Community builds (public share links, likes, reports), Discord link previews

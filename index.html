@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
 <title>Warframe Damage Calc</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -13,6 +13,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="description" content="Free Warframe damage calculator and build optimizer: mods, arcanes, Warframe buffs, enemy scaling, time to kill.">
 <link rel="stylesheet" href="ui/style.css">
+<script>try { document.documentElement.dataset.layout = localStorage.getItem('wfcalc.layout') || 'arsenal'; } catch (e) { document.documentElement.dataset.layout = 'arsenal'; }</script>
 </head>
 <body>
 <header class="topbar">
@@ -22,6 +23,7 @@
   </div>
   <a id="dataInfo" class="muted small" href="#dataSources"></a>
   <span class="spacer"></span>
+  <button type="button" id="layoutToggle" class="btn ghost sm" title="Switch between the arsenal layout and the classic layout">Classic view</button>
   <button type="button" id="themeToggle" class="btn ghost sm" title="Switch light/dark theme" aria-label="Switch theme">&#9680;</button>
   <a id="feedbackLink" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/issues/new" target="_blank" rel="noopener" title="Report a bug or wrong number">Feedback</a>
   <a id="downloadApp" class="btn ghost" href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Download Windows app</a>
@@ -30,39 +32,55 @@
 </header>
 
 <div id="patchBanner" class="banner" hidden></div>
-<main class="layout">
-  <!-- ================= BUILD ================= -->
-  <section class="build">
-    <div class="loadout">
-      <button type="button" class="hero hero-weapon" id="pickWeapon" aria-label="Choose weapon">
-        <div class="hero-img"><img id="weaponImg" alt=""><span class="ph" id="weaponPh">?</span></div>
-        <div class="hero-body">
-          <div class="kicker" id="weaponKicker">Weapon</div>
-          <div class="hero-name" id="weaponName">Choose a weapon</div>
-          <div class="hero-stats" id="weaponStats">Click to browse all weapons</div>
-          <div class="data-notes muted small" id="weaponNotes" hidden></div>
-        </div>
-      </button>
-
-      <div class="loadout-side">
-        <button type="button" class="hero hero-frame" id="pickFrame" aria-label="Choose warframe">
-          <div class="hero-img"><img id="frameImg" alt=""><span class="ph" id="framePh">?</span></div>
-          <div class="hero-body">
-            <div class="kicker">Warframe</div>
-            <div class="hero-name" id="frameName">Optional</div>
-            <div class="hero-stats" id="frameStats">For ability buffs</div>
-          </div>
-        </button>
-        <div class="arc-row">
-          <button type="button" class="arc-slot" data-arc="0" aria-label="Weapon arcane"></button>
-          <button type="button" class="arc-slot" data-arc="1" aria-label="Warframe arcane"></button>
-        </div>
+<main class="layout" id="appMain">
+  <!-- ================= TOP: weapon, capacity, configs ================= -->
+  <section class="ars-top" data-mview="mods stats">
+    <button type="button" class="hero hero-weapon" id="pickWeapon" aria-label="Choose weapon">
+      <div class="hero-img"><img id="weaponImg" alt=""><span class="ph" id="weaponPh">?</span></div>
+      <div class="hero-body">
+        <div class="kicker" id="weaponKicker">Weapon</div>
+        <div class="hero-name" id="weaponName">Choose a weapon</div>
+        <div class="hero-stats" id="weaponStats">Click to browse all weapons</div>
+        <div class="data-notes muted small" id="weaponNotes" hidden></div>
+      </div>
+    </button>
+    <div class="ars-cap">
+      <div class="cap-head" id="capHead"><span>Capacity</span><b>-</b></div>
+      <div class="cap-row">
+        <div id="capInfo" class="cap"></div>
+        <label class="check small"><input type="checkbox" id="catalyst" checked> Orokin Catalyst</label>
       </div>
     </div>
+    <div class="ars-configs">
+      <div class="cfg-tabs" id="cfgTabs" role="tablist" aria-label="Build configs for this weapon"></div>
+      <div class="cfg-tools">
+        <button type="button" class="btn ghost sm" id="undoBtn" title="Undo (Ctrl+Z)" disabled>&#8630;<span class="lbl"> Undo</span></button>
+        <button type="button" class="btn ghost sm" id="redoBtn" title="Redo (Ctrl+Y)" disabled>&#8631;<span class="lbl"> Redo</span></button>
+        <button type="button" class="btn ghost sm" id="clearMods" title="Remove all mods">Remove all</button>
+      </div>
+    </div>
+  </section>
 
-    <div class="attack-row">
-      <label>Attack <select id="attack"></select></label>
-      <div id="extraAttacks" class="extra-attacks"></div>
+  <!-- ================= STAT PANEL (tabs) ================= -->
+  <aside class="side statpanel" id="statPanel" data-mview="stats enemy more">
+    <div class="stat-tabs" role="tablist" aria-label="Statistics" id="statTabs">
+      <button type="button" role="tab" id="tab-arsenal" aria-controls="pane-arsenal" data-tab="arsenal" data-mgroup="stats">Arsenal</button>
+      <button type="button" role="tab" id="tab-dps" aria-controls="pane-dps" data-tab="dps" data-mgroup="stats">DPS &amp; TTK</button>
+      <button type="button" role="tab" id="tab-enemy" aria-controls="pane-enemy" data-tab="enemy" data-mgroup="enemy">Enemy</button>
+      <button type="button" role="tab" id="tab-buffs" aria-controls="pane-buffs" data-tab="buffs" data-mgroup="enemy">Buffs</button>
+      <button type="button" role="tab" id="tab-optimize" aria-controls="pane-optimize" data-tab="optimize" data-mgroup="more">Optimize</button>
+      <button type="button" role="tab" id="tab-builds" aria-controls="pane-builds" data-tab="builds" data-mgroup="more">Builds</button>
+    </div>
+
+    <!-- Arsenal: in-game style numbers plus combat headline -->
+    <section class="pane" role="tabpanel" id="pane-arsenal" aria-labelledby="tab-arsenal" data-pane="arsenal">
+      <h2 class="pane-title">Arsenal</h2>
+      <div class="attack-row">
+        <label>Attack <select id="attack"></select></label>
+        <div id="extraAttacks" class="extra-attacks"></div>
+      </div>
+      <div id="combatHead" class="combat-head"></div>
+      <div id="gameStats" class="game-stats"></div>
       <details class="ov">
         <summary>Base stat overrides</summary>
         <div class="grid4">
@@ -76,89 +94,40 @@
           <label>Charge (s) <input type="number" step="any" data-ov="chargeTime"></label>
         </div>
       </details>
-    </div>
-
-    <div id="incarnonPanel" class="panel inc-panel" hidden></div>
-
-    <div class="sec-head">
-      <h2>Mods</h2>
-      <span class="muted small" id="drainInfo"></span>
-      <span class="spacer"></span>
-      <button type="button" class="btn ghost sm" id="undoBtn" title="Undo (Ctrl+Z)" disabled>&#8630; Undo</button>
-      <button type="button" class="btn ghost sm" id="redoBtn" title="Redo (Ctrl+Y)" disabled>&#8631; Redo</button>
-      <button type="button" class="btn ghost sm" id="clearMods">Clear</button>
-    </div>
-    <div class="cap-row">
-      <div id="capInfo" class="cap"></div>
-      <label class="check small"><input type="checkbox" id="catalyst" checked> Orokin Catalyst</label>
-      <label class="check small"><input type="checkbox" id="showDelta" checked> Show mod value</label>
-    </div>
-    <p class="hint">Drag mods into slots or click to add. Drag slots to reorder (element order matters: first slot combines first). Right-click a slot to remove.</p>
-    <div id="slots" class="slot-grid"></div>
-
-    <details class="panel lb" id="leaderboard">
-      <summary><h2>Weapon leaderboard</h2></summary>
-      <p class="muted small">Ranks weapons by DPS against the enemy and buffs set on the right. "Quick-optimize" builds a fresh mod set per weapon (slower); otherwise each weapon is unmodded.</p>
-      <div class="row">
-        <select id="lbCat"><option value="Primary">Primary</option><option value="Secondary">Secondary</option><option value="Melee">Melee</option></select>
-        <select id="lbMetric"><option value="sustainedTotal">Sustained DPS</option><option value="burstTotal">Burst DPS</option><option value="perShotVsEnemy">Damage per shot</option><option value="groupSustained">Group DPS</option></select>
-        <label class="check small"><input type="checkbox" id="lbOpt" checked> Quick-optimize</label>
-        <label class="check small"><input type="checkbox" id="lbPrimeOnly"> Prime/Incarnon only</label>
-        <button type="button" class="btn sm" id="lbRun">Rank weapons</button>
-        <button type="button" class="btn ghost sm" id="lbStop" hidden>Stop</button>
-      </div>
-      <div id="lbProgress" class="small muted"></div>
-      <div id="lbOut"></div>
-    </details>
-
-    <div class="browser">
-      <div class="browser-bar">
-        <input type="search" id="modSearch" placeholder="Search mods (name or effect)" autocomplete="off">
-        <select id="modRarity" aria-label="Rarity">
-          <option value="">All rarities</option><option>Common</option><option>Uncommon</option><option>Rare</option><option>Legendary</option>
-        </select>
-        <select id="modSort" aria-label="Sort">
-          <option value="name">Name</option><option value="drain">Drain</option><option value="rarity">Rarity</option>
-        </select>
-      </div>
-      <div class="chips" id="modChips"></div>
-      <div class="muted small"><span id="modCount"></span> <span id="ownedCount" class="owned-count"></span></div>
-      <div id="modGrid" class="card-grid mods-grid"></div>
-    </div>
-  </section>
-
-  <!-- ================= SIDE ================= -->
-  <aside class="side">
-    <section class="panel results" id="resultPanel">
-      <h2>Results</h2>
-      <div id="tiles" class="tiles"></div>
-      <div id="typeBars"></div>
-      <div id="selfStatusBox" class="small"></div>
       <details id="arsenalBox">
-        <summary>Arsenal view (compare with the in-game Upgrade screen)</summary>
+        <summary>Arsenal check table (compare with the in-game Upgrade screen)</summary>
         <p class="muted small">Unconditional numbers like the in-game arsenal shows: no enemy, no ability buffs, no On Kill stacks, no quantization. Total includes multishot.</p>
         <div id="arsenalOut"></div>
       </details>
-      <details id="detailBox">
-        <summary>Full breakdown</summary>
-        <div id="breakdown"></div>
-      </details>
     </section>
 
-    <section class="panel">
-      <h2>Enemy</h2>
-      <div class="grid2">
-        <label>Faction <select id="faction"></select></label>
-        <label>Armor <input type="number" id="armor" value="0" min="0"></label>
-        <label>Headshot % <input type="number" id="headshotRate" value="0" min="0" max="100"></label>
-        <label>Weak point x <input type="number" id="weakPointMult" step="any" placeholder="auto"></label>
-        <label>Viral stacks <input type="number" id="viralStacks" value="0" min="0" max="10"></label>
-        <label>Corrosive stacks <input type="number" id="corrosiveStacks" value="0" min="0" max="10"></label>
-        <label>Other armor strip % <input type="number" id="armorStripPct" value="0" min="0" max="100"></label>
-        <label class="check"><input type="checkbox" id="heatStrip"> Heat strip (50%)</label>
-        <label>Magnetic stacks <input type="number" id="magneticStacks" value="0" min="0" max="10"></label>
+    <!-- DPS & TTK: full results -->
+    <section class="pane panel results" role="tabpanel" id="pane-dps" aria-labelledby="tab-dps" data-pane="dps">
+      <h2 class="pane-title">DPS &amp; time to kill</h2>
+      <div id="resultPanel">
+        <div id="tiles" class="tiles"></div>
+        <div id="typeBars"></div>
+        <div id="selfStatusBox" class="small"></div>
+        <details id="detailBox" open>
+          <summary>Full breakdown</summary>
+          <div id="breakdown"></div>
+        </details>
       </div>
-      <h3>Enemy unit (optional)</h3>
+      <section id="comparePanel">
+        <h2>Compare</h2>
+        <p class="muted small">Pin the current build as A, change things, and see the difference.</p>
+        <div class="row">
+          <button type="button" id="pinA" class="btn ghost sm">Pin current as A</button>
+          <button type="button" id="swapAB" class="btn ghost sm" hidden>Load A</button>
+          <button type="button" id="clearA" class="btn ghost sm" hidden>Clear</button>
+        </div>
+        <div id="compareOut"></div>
+      </section>
+    </section>
+
+    <!-- Enemy -->
+    <section class="pane panel" role="tabpanel" id="pane-enemy" aria-labelledby="tab-enemy" data-pane="enemy">
+      <h2 class="pane-title">Enemy</h2>
       <div class="unit-row">
         <button type="button" class="btn ghost sm" id="pickEnemy">Choose enemy</button>
         <span id="enemyName" class="muted small">Manual armor (no unit)</span>
@@ -171,11 +140,38 @@
         <label class="check"><input type="checkbox" id="eximus"> Eximus (Overguard)</label>
       </div>
       <p class="small" id="unitStats"></p>
-      <p class="muted small">Shields and Overguard are not modeled yet.</p>
+      <h3>Target</h3>
+      <div class="grid2">
+        <label>Faction <select id="faction"></select></label>
+        <label>Armor <input type="number" id="armor" value="0" min="0"></label>
+        <label>Headshot / weak point % <input type="number" id="headshotRate" value="0" min="0" max="100"></label>
+        <label>Weak point x <input type="number" id="weakPointMult" step="any" placeholder="auto"></label>
+        <label title="How many enemies area damage (explosions, clouds, Gas, Electricity chains, Blast bursts) hits.">Enemies in area <input type="number" id="targets" value="1" min="1" max="30"></label>
+      </div>
+      <h3>Statuses from others</h3>
+      <div class="grid2">
+        <label>Viral stacks <input type="number" id="viralStacks" value="0" min="0" max="10"></label>
+        <label>Corrosive stacks <input type="number" id="corrosiveStacks" value="0" min="0" max="10"></label>
+        <label>Magnetic stacks <input type="number" id="magneticStacks" value="0" min="0" max="10"></label>
+        <label>Other armor strip % <input type="number" id="armorStripPct" value="0" min="0" max="100"></label>
+        <label class="check"><input type="checkbox" id="heatStrip"> Heat strip (50%)</label>
+      </div>
     </section>
 
-    <section class="panel">
-      <h2>Buffs</h2>
+    <!-- Buffs: frame, abilities, conditions, riven -->
+    <section class="pane panel" role="tabpanel" id="pane-buffs" aria-labelledby="tab-buffs" data-pane="buffs">
+      <h2 class="pane-title">Warframe and buffs</h2>
+      <div class="frame-row">
+        <button type="button" class="hero hero-frame" id="pickFrame" aria-label="Choose warframe">
+          <div class="hero-img"><img id="frameImg" alt=""><span class="ph" id="framePh">?</span></div>
+          <div class="hero-body">
+            <div class="kicker">Warframe</div>
+            <div class="hero-name" id="frameName">Optional</div>
+            <div class="hero-stats" id="frameStats">For ability buffs</div>
+          </div>
+        </button>
+        <button type="button" class="arc-slot" data-arc="1" aria-label="Warframe arcane"></button>
+      </div>
       <div id="frameAbilities"></div>
       <h3>Damage buffs</h3>
       <div id="abilities"></div>
@@ -187,35 +183,24 @@
         <label title="Extra status types from teammates or abilities. Your own procs are counted automatically when the box below is ticked.">Status types on target (min) <input type="number" id="statusTypes" value="0" min="0"></label>
         <label class="check" title="Estimate the Viral, Corrosive, Heat, Magnetic, Puncture and Cold stacks your own procs keep on the target, and the number of status types for Galvanized Aptitude / Condition Overload."><input type="checkbox" id="selfStatus" checked> Count my own status effects</label>
         <label title="DoTs stop when the target dies. Blank = use time to kill when an enemy unit is chosen.">Fight length (s) <input type="number" id="fightSeconds" min="1" step="0.5" placeholder="auto"></label>
-        <label title="How many enemies area damage (explosions, clouds, Gas, Electricity chains, Blast bursts) hits.">Enemies in area <input type="number" id="targets" value="1" min="1" max="30"></label>
       </div>
       <div id="stacks"></div>
-      <details>
-        <summary>Custom buffs (Incarnon perks, shards, other abilities)</summary>
-        <p class="muted small">Values are decimals: 0.5 = +50%.</p>
-        <div id="custom"></div>
-        <button type="button" id="addCustom" class="btn ghost sm">+ Custom buff</button>
-      </details>
       <details>
         <summary>Riven</summary>
         <div id="riven"></div>
         <button type="button" id="addRiven" class="btn ghost sm">+ Riven stat</button>
       </details>
+      <details>
+        <summary>Custom buffs (shards, other abilities)</summary>
+        <p class="muted small">Values are decimals: 0.5 = +50%.</p>
+        <div id="custom"></div>
+        <button type="button" id="addCustom" class="btn ghost sm">+ Custom buff</button>
+      </details>
     </section>
 
-    <section class="panel" id="comparePanel">
-      <h2>Compare</h2>
-      <p class="muted small">Pin the current build as A, change things, and see the difference.</p>
-      <div class="row">
-        <button type="button" id="pinA" class="btn ghost sm">Pin current as A</button>
-        <button type="button" id="swapAB" class="btn ghost sm" hidden>Load A</button>
-        <button type="button" id="clearA" class="btn ghost sm" hidden>Clear</button>
-      </div>
-      <div id="compareOut"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Optimizer</h2>
+    <!-- Optimize: optimizer + leaderboard -->
+    <section class="pane panel" role="tabpanel" id="pane-optimize" aria-labelledby="tab-optimize" data-pane="optimize">
+      <h2 class="pane-title">Optimizer</h2>
       <div class="grid2">
         <label>Optimize for <select id="metric">
           <option value="sustainedTotal">Sustained DPS</option>
@@ -230,13 +215,28 @@
         <label class="check"><input type="checkbox" id="optExilus" checked> Use exilus slot</label>
         <label class="check" title="Star the mods you own in the mod browser"><input type="checkbox" id="optOwned"> Only mods I own</label>
       </div>
-      <p class="muted small">Locked slots are kept. Mod capacity and forma are not modeled.</p>
+      <p class="muted small">Locked slots are kept. Check the capacity bar afterwards; forma is not chosen for you.</p>
       <button type="button" id="runOpt" class="btn">Find best build</button>
       <div id="optOut" class="small"></div>
+      <details class="lb" id="leaderboard">
+        <summary><h2>Weapon leaderboard</h2></summary>
+        <p class="muted small">Ranks weapons by DPS against the enemy and buffs you set. "Quick-optimize" builds a fresh mod set per weapon (slower); otherwise each weapon is unmodded.</p>
+        <div class="row">
+          <select id="lbCat"><option value="Primary">Primary</option><option value="Secondary">Secondary</option><option value="Melee">Melee</option></select>
+          <select id="lbMetric"><option value="sustainedTotal">Sustained DPS</option><option value="burstTotal">Burst DPS</option><option value="perShotVsEnemy">Damage per shot</option><option value="groupSustained">Group DPS</option></select>
+          <label class="check small"><input type="checkbox" id="lbOpt" checked> Quick-optimize</label>
+          <label class="check small"><input type="checkbox" id="lbPrimeOnly"> Prime/Incarnon only</label>
+          <button type="button" class="btn sm" id="lbRun">Rank weapons</button>
+          <button type="button" class="btn ghost sm" id="lbStop" hidden>Stop</button>
+        </div>
+        <div id="lbProgress" class="small muted"></div>
+        <div id="lbOut"></div>
+      </details>
     </section>
 
-    <section class="panel">
-      <h2>Builds</h2>
+    <!-- Builds: save/load/share + community -->
+    <section class="pane panel" role="tabpanel" id="pane-builds" aria-labelledby="tab-builds" data-pane="builds">
+      <h2 class="pane-title">Builds</h2>
       <p class="muted small" id="cloudNote"></p>
       <div class="row">
         <input id="buildName" placeholder="Build name">
@@ -258,19 +258,58 @@
         <button type="button" id="pasteJson" class="btn ghost sm">Load from JSON</button>
       </div>
       <textarea id="jsonBox" rows="4" spellcheck="false" placeholder="Build JSON (paste here to load, or share with Claude)"></textarea>
-    </section>
-
-    <section class="panel" id="publicPanel" hidden>
-      <h2>Community builds</h2>
-      <p class="muted small">Builds people chose to publish. Publish yours with the share button and "Make public".</p>
-      <div class="row">
-        <input type="search" id="pubSearch" placeholder="Filter by weapon">
-        <select id="pubSort"><option value="top">Most liked</option><option value="new">Newest</option></select>
-      </div>
-      <div id="pubList" class="pub-list"></div>
+      <section id="publicPanel" hidden>
+        <h2>Community builds</h2>
+        <p class="muted small">Builds people chose to publish. Publish yours with the share button and "Make public".</p>
+        <div class="row">
+          <input type="search" id="pubSearch" placeholder="Filter by weapon">
+          <select id="pubSort"><option value="top">Most liked</option><option value="new">Newest</option></select>
+        </div>
+        <div id="pubList" class="pub-list"></div>
+      </section>
     </section>
   </aside>
+
+  <!-- ================= MOD BOARD ================= -->
+  <section class="build" data-mview="mods">
+    <div class="modboard" id="modBoard">
+      <div id="slots" class="slot-grid"></div>
+      <button type="button" class="arc-slot arc-weapon" data-arc="0" aria-label="Weapon arcane"></button>
+    </div>
+    <div class="board-foot">
+      <span class="muted small" id="drainInfo"></span>
+      <span class="spacer"></span>
+      <label class="check small"><input type="checkbox" id="showDelta" checked> Show mod value</label>
+      <button type="button" class="btn sm only-mobile" id="openBrowser">+ Add mods</button>
+    </div>
+    <p class="hint only-desktop">Drag mods into slots or click to add. Drag slots to reorder (element order matters: first slot combines first). Right-click a slot to remove.</p>
+    <div id="incarnonPanel" class="panel inc-panel" hidden></div>
+  </section>
+
+  <!-- ================= MOD BROWSER (bottom; full-screen sheet on phones) ================= -->
+  <section class="browser" id="browser" data-mview="mods" aria-label="Mod browser">
+    <div class="browser-bar">
+      <button type="button" class="btn ghost sm only-mobile" id="closeBrowser">Done</button>
+      <input type="search" id="modSearch" placeholder="Search mods (name or effect)" autocomplete="off">
+      <select id="modRarity" aria-label="Rarity">
+        <option value="">All rarities</option><option>Common</option><option>Uncommon</option><option>Rare</option><option>Legendary</option>
+      </select>
+      <select id="modSort" aria-label="Sort">
+        <option value="name">Name</option><option value="drain">Drain</option><option value="rarity">Rarity</option>
+      </select>
+    </div>
+    <div class="chips" id="modChips"></div>
+    <div class="muted small"><span id="modCount"></span> <span id="ownedCount" class="owned-count"></span></div>
+    <div id="modGrid" class="card-grid mods-grid"></div>
+  </section>
 </main>
+
+<nav class="bottombar" id="bottomBar" aria-label="Sections">
+  <button type="button" data-mv="mods" aria-current="page"><span aria-hidden="true">&#9638;</span>Mods</button>
+  <button type="button" data-mv="stats"><span aria-hidden="true">&#9776;</span>Stats</button>
+  <button type="button" data-mv="enemy"><span aria-hidden="true">&#9673;</span>Enemy</button>
+  <button type="button" data-mv="more"><span aria-hidden="true">&#8943;</span>More</button>
+</nav>
 
 <dialog id="picker">
   <form method="dialog" class="picker-head">
@@ -300,6 +339,7 @@
 <script src="src/enemy.js"></script>
 <script src="src/capacity.js"></script>
 <script src="src/incarnon.js"></script>
+<script src="ui/layout.js"></script>
 <script src="ui/features.js"></script>
 <script src="ui/app.js"></script>
 </body>

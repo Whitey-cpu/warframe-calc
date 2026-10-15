@@ -263,7 +263,7 @@
     const rm = e.target.closest('[data-remove]');
     if (rm) { const i = +rm.dataset.remove; state.mods[i] = null; state.ranks[i] = null; if (i < SLOT_COUNT) state.locks[i] = false; renderSlots(); update(); return; }
     const slot = e.target.closest('.slot');
-    if (slot && !state.mods[+slot.dataset.slot]) { $('modSearch').focus(); $('modSearch').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    if (slot && !state.mods[+slot.dataset.slot] && !window.matchMedia('(max-width: 760px)').matches) { $('modSearch').focus(); $('modSearch').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   });
   $('slots').addEventListener('contextmenu', e => {
     const slot = e.target.closest('.slot'); if (!slot) return;
@@ -401,7 +401,7 @@
     filter: (w, c) => c === 'all' || w.category === c || (c === 'prime' && w.isPrime) || (c === 'inc' && w.incarnon),
     text: w => `${w.category} ${w.type}`,
     meta: w => { const a = w.attacks[0]; return `${esc(w.type)} &middot; ${pct(a.critChance)} / ${pct(a.statusChance)}${w.isPrime ? ' <span class="badge prime">P</span>' : ''}${w.incarnon ? ' <span class="badge inc">Inc</span>' : ''}`; },
-    onPick: w => { if (w) { setWeapon(w); renderSlots(); update(); } }
+    onPick: w => { if (w) { if (window.WFUI.onWeaponPicked && window.WFUI.onWeaponPicked(w)) return; setWeapon(w); renderSlots(); update(); } }
   });
   $('pickFrame').onclick = () => openPicker({
     title: 'Warframes', items: D.frames, current: state.frame && state.frame.name, allowNone: true,
@@ -750,7 +750,8 @@
     let names;
     if (user) {
       try { const r = await api('/builds'); cloudBuilds = {}; r.builds.forEach(b => { cloudBuilds[b.name] = b.data; }); } catch (e) { flashMsg('Could not load cloud builds: ' + e.message); }
-      names = Object.keys(cloudBuilds);
+      names = Object.keys(cloudBuilds).filter(n => !(window.WFUI.isConfigBuild && window.WFUI.isConfigBuild(n)));
+      if (window.WFUI.onCloudBuilds) window.WFUI.onCloudBuilds(cloudBuilds);
     } else names = Object.keys(loadStore());
     $('savedBuilds').innerHTML = '<option value="">Load saved...</option>' + names.sort().map(k => `<option>${esc(k)}</option>`).join('');
     const local = Object.keys(loadStore());
@@ -882,6 +883,7 @@
     hooks: [], onSlots: null, renderEnemyUnit: null
   };
   if (window.WFFeatures) window.WFFeatures(window.WFUI);
+  if (window.WFLayout) window.WFLayout(window.WFUI);
 
   // ---------- start ----------
   renderFrame(); renderArcanes(); renderSlots(); renderModBrowser();

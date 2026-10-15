@@ -100,7 +100,7 @@ function buildData(load, version, extras) {
       maxRank: m.fusionLimit,
       polarity: m.polarity,
       rarity: m.rarity,
-      exilus: !!m.isExilus,
+      exilus: !!(m.isExilus || m.isUtility),
       augment: !!m.isAugment,
       set: m.modSet || null,
       image: m.imageName || null,

@@ -63,9 +63,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 details > summary { cursor: pointer; color: var(--muted); font-size: .82rem; margin: 6px 0; }
 
 /* ---------- layout ---------- */
-.layout { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; padding: 16px; max-width: 1700px; margin: 0 auto; align-items: start; }
-.side { display: grid; gap: 12px; position: sticky; top: 64px; max-height: calc(100vh - 76px); overflow: auto; padding-right: 2px; }
-@media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } .side { position: static; max-height: none; overflow: visible; } }
+/* page layouts: see the ARSENAL and CLASSIC sections at the end of this file */
 .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; min-width: 0; }
 .build { min-width: 0; }
 
@@ -324,3 +322,202 @@ details.lb > summary::after { content: ' \25BE'; color: var(--muted); }
 #dataSources ul { margin: 6px 0; padding-left: 18px; }
 #dataInfo { text-decoration: none; }
 #dataInfo:hover { text-decoration: underline; }
+
+
+/* =====================================================================
+   SHARED (both layouts)
+   ===================================================================== */
+.only-mobile { display: none !important; }
+.ars-top { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(220px, 1fr) auto; gap: 12px; align-items: stretch; }
+.ars-top .hero-weapon .hero-img { width: 128px; }
+.ars-top .hero-name { font-size: 1.2rem; }
+.ars-cap, .ars-configs { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; display: grid; gap: 6px; align-content: center; min-width: 0; }
+.cap-head { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.cap-head > b { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.cap-line { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--panel2); border: 1px solid var(--border); overflow: clip; }
+.cap-line span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.cap-line.over span { background: var(--warn); }
+.cap-head > .small { grid-column: 1 / -1; text-transform: none; letter-spacing: 0; font-weight: 400; }
+.ars-cap .cap-row { margin: 0; }
+.ars-cap .cap-bar { display: none; }
+html[data-layout="arsenal"] .ars-cap #capInfo { display: none; }
+.chips .chip { white-space: nowrap; }
+.chips { align-items: center; }
+.cfg-tabs { display: flex; gap: 2px; flex-wrap: wrap; }
+.cfg-tab { all: unset; cursor: pointer; padding: 6px 10px; font-size: .8rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+.cfg-tab.saved { color: var(--text); }
+.cfg-tab[aria-selected="true"] { color: var(--accent-2); border-bottom-color: var(--accent); }
+.cfg-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.cfg-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.frame-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 8px; }
+.frame-row .hero-frame .hero-img { width: 64px; }
+.board-foot { display: flex; align-items: center; gap: 10px; margin: 8px 0 4px; flex-wrap: wrap; }
+.board-foot label { margin: 0; }
+.pane-title { margin-top: 0; }
+
+/* in-game style stat list */
+.game-stats { display: grid; gap: 10px; margin: 6px 0 10px; }
+.gs-sec { background: color-mix(in srgb, var(--panel2) 70%, transparent); border: 1px solid var(--border); border-radius: 8px; overflow: clip; }
+.gs-sec h4 { margin: 0; padding: 7px 10px 5px; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-2); border-top: 1px solid var(--border); }
+.gs-sec h4:first-child { border-top: 0; }
+.gs-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 3px 10px; font-size: .86rem; }
+.gs-row:nth-of-type(even) { background: color-mix(in srgb, var(--text) 4%, transparent); }
+.gs-k { color: var(--muted); min-width: 0; }
+.gs-k .muted { font-size: .75rem; }
+.gs-v { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gs-v.up { color: light-dark(#0b5d8f, #7fd3ff); }
+.gs-v.down { color: var(--warn); }
+.gs-total .gs-k { color: var(--text); font-weight: 600; }
+.gs-note { margin: 0; padding: 4px 10px 7px; font-size: .74rem; color: var(--muted); }
+.dot { display: inline-block; width: .6em; height: .6em; border-radius: 50%; margin-right: .4em; vertical-align: baseline; }
+.dispo { letter-spacing: .05em; color: var(--accent-2); }
+.combat-head { border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--border)); border-radius: 10px; padding: 8px 10px 10px; margin-bottom: 10px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 10%, var(--panel)), var(--panel)); }
+.combat-head:empty { display: none; }
+.combat-head h4 { margin: 0 0 4px; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-2); }
+.combat-head h4 .muted { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.ch-main { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.ch-k { color: var(--muted); font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; }
+.ch-v { font-size: 1.7rem; font-weight: 750; color: var(--accent); font-variant-numeric: tabular-nums; }
+.ch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 4px 12px; margin: 4px 0 8px; }
+.ch-grid > div { display: grid; }
+.ch-grid b { font-variant-numeric: tabular-nums; }
+
+/* mod board: 2 rows of 4 slots, weapon arcane + exilus in a fifth column like the game */
+.modboard { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, .95fr); gap: 10px; align-items: stretch; }
+.modboard #slots { display: contents; }
+.modboard .slot { min-height: 160px; }
+.modboard .slot.exilus { grid-column: 5; grid-row: 2; min-height: 160px; }
+.modboard .slot.exilus .mod { grid-template-columns: none; grid-template-rows: auto auto auto 1fr; text-align: center; }
+.modboard .slot.exilus .mod .mod-img { grid-row: auto; height: 62px; }
+.modboard .arc-weapon { grid-column: 5; grid-row: 1; grid-template-columns: 1fr; grid-template-rows: auto auto; justify-items: center; text-align: center; align-content: center;
+  border-radius: 10px; min-height: 160px; }
+.modboard .arc-weapon .thumb { width: 72px; height: 72px; }
+.modboard .arc-weapon img { max-width: 72px; max-height: 72px; }
+.modboard .arc-weapon .t b { white-space: normal; }
+
+/* =====================================================================
+   ARSENAL LAYOUT (desktop / tablet)
+   ===================================================================== */
+html[data-layout="arsenal"] .layout { display: grid; gap: 12px; padding: 12px 16px; max-width: 1760px; margin: 0 auto; align-items: start;
+  grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+  grid-template-areas: "top top" "stats board" "stats browser"; grid-template-rows: auto auto 1fr; }
+html[data-layout="arsenal"] .ars-top { grid-area: top; }
+html[data-layout="arsenal"] .statpanel { grid-area: stats; position: sticky; top: 64px; max-height: calc(100dvh - 76px); overflow: auto; overscroll-behavior: contain;
+  scrollbar-gutter: stable; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 0 10px 10px; }
+html[data-layout="arsenal"] .build { grid-area: board; min-width: 0; }
+html[data-layout="arsenal"] .browser { grid-area: browser; min-width: 0; }
+html[data-layout="arsenal"] .pane { display: none; }
+html[data-layout="arsenal"] .pane.active { display: block; }
+html[data-layout="arsenal"] .pane.panel { background: none; border: 0; padding: 0; border-radius: 0; }
+html[data-layout="arsenal"] .pane-title { position: absolute; width: 1px; height: 1px; overflow: clip; clip-path: inset(50%); white-space: nowrap; }
+.stat-tabs { display: flex; flex-wrap: wrap; gap: 0 2px; position: sticky; top: 0; z-index: 2; background: var(--panel); padding-top: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+.stat-tabs [role=tab] { all: unset; cursor: pointer; padding: 7px 9px 6px; font-size: .76rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.stat-tabs [role=tab][aria-selected="true"] { color: var(--accent-2); border-bottom-color: var(--accent); }
+.stat-tabs [role=tab]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+html[data-layout="arsenal"] .attack-row { margin: 0 0 6px; gap: 6px 12px; }
+html[data-layout="arsenal"] .attack-row > label { min-width: 0; flex: 1 1 160px; margin: 0; }
+html[data-layout="arsenal"] .extra-attacks { margin: 0; }
+html[data-layout="arsenal"] #pane-dps .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+html[data-layout="arsenal"] .browser .mods-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.bottombar { display: none; }
+
+@media (max-width: 1180px) {
+  html[data-layout="arsenal"] .ars-top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  html[data-layout="arsenal"] .ars-configs { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; }
+  .modboard { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .modboard .arc-weapon { grid-column: 1 / span 2; grid-row: 3; min-height: 90px; grid-template-columns: 60px 1fr; text-align: left; justify-items: start; }
+  .modboard .arc-weapon .thumb { width: 52px; height: 52px; }
+  .modboard .slot.exilus { grid-column: 3 / span 2; grid-row: 3; min-height: 90px; }
+}
+
+/* =====================================================================
+   ARSENAL LAYOUT on phones: bottom tab bar, one section at a time, browser as a full-screen sheet
+   ===================================================================== */
+@media (max-width: 760px) {
+  html[data-layout="arsenal"] body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  html[data-layout="arsenal"] .topbar { padding: 8px 12px; gap: 8px; }
+  html[data-layout="arsenal"] .topbar h1 { font-size: .95rem; }
+  html[data-layout="arsenal"] #downloadApp, html[data-layout="arsenal"] #feedbackLink { display: none; }
+  html[data-layout="arsenal"] #dataInfo { order: 10; flex-basis: 100%; }
+  html[data-layout="arsenal"] .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "stats" "board" "browser"; padding: 10px 10px 16px; gap: 10px; }
+  html[data-layout="arsenal"] .statpanel { position: static; max-height: none; overflow: visible; padding: 0 10px 10px; }
+  html[data-layout="arsenal"] .mv-hide { display: none !important; }
+  html[data-layout="arsenal"] .stat-tabs [role=tab].mg-off { display: none; }
+  html[data-layout="arsenal"] .stat-tabs [role=tab] { flex: 1; text-align: center; padding: 10px 6px 8px; }
+  html[data-layout="arsenal"] .ars-top { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  html[data-layout="arsenal"] .ars-top .hero-weapon { grid-template-columns: 64px 1fr; gap: 10px; padding: 8px 10px; }
+  html[data-layout="arsenal"] .ars-top .hero-weapon .hero-img { width: 64px; }
+  html[data-layout="arsenal"] .ars-top .hero-name { font-size: 1.05rem; }
+  html[data-layout="arsenal"] .ars-top .hero-stats { display: none; }
+  html[data-layout="arsenal"] .ars-cap { padding: 8px 10px; min-width: 104px; }
+  html[data-layout="arsenal"] .ars-cap .cap-row { display: none; }
+  html[data-layout="arsenal"] .cap-head { font-size: .72rem; }
+  html[data-layout="arsenal"] .cap-head > b { font-size: 1.05rem; }
+  html[data-layout="arsenal"] .ars-configs { grid-column: 1 / -1; padding: 4px 8px; }
+  html[data-layout="arsenal"][data-mv="stats"] .ars-cap, html[data-layout="arsenal"][data-mv="stats"] .ars-configs { display: none; }
+  html[data-layout="arsenal"][data-mv="stats"] .ars-top { grid-template-columns: minmax(0, 1fr); }
+  html[data-layout="arsenal"] .ars-configs { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  html[data-layout="arsenal"] .cfg-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  html[data-layout="arsenal"] .cfg-tab { padding: 10px 8px; font-size: .74rem; }
+  html[data-layout="arsenal"] #layoutToggle { font-size: .72rem; padding: 4px 7px; }
+  html[data-layout="arsenal"] .cfg-pre { display: none; }
+  html[data-layout="arsenal"] .cfg-tab { min-width: 2.2em; text-align: center; }
+  .slot:has(.mod) .mod-top { padding-left: 30px; }
+  .slot .slot-n { left: 38px; }
+  html[data-layout="arsenal"] .cfg-tools .lbl { display: none; }
+  html[data-layout="arsenal"] .only-mobile { display: inline-block !important; }
+  html[data-layout="arsenal"] .only-desktop { display: none; }
+  .modboard { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .modboard .slot { min-height: 132px; }
+  .modboard .arc-weapon { grid-column: 1; grid-row: 5; min-height: 96px; grid-template-columns: 1fr; text-align: center; justify-items: center; }
+  .modboard .slot.exilus { grid-column: 2; grid-row: 5; min-height: 96px; }
+  .modboard .mod-fx { font-size: .68rem; }
+  .board-foot .btn { flex: 1 1 100%; padding: 12px; font-size: .95rem; }
+  html[data-layout="arsenal"] .frame-row { grid-template-columns: minmax(0, 1fr); }
+  /* touch targets */
+  .slot .slot-tools button, .rank button, .slot-pol { width: 28px; height: 28px; }
+  html[data-layout="arsenal"] input, html[data-layout="arsenal"] select { min-height: 40px; font-size: 16px; }
+  html[data-layout="arsenal"] label.check { min-height: 36px; }
+
+  /* browser sheet */
+  html[data-layout="arsenal"] .browser { display: none; }
+  html[data-layout="arsenal"] body.sheet-open .browser { display: grid; grid-template-rows: auto auto auto 1fr; position: fixed; inset: 0; z-index: 60;
+    border-radius: 0; border: 0; padding: calc(10px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom)); overflow: hidden; }
+  html[data-layout="arsenal"] body.sheet-open .browser .mods-grid { overflow: auto; overscroll-behavior: contain; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); align-content: start; padding-bottom: 12px; }
+  html[data-layout="arsenal"] body.sheet-open .browser .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  html[data-layout="arsenal"] body.sheet-open { overflow: hidden; }
+
+  /* bottom tab bar */
+  html[data-layout="arsenal"] .bottombar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; inset: auto 0 0 0; z-index: 40;
+    padding: 4px 4px env(safe-area-inset-bottom); background: color-mix(in srgb, var(--panel) 94%, transparent); backdrop-filter: blur(10px); border-top: 1px solid var(--border); }
+  .bottombar button { all: unset; cursor: pointer; display: grid; justify-items: center; gap: 2px; padding: 8px 4px; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  .bottombar button span { font-size: 1.15rem; line-height: 1; }
+  .bottombar button[aria-current="page"] { color: var(--accent-2); }
+  .bottombar button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; border-radius: 8px; }
+  dialog#picker { width: 100%; height: 100dvh; max-width: none; max-height: none; border-radius: 0; }
+  #pickerGrid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+/* =====================================================================
+   CLASSIC LAYOUT (toggle): everything visible, build on the left, panels on the right
+   ===================================================================== */
+html[data-layout="classic"] .layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 16px; padding: 16px; max-width: 1700px; margin: 0 auto; align-items: start;
+  grid-template-areas: "top stats" "board stats" "browser stats"; grid-template-rows: auto auto 1fr; }
+html[data-layout="classic"] .ars-top { grid-area: top; }
+html[data-layout="classic"] .build { grid-area: board; min-width: 0; }
+html[data-layout="classic"] .browser { grid-area: browser; min-width: 0; }
+html[data-layout="classic"] .statpanel { grid-area: stats; display: grid; gap: 12px; position: sticky; top: 64px; max-height: calc(100dvh - 76px); overflow: auto; padding-right: 2px; }
+html[data-layout="classic"] .stat-tabs { display: none; }
+html[data-layout="classic"] #pane-arsenal { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+html[data-layout="classic"] .bottombar, html[data-layout="classic"] .only-mobile { display: none !important; }
+@media (max-width: 1100px) {
+  html[data-layout="classic"] .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "board" "stats" "browser"; }
+  html[data-layout="classic"] .statpanel { position: static; max-height: none; overflow: visible; }
+  html[data-layout="classic"] .ars-top { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .modboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .modboard .arc-weapon { grid-column: 1; grid-row: 5; }
+  .modboard .slot.exilus { grid-column: 2; grid-row: 5; }
+}
