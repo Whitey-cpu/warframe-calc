@@ -4,6 +4,7 @@
  * (Digital Extremes' public Box share, https://www.warframe.com/community/fankit) and writes web-sized copies:
  *   assets/bg/<id>.webp        up to 1920x1200, for the page background
  *   assets/bg/<id>.thumb.webp  480 px wide, for the picker
+ *   assets/bg/manifest.js      the manifest as a script (window.WF_BG) for file:// pages
  * Then records size and fetch date back into the manifest. Already-fetched items are skipped unless --force.
  * Usage (needs internet access to box.com and the sharp package): npm i sharp && node scripts/fetch-art.js
  */
@@ -46,7 +47,12 @@ async function main() {
       console.error(`FAIL ${it.id}: ${e.message}`);
     }
   }
+  // remove images that are no longer listed (e.g. taken out of the manifest)
+  const keep = new Set(m.items.flatMap(it => [`${it.id}.webp`, `${it.id}.thumb.webp`]));
+  for (const f of fs.readdirSync(DIR)) if (f.endsWith('.webp') && !keep.has(f)) { fs.unlinkSync(path.join(DIR, f)); console.log(`removed ${f}`); }
   fs.writeFileSync(MANIFEST, JSON.stringify(m, null, 1) + '\n');
+  // script copy so the picker also works when the page is opened from disk or in the desktop app (file://)
+  fs.writeFileSync(path.join(DIR, 'manifest.js'), 'window.WF_BG = ' + JSON.stringify(m) + ';\n');
   console.log(`${ok} ready, ${failed} failed`);
   if (!ok) process.exit(1);
 }

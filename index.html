@@ -16,6 +16,7 @@
 <script>try { document.documentElement.dataset.layout = localStorage.getItem('wfcalc.layout') || 'arsenal'; } catch (e) { document.documentElement.dataset.layout = 'arsenal'; }</script>
 </head>
 <body>
+<div id="bgArt" aria-hidden="true"></div>
 <header class="topbar">
   <div class="brand">
     <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="16" cy="16" r="2.5" fill="currentColor"/><path d="M16 1v8M16 23v8M1 16h8M23 16h8" stroke="currentColor" stroke-width="2.5"/></svg>
@@ -23,6 +24,7 @@
   </div>
   <a id="dataInfo" class="muted small" href="#dataSources"></a>
   <span class="spacer"></span>
+  <button type="button" id="bgButton" class="btn ghost sm" title="Choose a background from the official Warframe Fansite Kit">Background</button>
   <button type="button" id="layoutToggle" class="btn ghost sm" title="Switch between the arsenal layout and the classic layout">Classic view</button>
   <button type="button" id="themeToggle" class="btn ghost sm" title="Switch light/dark theme" aria-label="Switch theme">&#9680;</button>
   <a id="feedbackLink" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/issues/new" target="_blank" rel="noopener" title="Report a bug or wrong number">Feedback</a>
@@ -321,7 +323,24 @@
   <div id="pickerGrid" class="card-grid"></div>
 </dialog>
 
+<dialog id="bgDialog" closedby="any" aria-labelledby="bgTitle">
+  <form method="dialog" class="picker-head">
+    <h2 id="bgTitle">Background</h2>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" value="close">Close</button>
+  </form>
+  <div class="bg-controls">
+    <label>Darken <input type="range" id="bgDim" min="0" max="90" step="5" value="60"></label>
+    <label>Blur <input type="range" id="bgBlur" min="0" max="20" step="1" value="0"></label>
+    <label class="check small"><input type="checkbox" id="bgShuffle"> New random background each visit</label>
+  </div>
+  <div class="chips" id="bgChips"></div>
+  <div id="bgGrid" class="card-grid bg-grid"></div>
+  <p class="muted small bg-credit">Art from the official <a href="https://www.warframe.com/community/fankit" target="_blank" rel="noopener">Warframe Fansite Kit</a> by Digital Extremes, used under the <a href="https://www.warframe.com/contentpolicy" target="_blank" rel="noopener">Warframe Content Policy</a> (non-commercial fan use). Your choice is saved in this browser only.</p>
+</dialog>
+
 <footer class="muted small">
+  <p id="bgCreditLine" class="muted small" hidden></p>
   <details id="dataSources"><summary>Data sources and freshness</summary><div id="dataSourcesBody"></div></details>
   Formulas: <a href="https://wiki.warframe.com/w/Damage_calculation" target="_blank" rel="noopener">WARFRAME Wiki</a>.
   Data: public sources only (listed above); images via the warframestat.us CDN.
@@ -339,6 +358,7 @@
 <script src="src/enemy.js"></script>
 <script src="src/capacity.js"></script>
 <script src="src/incarnon.js"></script>
+<script src="ui/background.js"></script>
 <script src="ui/layout.js"></script>
 <script src="ui/features.js"></script>
 <script src="ui/app.js"></script>

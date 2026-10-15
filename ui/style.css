@@ -521,3 +521,37 @@ html[data-layout="classic"] .bottombar, html[data-layout="classic"] .only-mobile
   .modboard .arc-weapon { grid-column: 1; grid-row: 5; }
   .modboard .slot.exilus { grid-column: 2; grid-row: 5; }
 }
+
+
+/* =====================================================================
+   BACKGROUND ART (official Warframe Fansite Kit, chosen in the Background dialog)
+   ===================================================================== */
+#bgArt { position: fixed; inset: 0; z-index: -1; background: center / cover no-repeat; pointer-events: none; }
+html[data-bg="on"] #bgArt { filter: blur(var(--bg-blur, 0px)); inset: calc(-2 * var(--bg-blur, 0px)); }
+html[data-bg="on"] #bgArt::after { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) calc(var(--bg-dim, .6) * 100%), transparent); }
+html[data-bg="on"] body { background: transparent; }
+html[data-bg="on"] { background: var(--bg); }
+html[data-bg="on"] .panel, html[data-bg="on"] .browser, html[data-bg="on"] .ars-cap, html[data-bg="on"] .ars-configs,
+html[data-bg="on"][data-layout="arsenal"] .statpanel, html[data-bg="on"] .hero, html[data-bg="on"] .slot:not(:has(.mod)), html[data-bg="on"] .arc-slot {
+  background: color-mix(in srgb, var(--panel) 84%, transparent); }
+html[data-bg="on"] .stat-tabs { background: color-mix(in srgb, var(--panel) 96%, transparent); }
+html[data-bg="on"] .topbar { background: color-mix(in srgb, var(--bg) 70%, transparent); }
+dialog#bgDialog { width: min(1000px, calc(100vw - 32px)); max-height: min(860px, calc(100dvh - 40px)); padding: 0; border: 1px solid var(--border); border-radius: 14px;
+  background: var(--panel); color: var(--text); overflow: hidden; }
+dialog#bgDialog[open] { display: grid; grid-template-rows: auto auto auto 1fr auto; }
+.bg-controls { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: end; padding: 10px 14px 0; }
+.bg-controls label { margin: 0; min-width: 160px; }
+#bgChips { padding: 8px 14px 0; margin: 0; }
+.bg-grid { overflow: auto; overscroll-behavior: contain; padding: 10px 14px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); align-content: start; }
+.bg-card { all: unset; box-sizing: border-box; cursor: pointer; display: grid; gap: 4px; border-radius: 10px; border: 1px solid var(--border); padding: 4px; background: var(--panel2); }
+.bg-card img { width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; border-radius: 7px; display: block; background: var(--bg2); }
+.bg-card .bg-none { display: grid; place-items: center; aspect-ratio: 16 / 9; border-radius: 7px; color: var(--muted); background: linear-gradient(135deg, var(--panel2), var(--bg)); }
+.bg-card .bg-name { font-size: .78rem; padding: 0 4px 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bg-card:hover, .bg-card.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.bg-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.bg-credit { margin: 0; padding: 8px 14px 12px; border-top: 1px solid var(--border); }
+@media (max-width: 760px) {
+  dialog#bgDialog { width: 100%; max-width: none; max-height: none; height: 100dvh; border-radius: 0; }
+  .bg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-layout="arsenal"] #bgButton { font-size: .72rem; padding: 4px 7px; }
+}

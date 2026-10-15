@@ -69,6 +69,9 @@ Public sources only. Nothing is read from the game client or a player account.
   weapon arcane and exilus, game-style stat panel (Fire Rate, Multishot, Damage, radial attacks, Incarnon form) with
   extra tabs for DPS/TTK, enemy, buffs, optimizer and builds. A "Classic view" toggle shows every panel at once.
 - Phone layout: bottom tab bar (Mods / Stats / Enemy / More) and a full-screen mod browser
+- Backgrounds: 44 images from the official Warframe Fansite Kit (Digital Extremes), with darken/blur controls and an
+  optional random pick per visit. Listed in `assets/bg/manifest.json`; the "Fetch background art" workflow downloads
+  and resizes them. Used under the Warframe Content Policy (non-commercial); images showing DE/Warframe logos are excluded.
 - Weapon/Warframe/arcane/enemy browsers, drag-and-drop mod cards, mod ranks, slot polarities
 - Mod value preview (what each equipped mod adds, what each mod in the browser would add), undo/redo (Ctrl+Z / Ctrl+Y, `/` focuses mod search)
 - Capacity and forma checker (Orokin Catalyst, matching/mismatched polarity drain)
