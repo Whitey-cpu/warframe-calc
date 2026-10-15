@@ -47,11 +47,24 @@ Mod text the parser does not understand is listed under "Not modeled" so nothing
 - Hand-maintained constants (factions, abilities, incompatible mods) live in `src/static.js` with a source link on each.
 - Anything the wiki does not state outright is tagged **ASSUMPTION** in the code and shown in the results notes.
 
-## Accounts (warframe.hardn.net only)
+## Features
+
+- Arsenal-style builder: weapon/Warframe/arcane/enemy browsers, drag-and-drop mod cards, mod ranks, slot polarities
+- Mod value preview (what each equipped mod adds, what each mod in the browser would add), undo/redo (Ctrl+Z / Ctrl+Y, `/` focuses mod search)
+- Capacity and forma checker (Orokin Catalyst, matching/mismatched polarity drain)
+- Incarnon evolution presets (hand-entered per weapon in `src/incarnon.js`; currently Soma/Soma Prime and Laetum)
+- Enemy units with level scaling and Steel Path (`src/enemy.js`), shields, Overguard, Magnetic, time to kill
+- Build compare (pin A vs current), weapon leaderboard (optionally quick-optimized per weapon)
+- Community builds (public share links, likes, reports), Discord link previews
+- Installable web app with offline support (`sw.js`), light/dark toggle, feedback button, patch-change banner
+- Desktop app: Discord sign-in, cloud sync, update notifications
+
+## Accounts (website and desktop app)
 
 Optional Discord sign-in syncs saved builds and the owned-mods list, and lets you create share links
 (`https://warframe.hardn.net/#share=ID`). Without signing in, everything is stored in the browser.
-The desktop app and local `index.html` keep using local storage.
+The desktop app signs in through a Discord window and syncs the same way. Opening `index.html` from disk keeps using local storage.
+- Moderation: set the optional repository secret `ADMIN_DISCORD_IDS` (comma-separated Discord user IDs) to use `/admin/reports` and remove builds.
 
 - API: `api/` (Cloudflare Worker + D1) served at `https://warframe-api.hardn.net`. Deployed by `.github/workflows/deploy-api.yml`.
 - Repository secrets it needs: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`.

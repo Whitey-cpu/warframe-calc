@@ -13,7 +13,7 @@ const path = require('path');
 const os = require('os');
 const { execSync } = require('child_process');
 
-const { buildData } = require('../src/build-data.js');
+const { buildData, diffData } = require('../src/build-data.js');
 const WF = global.WF;
 
 const ROOT = path.join(__dirname, '..');
@@ -37,6 +37,21 @@ function main() {
   const dir = getPackageDir();
   const data = build(dir);
   fs.mkdirSync(OUT, { recursive: true });
+  // Record what changed since the previous data build (shown as a banner on the site)
+  const prevPath = path.join(OUT, 'game-data.json');
+  if (fs.existsSync(prevPath)) {
+    try {
+      const prev = JSON.parse(fs.readFileSync(prevPath, 'utf8'));
+      if (prev.meta && prev.meta.version !== data.meta.version) {
+        const changes = diffData(prev, data);
+        data.meta.changes = changes;
+        data.meta.previousVersion = prev.meta.version;
+      } else if (prev.meta && prev.meta.changes) {
+        data.meta.changes = prev.meta.changes;
+        data.meta.previousVersion = prev.meta.previousVersion;
+      }
+    } catch (e) { console.warn('Could not diff previous data:', e.message); }
+  }
   const json = JSON.stringify(data);
   fs.writeFileSync(path.join(OUT, 'game-data.json'), json);
   fs.writeFileSync(path.join(OUT, 'game-data.js'), 'window.WF_DATA = ' + json + ';\n');

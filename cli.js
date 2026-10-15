@@ -18,6 +18,9 @@ require('./src/static.js');
 require('./src/parser.js');
 require('./src/engine.js');
 require('./src/optimizer.js');
+require('./src/enemy.js');
+require('./src/capacity.js');
+require('./src/incarnon.js');
 const WF = global.WF;
 
 const args = process.argv.slice(2);

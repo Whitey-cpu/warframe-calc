@@ -59,7 +59,7 @@
 
     const scen = {
       weapon, attack: opts.attack, enemy: opts.enemy, buffs: opts.buffs, customBuffs: opts.customBuffs,
-      conditions: opts.conditions, riven: opts.riven, overrides: opts.overrides
+      conditions: opts.conditions, riven: opts.riven, overrides: opts.overrides, incarnon: opts.incarnon
     };
     let evals = 0;
     const cache = new Map();

@@ -14,8 +14,10 @@
   const OWNED_KEY = 'wfcalc.owned.v1';
   // Accounts API (Cloudflare Worker). Only used on the published site, where the session cookie works.
   const SITE_ORIGIN = 'https://warframe.hardn.net';
-  const API = 'https://warframe-api.hardn.net';
-  const ACCOUNTS = location.origin === SITE_ORIGIN;
+  let API = 'https://warframe-api.hardn.net';
+  // Desktop app: API calls go through the main process (it holds the Discord session cookie)
+  const DESKTOP = !!(window.wfApp && window.wfApp.isDesktop && window.wfApp.api);
+  const ACCOUNTS = location.origin === SITE_ORIGIN || DESKTOP;
   let ACCOUNTS_UP = true;
 
   if (!D) { document.body.innerHTML = '<p style="padding:20px">No game data found. Run <code>node cli.js sync</code> in this folder, then reload.</p>'; return; }
@@ -45,7 +47,15 @@
   }
 
   // ---------- state ----------
-  const state = { weapon: null, frame: null, mods: new Array(SLOT_COUNT + 1).fill(null), locks: new Array(SLOT_COUNT).fill(false), arcanes: [null, null] };
+  const state = {
+    weapon: null, frame: null, mods: new Array(SLOT_COUNT + 1).fill(null), locks: new Array(SLOT_COUNT).fill(false), arcanes: [null, null],
+    ranks: new Array(SLOT_COUNT + 1).fill(null),   // null = max rank
+    pols: new Array(SLOT_COUNT + 1).fill(null),    // slot polarity (forma)
+    incarnon: {},                                  // { II: 'Perk name', ... }
+    enemyUnit: null                                // name from D.enemies, or null for manual
+  };
+  const POL_CYCLE = [null, 'madurai', 'vazarin', 'naramon', 'zenurik', 'umbra'];
+  const POL_ICON = { madurai: 'V', vazarin: 'D', naramon: '-', zenurik: '=', umbra: 'U', unairu: 'R', penjaga: 'Y' };
   let compatMods = [];
 
   $('faction').innerHTML = Object.keys(S.FACTIONS).map(f => `<option>${esc(f)}</option>`).join('');
@@ -53,17 +63,20 @@
   // ---------- helpers ----------
   const rarityClass = r => 'r-' + String(r || 'common').toLowerCase();
   const modFx = m => m.stats.map(WF.parser.clean).join(' / ').replace(/\n/g, ' ');
-  const modDrain = m => (m.drain || 0) + (m.maxRank || 0);
+  const modDrain = (m, rank) => (m.drain || 0) + (rank != null ? rank : (m.maxRank || 0));
+  const slotRank = (i, m) => state.ranks[i] != null ? Math.min(state.ranks[i], m.maxRank) : m.maxRank;
   const findModByName = n => (state.weapon && E.findMod(D, state.weapon, n)) || null;
 
   function modCard(m, opts = {}) {
     const fx = esc(modFx(m));
     return `<div class="mod ${rarityClass(m.rarity)} ${opts.cls || ''}" draggable="true" data-mod="${esc(m.name)}" title="${fx}${m.unparsed.length ? '\n(part of this mod is not modeled)' : ''}">
-      <div class="mod-top"><span class="drain">${modDrain(m)}</span>${opts.own ? `<button type="button" class="own${owned.has(m.name) ? ' on' : ''}" data-own="${esc(m.name)}" aria-pressed="${owned.has(m.name)}" title="${owned.has(m.name) ? 'You own this mod' : 'Mark as owned'}">&#9733;</button>` : ''}${m.polarity ? `<span class="pol">${esc(m.polarity.slice(0, 3))}</span>` : ''}</div>
+      <div class="mod-top"><span class="drain">${modDrain(m, opts.rank)}</span>${opts.own ? `<button type="button" class="own${owned.has(m.name) ? ' on' : ''}" data-own="${esc(m.name)}" aria-pressed="${owned.has(m.name)}" title="${owned.has(m.name) ? 'You own this mod' : 'Mark as owned'}">&#9733;</button>` : ''}${m.polarity ? `<span class="pol">${esc(m.polarity.slice(0, 3))}</span>` : ''}</div>
       <div class="mod-img">${img(m.image, m.name)}<span class="ph">${initials(m.name)}</span></div>
       <div class="mod-name">${esc(m.name)}</div>
       <div class="mod-fx">${fx}${m.unparsed.length ? ' <span class="nm">*</span>' : ''}</div>
       ${m.exilus ? '<span class="mod-tag">exilus</span>' : ''}
+      ${opts.own ? `<span class="mod-delta" data-delta="${esc(m.name)}"></span>` : ''}
+      ${opts.slotExtra || ''}
     </div>`;
   }
 
@@ -75,6 +88,12 @@
     if (!keepMods) {
       // drop mods that do not fit the new weapon
       state.mods = state.mods.map(n => n && compatMods.some(m => m.name === n) ? n : null);
+      state.ranks = state.ranks.map((r, i) => state.mods[i] ? r : null);
+      // ASSUMPTION: innate polarities are placed in the first slots (the data lists them without positions)
+      state.pols = new Array(SLOT_COUNT + 1).fill(null);
+      (w.polarities || []).slice(0, SLOT_COUNT).forEach((p, i) => { state.pols[i] = p; });
+      state.pols[SLOT_COUNT] = w.exilusPolarity || null;
+      state.incarnon = {};
       const arcTypes = WF.optimizer.arcaneTypesFor(w);
       const a0 = state.arcanes[0] && E.findArcane(D, state.arcanes[0]);
       if (a0 && !arcTypes.includes(a0.type)) state.arcanes[0] = null;
@@ -159,12 +178,18 @@
       const ex = i === SLOT_COUNT;
       const m = n && findModByName(n);
       const tools = m ? `<div class="slot-tools">${ex ? '' : `<button type="button" data-lock="${i}" aria-pressed="${state.locks[i]}" title="Lock for optimizer">&#128274;</button>`}<button type="button" data-remove="${i}" title="Remove">&#10005;</button></div>` : '';
+      const pol = state.pols[i];
+      const polBtn = `<button type="button" class="slot-pol${pol ? ' set' : ''}${m && pol ? (pol === m.polarity ? ' match' : ' mismatch') : ''}" data-pol="${i}" title="Slot polarity: ${pol || 'none'} (click to change)">${pol ? POL_ICON[pol] || pol[0] : '&#9675;'}</button>`;
+      const rank = m ? slotRank(i, m) : null;
+      const rankCtl = m && m.maxRank > 0 ? `<div class="rank" data-rankslot="${i}"><button type="button" data-rank="-1" aria-label="Lower rank">&minus;</button><span>R${rank}/${m.maxRank}</span><button type="button" data-rank="1" aria-label="Raise rank">+</button></div>` : '';
+      const extra = `${rankCtl}<span class="slot-val" data-val="${i}"></span>`;
       return `<div class="slot${ex ? ' exilus' : ''}${warnings.has(n) ? ' warn' : ''}" data-slot="${i}" tabindex="0" aria-label="${ex ? 'Exilus slot' : 'Mod slot ' + (i + 1)}">
-        <span class="slot-n">${ex ? 'Exilus' : i + 1}</span>${tools}
-        ${m ? modCard(m) : `<span>${ex ? 'Exilus slot' : 'Empty'}</span>`}</div>`;
+        <span class="slot-n">${ex ? 'Exilus' : i + 1}</span>${polBtn}${tools}
+        ${m ? modCard(m, { rank, slotExtra: extra }) : `<span>${ex ? 'Exilus slot' : 'Empty'}</span>`}</div>`;
     }).join('');
-    const total = names.reduce((t, n) => { const m = findModByName(n); return t + (m ? modDrain(m) : 0); }, 0);
-    $('drainInfo').textContent = names.length ? `${names.length} mods, ${total} drain at max rank (before polarity)` : '';
+    const total = state.mods.reduce((t, n, i) => { const m = n && findModByName(n); return t + (m ? modDrain(m, slotRank(i, m)) : 0); }, 0);
+    $('drainInfo').textContent = names.length ? `${names.length} mods, ${total} drain before polarity` : '';
+    if (window.WFUI && WFUI.onSlots) WFUI.onSlots();
     renderStacks();
     markUsed();
   }
@@ -192,10 +217,23 @@
 
   // slot interactions
   $('slots').addEventListener('click', e => {
+    const rk = e.target.closest('[data-rank]');
+    if (rk) {
+      e.stopPropagation();
+      const i = +rk.closest('[data-rankslot]').dataset.rankslot; const m = findModByName(state.mods[i]); if (!m) return;
+      const r = Math.max(0, Math.min(m.maxRank, slotRank(i, m) + (+rk.dataset.rank)));
+      state.ranks[i] = r === m.maxRank ? null : r; renderSlots(); update(); return;
+    }
+    const pb = e.target.closest('[data-pol]');
+    if (pb) {
+      e.stopPropagation();
+      const i = +pb.dataset.pol; const cur = POL_CYCLE.indexOf(state.pols[i]);
+      state.pols[i] = POL_CYCLE[(cur + 1) % POL_CYCLE.length]; renderSlots(); update(); return;
+    }
     const lock = e.target.closest('[data-lock]');
     if (lock) { const i = +lock.dataset.lock; state.locks[i] = !state.locks[i]; lock.setAttribute('aria-pressed', state.locks[i]); return; }
     const rm = e.target.closest('[data-remove]');
-    if (rm) { const i = +rm.dataset.remove; state.mods[i] = null; if (i < SLOT_COUNT) state.locks[i] = false; renderSlots(); update(); return; }
+    if (rm) { const i = +rm.dataset.remove; state.mods[i] = null; state.ranks[i] = null; if (i < SLOT_COUNT) state.locks[i] = false; renderSlots(); update(); return; }
     const slot = e.target.closest('.slot');
     if (slot && !state.mods[+slot.dataset.slot]) { $('modSearch').focus(); $('modSearch').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   });
@@ -424,9 +462,12 @@
     return {
       weapon: state.weapon.name,
       attack: parseInt($('attack').value, 10) || 0,
-      mods: state.mods.slice(0, SLOT_COUNT).filter(Boolean).concat(state.mods[SLOT_COUNT] ? [state.mods[SLOT_COUNT]] : []),
+      mods: state.mods.map((n, i) => n ? (state.ranks[i] != null ? { name: n, rank: state.ranks[i] } : n) : null).filter(Boolean),
       slotLayout: state.mods.slice(),
       slotLocks: state.locks.slice(),
+      slotRanks: state.ranks.slice(),
+      slotPolarities: state.pols.slice(),
+      incarnon: Object.keys(state.incarnon).length ? Object.assign({}, state.incarnon) : undefined,
       arcanes: state.arcanes.filter(Boolean),
       arcaneSlots: state.arcanes.slice(),
       riven: readRows($('riven')).map(toEffect),
@@ -435,12 +476,28 @@
       customBuffs: readRows($('custom')).map(r => Object.assign(toEffect(r), { kind: r.kind.startsWith('element:') ? 'element' : r.kind, label: r.label || undefined })),
       conditions: { assumeMax: $('assumeMax').checked, aiming: $('aiming').checked, combo: ev('combo') || 1, statusTypes: ev('statusTypes'), stacks },
       overrides,
-      enemy: {
+      enemy: Object.assign({
         faction: $('faction').value, armor: ev('armor'), headshotRate: ev('headshotRate') / 100,
+        magneticStacks: ev('magneticStacks'),
         weakPointMult: $('weakPointMult').value === '' ? undefined : ev('weakPointMult'),
         viralStacks: ev('viralStacks'), corrosiveStacks: ev('corrosiveStacks'), armorStripPct: ev('armorStripPct') / 100, heatStrip: $('heatStrip').checked
-      }
+      }, enemyUnitStats())
     };
+  }
+  // Enemy unit picker: scales the unit's base stats to the chosen level (src/enemy.js)
+  function enemyUnitStats() {
+    if (!state.enemyUnit) { $('armor').disabled = false; return {}; }
+    const u = D.enemies.find(x => x.name === state.enemyUnit);
+    if (!u) return {};
+    const sc = WF.enemy.scale({
+      faction: $('faction').value, health: u.health, shield: u.shield, armor: u.armor,
+      overguard: $('eximus').checked ? 12 : 0,
+      level: parseFloat($('enemyLevel').value) || 1, baseLevel: parseFloat($('enemyBaseLevel').value) || undefined, steelPath: $('steelPath').checked
+    });
+    $('armor').value = sc.armor; $('armor').disabled = true;
+    $('unitStats').innerHTML = `Level <b>${sc.level}</b>: Health <b>${fmt(sc.health)}</b> &middot; Shield <b>${fmt(sc.shield)}</b> &middot; Armor <b>${fmt(sc.armor)}</b>${sc.overguard ? ` &middot; Overguard <b>${fmt(sc.overguard)}</b>` : ''}`;
+    return { armor: sc.armor, health: sc.health, shield: sc.shield, overguard: sc.overguard, unit: u.name, level: parseFloat($('enemyLevel').value) || 1,
+      baseLevel: parseFloat($('enemyBaseLevel').value) || undefined, steelPath: $('steelPath').checked, eximus: $('eximus').checked };
   }
 
   function apply(b) {
@@ -459,6 +516,13 @@
         else if (k < SLOT_COUNT) state.mods[k++] = m ? m.name : n;
       });
     }
+    state.ranks = new Array(SLOT_COUNT + 1).fill(null);
+    if (b.slotRanks) b.slotRanks.slice(0, SLOT_COUNT + 1).forEach((r, i) => { state.ranks[i] = r; });
+    else (b.mods || []).forEach(m => { if (typeof m === 'object' && m.rank != null) { const i = state.mods.indexOf(m.name); if (i >= 0) state.ranks[i] = m.rank; } });
+    state.pols = new Array(SLOT_COUNT + 1).fill(null);
+    if (b.slotPolarities) b.slotPolarities.slice(0, SLOT_COUNT + 1).forEach((p, i) => { state.pols[i] = p || null; });
+    else if (w) { (w.polarities || []).slice(0, SLOT_COUNT).forEach((p, i) => { state.pols[i] = p; }); state.pols[SLOT_COUNT] = w.exilusPolarity || null; }
+    state.incarnon = Object.assign({}, b.incarnon || {});
     if (b.arcaneSlots) state.arcanes = [b.arcaneSlots[0] || null, b.arcaneSlots[1] || null];
     else {
       const arcs = (b.arcanes || []).map(n => E.findArcane(D, n)).filter(Boolean);
@@ -484,6 +548,10 @@
     $('headshotRate').value = Math.round((e.headshotRate || 0) * 100); $('weakPointMult').value = e.weakPointMult != null ? e.weakPointMult : '';
     $('viralStacks').value = e.viralStacks || 0; $('corrosiveStacks').value = e.corrosiveStacks || 0;
     $('armorStripPct').value = Math.round((e.armorStripPct || 0) * 100); $('heatStrip').checked = !!e.heatStrip;
+    $('magneticStacks').value = e.magneticStacks || 0;
+    state.enemyUnit = e.unit || null;
+    $('enemyLevel').value = e.level || 100; $('enemyBaseLevel').value = e.baseLevel || ''; $('steelPath').checked = !!e.steelPath; $('eximus').checked = !!e.eximus;
+    if (window.WFUI && WFUI.renderEnemyUnit) WFUI.renderEnemyUnit();
     pendingStacks = c.stacks || {};
     document.querySelectorAll('[data-stack]').forEach(i => { i.value = ''; });
     renderWeapon(); renderArcanes(); renderSlots(); renderModBrowser();
@@ -499,7 +567,8 @@
     $('tiles').innerHTML = [
       ['Sustained DPS', r.dps.sustainedTotal, true], ['Burst DPS', r.dps.burstTotal], ['Avg per shot', r.perShotVsEnemy],
       ['Burst direct', r.dps.burstDirect], ['Burst DoT', r.dps.burstDot]
-    ].map(([k, v, main]) => `<div class="tile${main ? ' main' : ''}"><div class="k">${k}</div><div class="v">${fmt(v)}</div></div>`).join('');
+    ].concat(r.ttk ? [['Time to kill', r.ttk.seconds < 100 ? r.ttk.seconds.toFixed(2) + 's' : fmt(r.ttk.seconds) + 's'], ['Shots to kill', Math.ceil(r.ttk.shots)]] : [])
+      .map(([k, v, main]) => `<div class="tile${main ? ' main' : ''}"><div class="k">${k}</div><div class="v">${typeof v === 'string' ? v : fmt(v)}</div></div>`).join('');
     const types = Object.entries(r.damageTypes).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
     const max = Math.max(1, ...types.map(t => t[1]));
     $('typeBars').innerHTML = `<div class="statline">
@@ -532,8 +601,10 @@
       const b = collect();
       if (!b) { $('tiles').innerHTML = '<p class="muted">Choose a weapon to start.</p>'; $('typeBars').innerHTML = ''; $('breakdown').innerHTML = ''; return; }
       try {
-        render(E.calculate(b, D));
+        const result = E.calculate(b, D);
+        render(result);
         try { localStorage.setItem(LAST_KEY, JSON.stringify(b)); } catch (e) { /* storage unavailable */ }
+        if (window.WFUI) WFUI.hooks.forEach(fn => { try { fn(b, result); } catch (err) { console.error(err); } });
       } catch (e) { $('tiles').innerHTML = `<p class="muted">Error: ${esc(e.message)}</p>`; }
     }, 50);
   }
@@ -568,6 +639,11 @@
   // ---------- account (Discord sign-in via the API) ----------
   let user = null;
   async function api(path, opts = {}) {
+    if (DESKTOP) {
+      const r = await window.wfApp.api(path, { method: opts.method || 'GET', body: opts.body });
+      if (!r.ok) { const err = new Error((r.body && r.body.error) || `HTTP ${r.status}`); err.status = r.status; throw err; }
+      return r.body;
+    }
     const res = await fetch(API + path, Object.assign({ credentials: 'include' }, opts, {
       headers: Object.assign(opts.body ? { 'Content-Type': 'application/json' } : {}, opts.headers || {})
     }));
@@ -577,9 +653,17 @@
   }
   function renderAccount() {
     const el = $('account');
-    if (!ACCOUNTS || !ACCOUNTS_UP) { el.innerHTML = ''; $('shareBuild').hidden = true; $('myShares').hidden = true; $('cloudNote').textContent = 'Builds are saved in this browser.'; return; }
+    if (!ACCOUNTS || !ACCOUNTS_UP) { el.innerHTML = ''; $('shareBuild').hidden = true; $('sharePublic').parentElement.hidden = true; $('myShares').hidden = true; $('cloudNote').textContent = 'Builds are saved in this browser.'; return; }
     if (!user) {
-      el.innerHTML = `<a class="btn discord sm" href="${API}/auth/discord/login?return=${encodeURIComponent(location.href.split('#')[0])}">Sign in with Discord</a>`;
+      el.innerHTML = DESKTOP
+        ? `<button type="button" class="btn discord sm" id="desktopLogin">Sign in with Discord</button>`
+        : `<a class="btn discord sm" href="${API}/auth/discord/login?return=${encodeURIComponent(location.href.split('#')[0])}">Sign in with Discord</a>`;
+      if (DESKTOP) $('desktopLogin').onclick = async () => {
+        const ok = await window.wfApp.login();
+        if (!ok) { flashMsg('Discord sign-in did not complete.'); return; }
+        try { user = (await api('/me')).user; } catch (e) { user = null; }
+        afterAuthChange();
+      };
     } else {
       el.innerHTML = `<details class="acct"><summary>${user.avatarUrl ? `<img src="${esc(user.avatarUrl)}" alt="">` : ''}<span>${esc(user.displayName || user.username)}</span></summary>
         <div class="acct-menu"><div class="muted small">Signed in with Discord as ${esc(user.username)}</div>
@@ -595,6 +679,7 @@
     }
     $('cloudNote').textContent = user ? 'Builds are saved to your account and sync across devices.' : (ACCOUNTS ? 'Builds are saved in this browser. Sign in with Discord to sync them.' : 'Builds are saved on this device.');
     $('shareBuild').hidden = !ACCOUNTS;
+    $('sharePublic').parentElement.hidden = !user;
     $('myShares').hidden = !user;
   }
   function flashMsg(t) { $('buildMsg').textContent = t; clearTimeout(flashMsg.t); flashMsg.t = setTimeout(() => { $('buildMsg').textContent = ''; }, 4000); }
@@ -604,6 +689,7 @@
     if (user) await syncOwnedFromServer();
     renderModBrowser();
     if (user) refreshShares();
+    if (window.WFUI && WFUI.loadPublic) WFUI.loadPublic();
   }
 
   // ---------- builds: local storage or account ----------
@@ -681,13 +767,22 @@
   $('ownedCount').textContent = owned.size ? `${owned.size} owned` : '';
 
   // ---------- share links ----------
-  function shareUrl(id) { return `${SITE_ORIGIN}/#share=${id}`; }
+  // Share links go through the API so Discord and other apps get a preview card; it redirects to the site.
+  function shareUrl(id) { return `${API}/s/${id}`; }
   $('shareBuild').onclick = async () => {
     const b = collect(); if (!b) return;
     if (!user) { flashMsg('Sign in with Discord to create share links.'); return; }
     try {
       const out = Object.assign({}, b);
-      const r = await api('/shares', { method: 'POST', body: JSON.stringify({ data: out }) });
+      const res = E.calculate(b, D);
+      const top = (b.mods || []).slice(0, 4).map(m => typeof m === 'string' ? m : m.name).join(', ');
+      const r = await api('/shares', { method: 'POST', body: JSON.stringify({
+        data: out,
+        public: $('sharePublic').checked,
+        title: ($('buildName').value.trim() || `${b.weapon} build`).slice(0, 60),
+        meta: { image: state.weapon && state.weapon.image, dps: Math.round(res.dps.sustainedTotal), summary: top }
+      }) });
+      if ($('sharePublic').checked && WFUI.loadPublic) WFUI.loadPublic();
       const link = shareUrl(r.id);
       $('jsonBox').value = link;
       try { await navigator.clipboard.writeText(link); flashMsg('Share link copied: ' + link); } catch (e) { flashMsg('Share link: ' + link); }
@@ -709,9 +804,9 @@
     const m = location.hash.match(/share=([A-Za-z0-9]{6,16})/);
     if (!m) return false;
     try {
-      const r = await fetch(`${API}/shares/${m[1]}`);
-      if (!r.ok) throw new Error(r.status === 404 ? 'This share link does not exist (it may have been deleted).' : `HTTP ${r.status}`);
-      const j = await r.json();
+      let j;
+      try { j = await api(`/shares/${m[1]}`); }
+      catch (err) { throw new Error(err.status === 404 ? 'This share link does not exist (it may have been deleted).' : err.message); }
       apply(j.data);
       flashMsg('Loaded a shared build. Save it to keep your own copy.');
       return true;
@@ -728,6 +823,16 @@
   };
   $('pasteJson').onclick = () => { try { apply(JSON.parse($('jsonBox').value)); } catch (e) { $('jsonBox').value = 'Could not read JSON: ' + e.message + '\n\n' + $('jsonBox').value; } };
 
+  // ---------- shared hooks for ui/features.js ----------
+  window.WFUI = {
+    D, E, S, WF, state, SLOT_COUNT, $, esc, fmt, pct, img, IMG, initials, modCard, modFx,
+    collect, apply, update, renderSlots, renderModBrowser, renderWeapon, findModByName, openPicker,
+    getCompatMods: () => compatMods, flashMsg: m => flashMsg(m), getUser: () => user, api: (p, o) => api(p, o),
+    accountsEnabled: () => ACCOUNTS && ACCOUNTS_UP, SITE_ORIGIN, API,
+    hooks: [], onSlots: null, renderEnemyUnit: null
+  };
+  if (window.WFFeatures) window.WFFeatures(window.WFUI);
+
   // ---------- start ----------
   renderFrame(); renderArcanes(); renderSlots(); renderModBrowser();
   renderAccount();
@@ -740,6 +845,17 @@
       let last = null;
       try { last = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch (e) { last = null; }
       if (last && last.weapon) apply(last); else update();
+    }
+    if (DESKTOP) {
+      try { API = (await window.wfApp.config()).api || API; WFUI.API = API; } catch (e) { /* keep default */ }
+      window.wfApp.checkAppUpdate().then(u => {
+        if (!u || !u.available) return;
+        const el = $('patchBanner');
+        el.innerHTML = `<b>Update available:</b> version ${esc(u.latest)} (you have ${esc(u.current)}). <button type="button" class="btn sm" id="getUpdate">Download</button> <button type="button" class="btn ghost sm" id="skipUpdate">Later</button>`;
+        el.hidden = false;
+        $('getUpdate').onclick = () => window.wfApp.openExternal(u.url);
+        $('skipUpdate').onclick = () => { el.hidden = true; };
+      }).catch(() => { /* offline */ });
     }
     if (ACCOUNTS) {
       let apiUp = true;

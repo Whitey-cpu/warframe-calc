@@ -140,7 +140,9 @@
       dmg: 0, direct: 0, phys: { impact: 0, puncture: 0, slash: 0 },
       cc: 0, ccFlat: 0, cd: 0, cdFlat: 0, sc: 0, ms: 0, fr: 0, mag: 0, reload: 0,
       statusDuration: 0, statusDamage: 0, headshot: 0, weakPoint: 0, faction: 0,
-      slashOnCrit: 0, separate: [], voidExtra: 0
+      slashOnCrit: 0, separate: [], voidExtra: 0,
+      // flat changes to the weapon's BASE stats (Incarnon evolutions, e.g. "+12 base damage per pellet")
+      baseDmgFlat: 0, baseCCFlat: 0, baseCDFlat: 0, baseSCFlat: 0, baseMSFlat: 0
     };
     const elementOrder = []; // [{el, bonus, slot}]
     const used = [];
@@ -148,6 +150,20 @@
     const factionInfo = S.FACTIONS[enemy.faction] || S.FACTIONS['None (neutral)'];
 
     const sources = gatherSources(build, data, weapon, notes);
+    // Incarnon evolution perks: build.incarnon = { II: 'Perk name', ... }
+    if (build.incarnon && WF.incarnonFor) {
+      const preset = WF.incarnonFor(weapon.name);
+      if (preset) {
+        for (const t of preset.tiers) {
+          const pick = build.incarnon[t.tier];
+          const perk = pick && t.perks.find(x => x.name === pick);
+          if (!perk) continue;
+          if (perk.modeled === false) { notes.push(`Incarnon ${t.tier} "${perk.name}" has no modeled damage effect.`); continue; }
+          if (perk.attack && !new RegExp(perk.attack, 'i').test(atk.name)) continue;
+          sources.push({ key: `Incarnon: ${perk.name}`, kind: 'incarnon', slot: 150, item: { name: perk.name, effects: perk.effects }, scale: 1 });
+        }
+      }
+    }
 
     // exclusivity check
     const roots = new Map();
@@ -198,6 +214,11 @@
         case 'headshot': P.headshot += v; break;
         case 'weakPoint': P.weakPoint += v; break;
         case 'slashOnCrit': P.slashOnCrit += v; break;
+        case 'baseDamageFlat': P.baseDmgFlat += v; break;
+        case 'baseCritChance': P.baseCCFlat += v; break;
+        case 'baseCritMult': P.baseCDFlat += v; break;
+        case 'baseStatus': P.baseSCFlat += v; break;
+        case 'baseMultishot': P.baseMSFlat += v; break;
         case 'faction':
           if (eff.faction && factionInfo.baneKey && eff.faction.toLowerCase() === factionInfo.baneKey.toLowerCase()) P.faction += v;
           else if (eff.faction === '*') P.faction += v;
@@ -234,7 +255,14 @@
     // ---------- damage composition ----------
     const base = {};
     for (const [k, v] of Object.entries(atk.damage)) base[k] = v;
-    const baseTotal = Object.values(base).reduce((a, b) => a + b, 0);
+    let baseTotal = Object.values(base).reduce((a, b) => a + b, 0);
+    if (P.baseDmgFlat && baseTotal > 0) {
+      // ASSUMPTION: flat base damage is spread over the attack's damage types in their existing proportions
+      const f = (baseTotal + P.baseDmgFlat) / baseTotal;
+      for (const k of Object.keys(base)) base[k] *= f;
+      baseTotal += P.baseDmgFlat;
+      notes.push('ASSUMPTION: flat base damage bonuses are split across damage types in proportion to the base damage.');
+    }
     const scale = baseTotal / 32;
 
     // Innate elements: merge into a matching modded element, else append last (HCET order for two).
@@ -285,10 +313,16 @@
     for (const [k, v] of Object.entries(typed)) hitTyped[k] = v * hitMult;
     const hitTotal = quantTotal * hitMult;
 
-    const ms = (ov.multishot != null ? ov.multishot : (isMelee ? 1 : weapon.multishot)) * (isMelee ? 1 : (1 + P.ms));
-    const baseCC = ov.critChance != null ? ov.critChance : atk.critChance;
-    const baseCD = ov.critMult != null ? ov.critMult : atk.critMult;
-    const baseSC = ov.statusChance != null ? ov.statusChance : atk.statusChance;
+    let formMs = null;
+    const incPreset = WF.incarnonFor ? WF.incarnonFor(weapon.name) : null;
+    if (incPreset && incPreset.forms) {
+      const fm = incPreset.forms.find(x => new RegExp(x.attack, 'i').test(atk.name));
+      if (fm && fm.multishot != null) formMs = fm.multishot;
+    }
+    const ms = ((ov.multishot != null ? ov.multishot : (formMs != null ? formMs : (isMelee ? 1 : weapon.multishot))) + P.baseMSFlat) * (isMelee ? 1 : (1 + P.ms));
+    const baseCC = (ov.critChance != null ? ov.critChance : atk.critChance) + P.baseCCFlat;
+    const baseCD = (ov.critMult != null ? ov.critMult : atk.critMult) + P.baseCDFlat;
+    const baseSC = (ov.statusChance != null ? ov.statusChance : atk.statusChance) + P.baseSCFlat;
     const cc = baseCC * (1 + P.cc) + P.ccFlat;
     const cd = baseCD * (1 + P.cd) + P.cdFlat;
     const sc = Math.max(0, baseSC * (1 + P.sc));
@@ -336,6 +370,22 @@
     const perProjectile = (vsTotalNonCrit + voidPerHit) * critBodyHeadAvg;
     const perShot = perProjectile * ms;
 
+    // ---------- shields and Overguard ----------
+    // Shields: armor does not apply, Toxin bypasses shields (goes to health), Magnetic stacks amplify.
+    // Overguard: armor does not apply, Void deals +50%, Magnetic stacks amplify.
+    // Sources: https://wiki.warframe.com/w/Damage_calculation , https://wiki.warframe.com/w/Overguard , https://wiki.warframe.com/w/Status_Effect
+    const magnetic = viralMult(enemy.magneticStacks); // same 100% + 25%/stack curve as Viral
+    let shieldPart = 0, toxinPart = 0, ogPart = 0;
+    for (const [k, v] of Object.entries(hitTyped)) {
+      if (k === 'toxin') { toxinPart += v * typeMod(k) * armorDM * viral; continue; }
+      shieldPart += v * (k === 'true' ? 1 : typeMod(k));
+      ogPart += v * (k === 'true' ? 1 : typeMod(k)) * (k === 'void' ? 1.5 : 1);
+    }
+    const voidRaw = P.voidExtra ? P.voidExtra * hitTotal * factionMult : 0;
+    const perShotShield = (shieldPart * factionMult * magnetic + voidRaw * factionMult * typeMod('void') * magnetic) * critBodyHeadAvg * ms;
+    const perShotToxinThroughShield = toxinPart * factionMult * critBodyHeadAvg * ms;
+    const perShotOverguard = (ogPart * factionMult * magnetic + voidRaw * factionMult * typeMod('void') * 1.5 * magnetic) * critBodyHeadAvg * ms;
+
     // ---------- status ----------
     const procWeights = {};
     const wTotal = Object.values(typed).reduce((a, b) => a + b, 0);
@@ -380,6 +430,21 @@
 
     const burstDirect = perShot * effFR;
     const burstDot = dotPerShot * effFR;
+
+    // ---------- time to kill (optional: enemy.health / shield / overguard) ----------
+    let ttk = null;
+    if (enemy.health > 0) {
+      const rate = effFR * sustainFactor;
+      const hp = enemy.health, sh = Math.max(0, enemy.shield || 0), og = Math.max(0, enemy.overguard || 0);
+      const tOg = og ? og / Math.max(1e-9, perShotOverguard * rate) : 0;
+      // while shields are up, only Toxin (and DoTs, ASSUMPTION) reach health
+      const tSh = sh ? sh / Math.max(1e-9, perShotShield * rate) : 0;
+      const hpDuringShield = sh ? Math.min(hp, (perShotToxinThroughShield * rate) * tSh) : 0;
+      const tHp = Math.max(0, hp - hpDuringShield) / Math.max(1e-9, perShot * rate + dotPerShot * rate);
+      const shots = (og ? og / Math.max(1e-9, perShotOverguard) : 0) + (sh ? sh / Math.max(1e-9, perShotShield) : 0) + Math.max(0, hp - hpDuringShield) / Math.max(1e-9, perShot + dotPerShot);
+      ttk = { seconds: round(tOg + tSh + tHp), shots: round(shots), overguardSeconds: round(tOg), shieldSeconds: round(tSh), healthSeconds: round(tHp) };
+      notes.push('ASSUMPTION: time to kill uses sustained rate with average crits and expected DoT damage on health; DoTs are not counted against shields or Overguard.');
+    }
     const result = {
       weapon: weapon.name, attack: atk.name, category: weapon.category, type: weapon.type,
       stats: {
@@ -394,6 +459,9 @@
       elements: groups.map(g => g.type),
       perHitNonCrit: round(hitTotal),
       perShotVsEnemy: round(perShot),
+      perShotVsShield: round(perShotShield),
+      perShotVsOverguard: round(perShotOverguard),
+      ttk,
       dots: Object.fromEntries(Object.entries(dots).map(([k, v]) => [k, mapRound(v)])),
       procsPerShot: round(procsPerShot + extraSlashPerShot),
       dps: {

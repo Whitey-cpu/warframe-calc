@@ -37,3 +37,30 @@ CREATE TABLE IF NOT EXISTS shares (
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS shares_user ON shares(user_id);
+
+-- Share extras (kept in their own table so existing databases need no ALTER TABLE)
+CREATE TABLE IF NOT EXISTS share_meta (
+  id TEXT PRIMARY KEY REFERENCES shares(id),
+  public INTEGER NOT NULL DEFAULT 0,
+  hidden INTEGER NOT NULL DEFAULT 0,      -- set by reports or an admin
+  title TEXT,
+  weapon TEXT,
+  image TEXT,
+  dps INTEGER,
+  summary TEXT
+);
+CREATE INDEX IF NOT EXISTS share_meta_public ON share_meta(public, hidden);
+
+CREATE TABLE IF NOT EXISTS likes (
+  share_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (share_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS reports (
+  share_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  PRIMARY KEY (share_id, user_id)
+);

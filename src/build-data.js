@@ -44,6 +44,7 @@ function slimWeapon(w) {
     reload: w.reloadTime || 0,
     disposition: w.disposition || null,
     polarities: w.polarities || [],
+    exilusPolarity: w.exilusPolarity || null,
     isPrime: !!w.isPrime,
     incarnon: (w.attacks || []).some(a => /incarnon/i.test(a.name || '')),
     mastery: w.masteryReq || 0,
@@ -128,10 +129,43 @@ function buildData(load, version) {
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  // Enemies: base stats for the enemy picker (level scaling happens in src/enemy.js)
+  const FACTION_GUESS = { Grineer: 'Grineer', Corpus: 'Corpus', Infestation: 'Infested', Orokin: 'Orokin (Corrupted)', Sentient: 'Sentient' };
+  const seenEn = new Set();
+  const enemies = load('Enemy.json')
+    .filter(e => e.health > 0 && e.name && !/^\[|<|Specter|Warframe/.test(e.name))
+    .filter(e => { const k = e.name.toLowerCase(); if (seenEn.has(k)) return false; seenEn.add(k); return true; })
+    .map(e => {
+      const res = (e.resistances || []).map(r => r.type);
+      return {
+        name: e.name, health: e.health, shield: e.shield || 0, armor: e.armor || 0,
+        faction: FACTION_GUESS[e.type] || (res.some(t => /Shield/.test(t)) && e.shield ? 'Corpus' : null),
+        image: e.imageName || null
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   return {
     meta: { source: '@wfcd/items', version, builtAt: new Date().toISOString() },
-    weapons, mods, arcanes, frames
+    weapons, mods, arcanes, frames, enemies
   };
 }
 
-module.exports = { buildData };
+function diffData(prev, next) {
+  const key = w => JSON.stringify([w.attacks, w.multishot, w.magazine, w.reload, w.disposition]);
+  const pw = new Map(prev.weapons.map(w => [w.name, w]));
+  const nw = new Map(next.weapons.map(w => [w.name, w]));
+  const pm = new Map(prev.mods.map(m => [m.name + '|' + m.type, m]));
+  const nm = new Map(next.mods.map(m => [m.name + '|' + m.type, m]));
+  const out = {
+    weaponsAdded: [...nw.keys()].filter(n => !pw.has(n)),
+    weaponsRemoved: [...pw.keys()].filter(n => !nw.has(n)),
+    weaponsChanged: [...nw.keys()].filter(n => pw.has(n) && key(pw.get(n)) !== key(nw.get(n))),
+    modsAdded: [...nm.values()].filter(m => !pm.has(m.name + '|' + m.type)).map(m => m.name),
+    modsChanged: [...nm.values()].filter(m => pm.has(m.name + '|' + m.type) && JSON.stringify(pm.get(m.name + '|' + m.type).stats) !== JSON.stringify(m.stats)).map(m => m.name)
+  };
+  for (const k of Object.keys(out)) out[k] = [...new Set(out[k])].slice(0, 200);
+  return out;
+}
+
+module.exports = { buildData, diffData };

@@ -11,7 +11,13 @@
  *         DELETE /builds/:name
  * Owned:  GET  /owned                   -> { mods: [...] }
  *         PUT  /owned                   -> body { mods: [...] }
- * Shares: POST /shares                  -> body { data } -> { id }
+ * Shares: POST /shares                  -> body { data, public?, title?, meta? { image, dps, summary } } -> { id }
+ *         GET  /s/:id                   -> HTML page with Discord/Open Graph preview tags, redirects to the site
+ *         GET  /public?sort=top|new&weapon=  -> community (public) builds
+ *         POST /shares/:id/like         -> toggle like
+ *         POST /shares/:id/report       -> report (3 reports hide a build)
+ *         PATCH /shares/:id             -> body { public?, title? }
+ * Admin:  GET /admin/reports, DELETE /admin/shares/:id   (Discord IDs listed in ADMIN_IDS)
  *         GET  /shares/:id              -> { data, createdAt }   (public, no login)
  *         GET  /shares                  -> list of your shares
  *         DELETE /shares/:id
@@ -19,7 +25,7 @@
  * Security notes
  * - Session token: 32 random bytes in an HttpOnly, Secure, SameSite=Lax cookie; only its SHA-256 hash is stored.
  * - OAuth "state" is checked against a short-lived HttpOnly cookie (CSRF protection on login).
- * - Writes require the request Origin to be the site and a JSON body (blocks cross-site form posts).
+ * - Writes require the request Origin to be the site (or the desktop app header with no Origin) and a JSON body.
  * - Discord scope is "identify" only: Discord ID, username, avatar. No email.
  */
 
@@ -30,6 +36,7 @@ const MAX_BODY = 64 * 1024;
 const MAX_BUILDS = 300;
 const MAX_SHARES = 200;
 const MAX_OWNED = 3000;
+const REPORTS_TO_HIDE = 3;
 
 export default {
   async fetch(request, env) {
@@ -72,6 +79,29 @@ async function route(request, env, url, origin, allowed) {
     return json({ data: JSON.parse(row.data), createdAt: row.created_at }, 200, { 'Cache-Control': 'public, max-age=300' });
   }
 
+  // link preview page for Discord / social apps
+  mm = p.match(/^\/s\/([A-Za-z0-9]{6,16})$/);
+  if (mm && m === 'GET') return sharePreview(env, mm[1]);
+
+  // community builds (public); shows whether the current user liked each one when signed in
+  if (p === '/public' && m === 'GET') {
+    const viewer = await currentUser(request, env);
+    const sort = url.searchParams.get('sort') === 'new' ? 'new' : 'top';
+    const weapon = (url.searchParams.get('weapon') || '').slice(0, 60);
+    const offset = Math.max(0, Math.min(1000, parseInt(url.searchParams.get('offset') || '0', 10) || 0));
+    const where = ['sm.public = 1', 'sm.hidden = 0'];
+    const binds = [];
+    if (weapon) { where.push('sm.weapon LIKE ?'); binds.push('%' + weapon.replace(/[%_]/g, '') + '%'); }
+    const order = sort === 'new' ? 's.created_at DESC' : 'likes DESC, s.created_at DESC';
+    const sql = `SELECT s.id, s.created_at, sm.title, sm.weapon, sm.image, sm.dps, sm.summary,
+        (SELECT COUNT(*) FROM likes l WHERE l.share_id = s.id) AS likes
+        ${viewer ? ', EXISTS(SELECT 1 FROM likes l2 WHERE l2.share_id = s.id AND l2.user_id = ?) AS liked' : ''}
+      FROM shares s JOIN share_meta sm ON sm.id = s.id WHERE ${where.join(' AND ')} ORDER BY ${order} LIMIT 50 OFFSET ?`;
+    const args = (viewer ? [viewer.id] : []).concat(binds, [offset]);
+    const { results } = await env.DB.prepare(sql).bind(...args).all();
+    return json({ builds: results.map(r => ({ id: r.id, title: r.title, weapon: r.weapon, image: r.image, dps: r.dps, summary: r.summary, likes: r.likes, liked: !!r.liked, createdAt: r.created_at })) });
+  }
+
   // everything below needs a session; writes also need a trusted Origin + JSON
   if (m !== 'GET') requireTrustedWrite(request, origin, allowed);
   const user = await currentUser(request, env);
@@ -88,6 +118,9 @@ async function route(request, env, url, origin, allowed) {
     await env.DB.batch([
       env.DB.prepare('DELETE FROM builds WHERE user_id = ?').bind(user.id),
       env.DB.prepare('DELETE FROM owned WHERE user_id = ?').bind(user.id),
+      env.DB.prepare('DELETE FROM likes WHERE user_id = ? OR share_id IN (SELECT id FROM shares WHERE user_id = ?)').bind(user.id, user.id),
+      env.DB.prepare('DELETE FROM reports WHERE user_id = ? OR share_id IN (SELECT id FROM shares WHERE user_id = ?)').bind(user.id, user.id),
+      env.DB.prepare('DELETE FROM share_meta WHERE id IN (SELECT id FROM shares WHERE user_id = ?)').bind(user.id),
       env.DB.prepare('DELETE FROM shares WHERE user_id = ?').bind(user.id),
       env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(user.id),
       env.DB.prepare('DELETE FROM users WHERE id = ?').bind(user.id)
@@ -139,8 +172,9 @@ async function route(request, env, url, origin, allowed) {
 
   // shares
   if (p === '/shares' && m === 'GET') {
-    const { results } = await env.DB.prepare('SELECT id, data, created_at FROM shares WHERE user_id = ? ORDER BY created_at DESC').bind(user.id).all();
-    return json({ shares: results.map(r => { const d = JSON.parse(r.data); return { id: r.id, weapon: d.weapon, createdAt: r.created_at }; }) });
+    const { results } = await env.DB.prepare(`SELECT s.id, s.data, s.created_at, sm.public, sm.title, sm.hidden FROM shares s LEFT JOIN share_meta sm ON sm.id = s.id
+      WHERE s.user_id = ? ORDER BY s.created_at DESC`).bind(user.id).all();
+    return json({ shares: results.map(r => { const d = JSON.parse(r.data); return { id: r.id, weapon: d.weapon, title: r.title, public: !!r.public, hidden: !!r.hidden, createdAt: r.created_at }; }) });
   }
   if (p === '/shares' && m === 'POST') {
     const body = await readJson(request);
@@ -151,14 +185,66 @@ async function route(request, env, url, origin, allowed) {
     for (let i = 0; i < 5; i++) {
       id = randomId(8);
       const r = await env.DB.prepare('INSERT OR IGNORE INTO shares (id, user_id, data, created_at) VALUES (?, ?, ?, ?)').bind(id, user.id, data, now()).run();
-      if (r.meta && r.meta.changes) return json({ ok: true, id });
+      if (r.meta && r.meta.changes) {
+        const meta = body.meta && typeof body.meta === 'object' ? body.meta : {};
+        await env.DB.prepare('INSERT INTO share_meta (id, public, hidden, title, weapon, image, dps, summary) VALUES (?, ?, 0, ?, ?, ?, ?, ?)')
+          .bind(id, body.public ? 1 : 0, cleanText(body.title, 60), cleanText(body.data.weapon, 80), cleanImage(meta.image),
+            Number.isFinite(+meta.dps) ? Math.max(0, Math.min(1e12, Math.round(+meta.dps))) : null, cleanText(meta.summary, 160)).run();
+        return json({ ok: true, id });
+      }
     }
     throw httpError(500, 'Could not create share');
   }
   mm = p.match(/^\/shares\/([A-Za-z0-9]{6,16})$/);
   if (mm && m === 'DELETE') {
-    await env.DB.prepare('DELETE FROM shares WHERE id = ? AND user_id = ?').bind(mm[1], user.id).run();
+    const own = await env.DB.prepare('SELECT 1 FROM shares WHERE id = ? AND user_id = ?').bind(mm[1], user.id).first();
+    if (own) await deleteShare(env, mm[1]);
     return json({ ok: true });
+  }
+  if (mm && m === 'PATCH') {
+    const own = await env.DB.prepare('SELECT 1 FROM shares WHERE id = ? AND user_id = ?').bind(mm[1], user.id).first();
+    if (!own) throw httpError(404, 'Share not found');
+    const body = await readJson(request);
+    if (body.public != null) await env.DB.prepare('UPDATE share_meta SET public = ? WHERE id = ?').bind(body.public ? 1 : 0, mm[1]).run();
+    if (body.title != null) await env.DB.prepare('UPDATE share_meta SET title = ? WHERE id = ?').bind(cleanText(body.title, 60), mm[1]).run();
+    return json({ ok: true });
+  }
+  mm = p.match(/^\/shares\/([A-Za-z0-9]{6,16})\/(like|report)$/);
+  if (mm && m === 'POST') {
+    const [, id, action] = mm;
+    const exists = await env.DB.prepare('SELECT 1 FROM share_meta WHERE id = ? AND public = 1').bind(id).first();
+    if (!exists) throw httpError(404, 'Build not found');
+    if (action === 'like') {
+      const had = await env.DB.prepare('SELECT 1 FROM likes WHERE share_id = ? AND user_id = ?').bind(id, user.id).first();
+      if (had) await env.DB.prepare('DELETE FROM likes WHERE share_id = ? AND user_id = ?').bind(id, user.id).run();
+      else await env.DB.prepare('INSERT INTO likes (share_id, user_id, created_at) VALUES (?, ?, ?)').bind(id, user.id, now()).run();
+      return json({ ok: true, liked: !had });
+    }
+    await env.DB.prepare('INSERT OR IGNORE INTO reports (share_id, user_id, created_at) VALUES (?, ?, ?)').bind(id, user.id, now()).run();
+    const c = await env.DB.prepare('SELECT COUNT(*) AS n FROM reports WHERE share_id = ?').bind(id).first();
+    if (c.n >= REPORTS_TO_HIDE) await env.DB.prepare('UPDATE share_meta SET hidden = 1 WHERE id = ?').bind(id).run();
+    return json({ ok: true });
+  }
+
+  // admin (moderation)
+  if (p.startsWith('/admin/')) {
+    const admins = String(env.ADMIN_IDS || '').split(',').map(x => x.trim()).filter(Boolean);
+    if (!admins.includes(user.id)) throw httpError(403, 'Admins only');
+    if (p === '/admin/reports' && m === 'GET') {
+      const { results } = await env.DB.prepare(`SELECT r.share_id, COUNT(*) AS reports, sm.title, sm.weapon, sm.hidden FROM reports r
+        JOIN share_meta sm ON sm.id = r.share_id GROUP BY r.share_id ORDER BY reports DESC LIMIT 100`).all();
+      return json({ reports: results });
+    }
+    mm = p.match(/^\/admin\/shares\/([A-Za-z0-9]{6,16})$/);
+    if (mm && m === 'DELETE') { await deleteShare(env, mm[1]); return json({ ok: true }); }
+    mm = p.match(/^\/admin\/shares\/([A-Za-z0-9]{6,16})\/unhide$/);
+    if (mm && m === 'POST') {
+      await env.DB.batch([
+        env.DB.prepare('UPDATE share_meta SET hidden = 0 WHERE id = ?').bind(mm[1]),
+        env.DB.prepare('DELETE FROM reports WHERE share_id = ?').bind(mm[1])
+      ]);
+      return json({ ok: true });
+    }
   }
 
   throw httpError(404, 'Not found');
@@ -178,7 +264,7 @@ function discordLogin(env, url) {
   return new Response(null, {
     status: 302,
     headers: {
-      Location: `https://discord.com/oauth2/authorize?${q}`,
+      Location: `${env.DISCORD_AUTHORIZE_URL || 'https://discord.com/oauth2/authorize'}?${q}`,
       'Set-Cookie': cookie(STATE_COOKIE, `${state}|${encodeURIComponent(returnTo)}`, 600, env)
     }
   });
@@ -265,9 +351,64 @@ async function readJson(request) {
   try { return JSON.parse(text || '{}'); } catch (e) { throw httpError(400, 'Invalid JSON'); }
 }
 function requireTrustedWrite(request, origin, allowed) {
-  if (!origin || !allowed.includes(origin)) throw httpError(403, 'Origin not allowed');
+  // The desktop app calls from its main process, which sends no Origin. Browsers always send Origin on
+  // cross-site writes and cannot add the custom header without a CORS preflight this API refuses, so
+  // "no Origin + X-WF-Client: desktop" cannot be forged from a web page.
+  const desktop = !origin && request.headers.get('X-WF-Client') === 'desktop';
+  if (!desktop && (!origin || !allowed.includes(origin))) throw httpError(403, 'Origin not allowed');
   const ct = request.headers.get('Content-Type') || '';
   if (request.method !== 'DELETE' && !ct.includes('application/json')) throw httpError(415, 'Use application/json');
+}
+
+// ---------------- shares: helpers and preview page ----------------
+async function deleteShare(env, id) {
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM likes WHERE share_id = ?').bind(id),
+    env.DB.prepare('DELETE FROM reports WHERE share_id = ?').bind(id),
+    env.DB.prepare('DELETE FROM share_meta WHERE id = ?').bind(id),
+    env.DB.prepare('DELETE FROM shares WHERE id = ?').bind(id)
+  ]);
+}
+function cleanText(v, max) {
+  if (v == null) return null;
+  const s = String(v).replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, max);
+  return s || null;
+}
+function cleanImage(v) {
+  const s = String(v || '');
+  return /^[A-Za-z0-9._-]{1,120}\.(png|jpg|jpeg|webp)$/i.test(s) ? s : null;
+}
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+async function sharePreview(env, id) {
+  const site = siteUrl(env);
+  const target = `${site}#share=${id}`;
+  const row = await env.DB.prepare(`SELECT s.data, sm.title, sm.weapon, sm.image, sm.dps, sm.summary, sm.hidden FROM shares s
+    LEFT JOIN share_meta sm ON sm.id = s.id WHERE s.id = ?`).bind(id).first();
+  let title = 'Warframe build', desc = 'Open this build in Warframe Damage Calc.', image = null;
+  if (row && !row.hidden) {
+    let weapon = row.weapon;
+    try { weapon = weapon || JSON.parse(row.data).weapon; } catch (e) { /* ignore */ }
+    title = row.title || `${weapon} build`;
+    const bits = [];
+    if (row.dps) bits.push(`${Number(row.dps).toLocaleString('en-US')} sustained DPS`);
+    if (row.summary) bits.push(row.summary);
+    desc = (bits.join(' | ') || `${weapon} build`) + ' | Warframe Damage Calc';
+    if (row.image) image = `https://cdn.warframestat.us/img/${encodeURIComponent(row.image)}`;
+  }
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>${escHtml(title)}</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Warframe Damage Calc">
+<meta property="og:title" content="${escHtml(title)}">
+<meta property="og:description" content="${escHtml(desc)}">
+<meta property="og:url" content="${escHtml(target)}">
+${image ? `<meta property="og:image" content="${escHtml(image)}"><meta name="twitter:image" content="${escHtml(image)}">` : ''}
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#e0b04a">
+<meta http-equiv="refresh" content="0; url=${escHtml(target)}">
+</head><body><p><a href="${escHtml(target)}">Open the build</a></p><script>location.replace(${JSON.stringify(target)})</script></body></html>`;
+  return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300',
+    'Content-Security-Policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'" } });
 }
 
 // ---------------- helpers ----------------

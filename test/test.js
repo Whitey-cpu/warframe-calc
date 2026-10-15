@@ -5,6 +5,9 @@
 require('../src/static.js');
 require('../src/parser.js');
 require('../src/engine.js');
+require('../src/enemy.js');
+require('../src/capacity.js');
+require('../src/incarnon.js');
 const WF = global.WF;
 const E = WF.engine;
 const data = require('../data/game-data.json');
@@ -101,6 +104,37 @@ r = E.calculate({ weapon: elecW, mods: [], riven: [
   { stat: 'element', element: 'cold', value: 0.6 }, { stat: 'element', element: 'toxin', value: 0.6 }, { stat: 'element', element: 'heat', value: 0.6 }] }, data);
 eq('Prova example -> Viral present', r.elements.includes('viral') ? 1 : 0, 1);
 eq('Prova example -> Radiation present', r.elements.includes('radiation') ? 1 : 0, 1);
+
+// 12. Enemy level scaling (https://wiki.warframe.com/w/Enemy_Level_Scaling worked example: armor 100, base level 1)
+eq('Armor scale lvl 50', WF.enemy.scale({ faction: 'Grineer', health: 100, armor: 100, level: 50, baseLevel: 1 }).armor, 554, 1);
+eq('Armor scale lvl 75 (blend)', WF.enemy.scale({ faction: 'Grineer', health: 100, armor: 100, level: 75, baseLevel: 1 }).armor, 1060, 2);
+eq('Armor cap 2700', WF.enemy.scale({ faction: 'Grineer', health: 100, armor: 500, level: 300, baseLevel: 1 }).armor, 2700);
+eq('Steel Path health x2.5 and +100 levels', WF.enemy.scale({ faction: 'Grineer', health: 100, level: 1, baseLevel: 1, steelPath: true }).health,
+  Math.round(Math.fround(100 * WF.enemy.multiplier([0.015, 2.12, 10.7332, 0.72], 100, 70, 80)) * 2.5), 1);
+eq('Steel Path leaves armor unscaled by SP multiplier', WF.enemy.scale({ faction: 'Grineer', health: 100, armor: 100, level: 50, baseLevel: 1, steelPath: true }).armor,
+  WF.enemy.scale({ faction: 'Grineer', health: 100, armor: 100, level: 150, baseLevel: 1 }).armor);
+
+// 13. Capacity (https://wiki.warframe.com/w/Mod_Capacity): Serration 14, matching 7, mismatched 14 + 4 = 18
+eq('Drain matching polarity', WF.capacity.slotDrain(4, 10, 'madurai', 'madurai'), 7);
+eq('Drain mismatched polarity', WF.capacity.slotDrain(4, 10, 'madurai', 'naramon'), 18);
+eq('Drain no polarity', WF.capacity.slotDrain(4, 10, 'madurai', null), 14);
+
+// 14. Incarnon: Soma Zeroed In adds +0.6 base crit multiplier
+const somaNoInc = E.calculate({ weapon: 'Soma Prime', attack: 'Incarnon Form' }, data);
+const somaInc = E.calculate({ weapon: 'Soma Prime', attack: 'Incarnon Form', incarnon: { IV: 'Zeroed In' } }, data);
+eq('Incarnon Zeroed In +0.6 crit mult', somaInc.stats.critMultiplier - somaNoInc.stats.critMultiplier, 0.6);
+const somaFs = E.calculate({ weapon: 'Soma Prime', attack: 'Incarnon Form', incarnon: { II: 'Fortress Salvo' } }, data);
+eq('Incarnon Fortress Salvo +12 base per pellet', somaFs.stats.baseTotal - somaNoInc.stats.baseTotal, 12);
+
+// 15. Shields: Toxin skips shields, armor ignored on shields
+const shW = testWeapon({ impact: 100 });
+r = E.calculate({ weapon: shW, enemy: { armor: 2700 } }, data);
+eq('Shield damage ignores armor', r.perShotVsShield, 100);
+eq('Health damage uses armor', r.perShotVsEnemy, 10);
+r = E.calculate({ weapon: testWeapon({ toxin: 100 }) }, data);
+eq('Toxin does no shield damage', r.perShotVsShield, 0);
+r = E.calculate({ weapon: testWeapon({ impact: 100 }), enemy: { health: 1000, shield: 500 } }, data);
+eq('TTK shots (500 shield + 1000 health at 100/shot)', r.ttk.shots, 15);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

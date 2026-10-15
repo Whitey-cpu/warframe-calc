@@ -10,6 +10,8 @@
 <link rel="alternate icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#0b0d12">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="description" content="Free Warframe damage calculator and build optimizer: mods, arcanes, Warframe buffs, enemy scaling, time to kill.">
 <link rel="stylesheet" href="ui/style.css">
 </head>
 <body>
@@ -20,11 +22,14 @@
   </div>
   <span id="dataInfo" class="muted small"></span>
   <span class="spacer"></span>
+  <button type="button" id="themeToggle" class="btn ghost sm" title="Switch light/dark theme" aria-label="Switch theme">&#9680;</button>
+  <a id="feedbackLink" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/issues/new" target="_blank" rel="noopener" title="Report a bug or wrong number">Feedback</a>
   <a id="downloadApp" class="btn ghost" href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Download Windows app</a>
   <button type="button" id="updateData" class="btn ghost" hidden>Update game data</button>
   <div id="account"></div>
 </header>
 
+<div id="patchBanner" class="banner" hidden></div>
 <main class="layout">
   <!-- ================= BUILD ================= -->
   <section class="build">
@@ -71,14 +76,38 @@
       </details>
     </div>
 
+    <div id="incarnonPanel" class="panel inc-panel" hidden></div>
+
     <div class="sec-head">
       <h2>Mods</h2>
       <span class="muted small" id="drainInfo"></span>
       <span class="spacer"></span>
+      <button type="button" class="btn ghost sm" id="undoBtn" title="Undo (Ctrl+Z)" disabled>&#8630; Undo</button>
+      <button type="button" class="btn ghost sm" id="redoBtn" title="Redo (Ctrl+Y)" disabled>&#8631; Redo</button>
       <button type="button" class="btn ghost sm" id="clearMods">Clear</button>
+    </div>
+    <div class="cap-row">
+      <div id="capInfo" class="cap"></div>
+      <label class="check small"><input type="checkbox" id="catalyst" checked> Orokin Catalyst</label>
+      <label class="check small"><input type="checkbox" id="showDelta" checked> Show mod value</label>
     </div>
     <p class="hint">Drag mods into slots or click to add. Drag slots to reorder (element order matters: first slot combines first). Right-click a slot to remove.</p>
     <div id="slots" class="slot-grid"></div>
+
+    <details class="panel lb" id="leaderboard">
+      <summary><h2>Weapon leaderboard</h2></summary>
+      <p class="muted small">Ranks weapons by DPS against the enemy and buffs set on the right. "Quick-optimize" builds a fresh mod set per weapon (slower); otherwise each weapon is unmodded.</p>
+      <div class="row">
+        <select id="lbCat"><option value="Primary">Primary</option><option value="Secondary">Secondary</option><option value="Melee">Melee</option></select>
+        <select id="lbMetric"><option value="sustainedTotal">Sustained DPS</option><option value="burstTotal">Burst DPS</option><option value="perShotVsEnemy">Damage per shot</option></select>
+        <label class="check small"><input type="checkbox" id="lbOpt" checked> Quick-optimize</label>
+        <label class="check small"><input type="checkbox" id="lbPrimeOnly"> Prime/Incarnon only</label>
+        <button type="button" class="btn sm" id="lbRun">Rank weapons</button>
+        <button type="button" class="btn ghost sm" id="lbStop" hidden>Stop</button>
+      </div>
+      <div id="lbProgress" class="small muted"></div>
+      <div id="lbOut"></div>
+    </details>
 
     <div class="browser">
       <div class="browser-bar">
@@ -119,7 +148,21 @@
         <label>Corrosive stacks <input type="number" id="corrosiveStacks" value="0" min="0" max="10"></label>
         <label>Other armor strip % <input type="number" id="armorStripPct" value="0" min="0" max="100"></label>
         <label class="check"><input type="checkbox" id="heatStrip"> Heat strip (50%)</label>
+        <label>Magnetic stacks <input type="number" id="magneticStacks" value="0" min="0" max="10"></label>
       </div>
+      <h3>Enemy unit (optional)</h3>
+      <div class="unit-row">
+        <button type="button" class="btn ghost sm" id="pickEnemy">Choose enemy</button>
+        <span id="enemyName" class="muted small">Manual armor (no unit)</span>
+        <button type="button" class="btn ghost sm" id="clearEnemy" hidden>Clear</button>
+      </div>
+      <div class="grid2" id="unitFields">
+        <label>Level <input type="number" id="enemyLevel" value="100" min="1"></label>
+        <label title="Most enemies spawn at their own base level. Leave blank for 1.">Base level <input type="number" id="enemyBaseLevel" min="1" placeholder="1"></label>
+        <label class="check"><input type="checkbox" id="steelPath"> Steel Path (+100 lvl, x2.5 HP/shields)</label>
+        <label class="check"><input type="checkbox" id="eximus"> Eximus (Overguard)</label>
+      </div>
+      <p class="small" id="unitStats"></p>
       <p class="muted small">Shields and Overguard are not modeled yet.</p>
     </section>
 
@@ -147,6 +190,17 @@
         <div id="riven"></div>
         <button type="button" id="addRiven" class="btn ghost sm">+ Riven stat</button>
       </details>
+    </section>
+
+    <section class="panel" id="comparePanel">
+      <h2>Compare</h2>
+      <p class="muted small">Pin the current build as A, change things, and see the difference.</p>
+      <div class="row">
+        <button type="button" id="pinA" class="btn ghost sm">Pin current as A</button>
+        <button type="button" id="swapAB" class="btn ghost sm" hidden>Load A</button>
+        <button type="button" id="clearA" class="btn ghost sm" hidden>Clear</button>
+      </div>
+      <div id="compareOut"></div>
     </section>
 
     <section class="panel">
@@ -181,6 +235,7 @@
       </div>
       <div class="row">
         <button type="button" id="shareBuild" class="btn ghost sm" hidden>Create share link</button>
+        <label class="check small" title="List this build under Community builds"><input type="checkbox" id="sharePublic"> Make public</label>
         <button type="button" id="uploadLocal" class="btn ghost sm" hidden></button>
       </div>
       <p class="small" id="buildMsg" role="status" aria-live="polite"></p>
@@ -190,6 +245,16 @@
         <button type="button" id="pasteJson" class="btn ghost sm">Load from JSON</button>
       </div>
       <textarea id="jsonBox" rows="4" spellcheck="false" placeholder="Build JSON (paste here to load, or share with Claude)"></textarea>
+    </section>
+
+    <section class="panel" id="publicPanel" hidden>
+      <h2>Community builds</h2>
+      <p class="muted small">Builds people chose to publish. Publish yours with the share button and "Make public".</p>
+      <div class="row">
+        <input type="search" id="pubSearch" placeholder="Filter by weapon">
+        <select id="pubSort"><option value="top">Most liked</option><option value="new">Newest</option></select>
+      </div>
+      <div id="pubList" class="pub-list"></div>
     </section>
   </aside>
 </main>
@@ -218,6 +283,10 @@
 <script src="src/parser.js"></script>
 <script src="src/engine.js"></script>
 <script src="src/optimizer.js"></script>
+<script src="src/enemy.js"></script>
+<script src="src/capacity.js"></script>
+<script src="src/incarnon.js"></script>
+<script src="ui/features.js"></script>
 <script src="ui/app.js"></script>
 </body>
 </html>
