@@ -608,7 +608,7 @@
         extraAttacks: [], conditions: Object.assign({}, b.conditions, { assumeMax: false, selfStatus: false, fightSeconds: undefined, statusTypes: 0 }) }), D);
       const a = ar.stats;
       $('arsenalOut').innerHTML = `<table>${[
-        ['Fire rate', fmt(a.fireRate)], ['Multishot', fmt(a.multishot)], ['Magazine', a.magazine], ['Reload', a.reload.toFixed(2) + 's'],
+        ['Fire rate', fmt(a.fireRate)], ['Multishot', fmt(ar.arsenal.multishot != null ? ar.arsenal.multishot : a.multishot)], ['Magazine', a.magazine], ['Reload', a.reload.toFixed(2) + 's'],
         ['Critical chance', pct(a.critChance)], ['Critical damage', fmt(a.critMultiplier) + 'x'], ['Status', pct(a.statusChance)]
       ].concat(Object.entries(ar.arsenal.types).map(([k, v]) => [k[0].toUpperCase() + k.slice(1), fmt(v)])).concat([['Total (x multishot)', fmt(ar.arsenal.total)]])
         .map(([k, v]) => `<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join('')}</table>`;
