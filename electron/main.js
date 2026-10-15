@@ -14,11 +14,17 @@ const userDataFile = () => path.join(app.getPath('userData'), 'game-data.json');
 const bundledFile = path.join(ROOT, 'data', 'game-data.json');
 
 // Use the downloaded dataset if it exists and parses; otherwise the one shipped with the app.
+// Use whichever copy was built most recently: a data update downloaded earlier, or the data shipped with
+// a newer installer (otherwise an old downloaded file would hide newer bundled data after an app update).
 function loadData() {
+  let best = null;
   for (const f of [userDataFile(), bundledFile]) {
-    try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (e) { /* try next */ }
+    try {
+      const d = JSON.parse(fs.readFileSync(f, 'utf8'));
+      if (!best || String(d.meta && d.meta.builtAt) > String(best.meta && best.meta.builtAt)) best = d;
+    } catch (e) { /* missing or unreadable */ }
   }
-  return null;
+  return best;
 }
 
 let win;
