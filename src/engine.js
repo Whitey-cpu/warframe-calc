@@ -178,7 +178,7 @@
       slashOnCrit: 0, separate: [], voidExtra: 0,
       // flat changes to the weapon's BASE stats (Incarnon evolutions, e.g. "+12 base damage per pellet")
       baseDmgFlat: 0, baseCCFlat: 0, baseCDFlat: 0, baseSCFlat: 0, baseMSFlat: 0, baseMagFlat: 0,
-      locks: {}, wpCrit: 0, lingerFirstDouble: 0, lastShotMS: 0
+      locks: {}, wpCrit: 0, lingerFirstDouble: 0, lastShotMS: 0, msDmg: 0
     };
     const elementOrder = []; // [{el, bonus, slot}]
     const used = [];
@@ -188,7 +188,7 @@
     const sources = gatherSources(build, data, weapon, notes);
     // Incarnon evolution perks: build.incarnon = { II: 'Perk name', ... }
     if (build.incarnon && WF.incarnonFor) {
-      const preset = WF.incarnonFor(weapon.name);
+      const preset = WF.incarnonFor(weapon.name, data);
       if (preset) {
         for (const t of preset.tiers) {
           const pick = build.incarnon[t.tier];
@@ -196,6 +196,8 @@
           if (!perk) continue;
           if (perk.modeled === false) { notes.push(`Incarnon ${t.tier} "${perk.name}" has no modeled damage effect.`); continue; }
           if (perk.attack && !new RegExp(perk.attack, 'i').test(atk.name)) continue;
+          if (perk.unparsed && perk.unparsed.length) notes.push(`Incarnon ${t.tier} "${perk.name}": not modeled: ${perk.unparsed.join('; ')}`);
+          (perk.assumed || []).forEach(a => notes.push(`ASSUMPTION: Incarnon ${t.tier} "${perk.name}": ${a}`));
           sources.push({ key: `Incarnon: ${perk.name}`, kind: 'incarnon', slot: 150, item: { name: perk.name, effects: perk.effects.filter(e => !e.attack || new RegExp(e.attack, 'i').test(atk.name)) }, scale: 1 });
         }
       }
@@ -260,6 +262,7 @@
         case 'weakPointCrit': P.wpCrit += v; break;
         case 'lingeringFirstShotDouble': P.lingerFirstDouble = 1; break;
         case 'lastShotMultishotFlat': P.lastShotMS += v; break;
+        case 'multishotDamage': P.msDmg += v; break;
         case 'faction':
           if (eff.faction && factionInfo.baneKey && eff.faction.toLowerCase() === factionInfo.baneKey.toLowerCase()) P.faction += v;
           else if (eff.faction === '*') P.faction += v;
@@ -345,6 +348,30 @@
     });
     const quantTotal = Object.values(typed).reduce((a, b) => a + b, 0);
 
+    let formMs = null;
+    const incPreset = WF.incarnonFor ? WF.incarnonFor(weapon.name, data) : null;
+    if (incPreset && incPreset.forms) {
+      const fm = incPreset.forms.find(x => new RegExp(x.attack, 'i').test(atk.name));
+      if (fm && fm.multishot != null) formMs = fm.multishot;
+    }
+    const isIncForm = /incarnon/i.test(atk.name);
+    // "Multishot consumes ammo ... increases Damage by +N%": normal mode = extra projectiles deal +N% (multiplicative);
+    // Incarnon Form = all multishot bonuses are increased by N% (wiki notes, e.g. https://wiki.warframe.com/w/Torid_Incarnon_Genesis)
+    const msBonus = P.ms * (P.msDmg && isIncForm ? 1 + P.msDmg : 1);
+    const msModded = ((ov.multishot != null ? ov.multishot : (formMs != null ? formMs : (isMelee ? 1 : weapon.multishot))) + P.baseMSFlat) * (isMelee || P.locks.multishot ? 1 : (1 + msBonus));
+    let ms = msModded;
+    if (P.lastShotMS) {
+      // "+N Multishot on last shot in magazine": averaged over the magazine, added after multishot mods (ASSUMPTION)
+      const magE = Math.max(1, Math.floor(((ov.magazine != null ? ov.magazine : weapon.magazine) + P.baseMagFlat) * (1 + P.mag)));
+      ms += P.lastShotMS / magE;
+      notes.push(`ASSUMPTION: +${P.lastShotMS} multishot on the last shot is averaged over the ${magE}-round magazine and not scaled by multishot mods.`);
+    }
+    if (P.locks.multishot && P.ms) notes.push('A mod says "Multishot cannot be modified": multishot bonuses are ignored.');
+    if (P.msDmg && !isIncForm && ms > 1) {
+      P.separate.push((1 + (ms - 1) * (1 + P.msDmg)) / ms);
+      notes.push(`Extra multishot projectiles deal +${Math.round(P.msDmg * 100)}% damage (Incarnon perk), averaged over ${ms.toFixed(2)} projectiles.`);
+    }
+
     // ---------- multipliers ----------
     const sepMult = P.separate.reduce((a, b) => a * b, 1);
     const hitMult = (1 + P.dmg + P.direct) * sepMult;
@@ -355,21 +382,6 @@
     for (const [k, v] of Object.entries(typed)) hitTyped[k] = v * hitMult;
     const hitTotal = quantTotal * hitMult;
 
-    let formMs = null;
-    const incPreset = WF.incarnonFor ? WF.incarnonFor(weapon.name) : null;
-    if (incPreset && incPreset.forms) {
-      const fm = incPreset.forms.find(x => new RegExp(x.attack, 'i').test(atk.name));
-      if (fm && fm.multishot != null) formMs = fm.multishot;
-    }
-    const msModded = ((ov.multishot != null ? ov.multishot : (formMs != null ? formMs : (isMelee ? 1 : weapon.multishot))) + P.baseMSFlat) * (isMelee || P.locks.multishot ? 1 : (1 + P.ms));
-    let ms = msModded;
-    if (P.lastShotMS) {
-      // "+N Multishot on last shot in magazine": averaged over the magazine, added after multishot mods (ASSUMPTION)
-      const magE = Math.max(1, Math.floor(((ov.magazine != null ? ov.magazine : weapon.magazine) + P.baseMagFlat) * (1 + P.mag)));
-      ms += P.lastShotMS / magE;
-      notes.push(`ASSUMPTION: +${P.lastShotMS} multishot on the last shot is averaged over the ${magE}-round magazine and not scaled by multishot mods.`);
-    }
-    if (P.locks.multishot && P.ms) notes.push('A mod says "Multishot cannot be modified": multishot bonuses are ignored.');
     const baseCC = (ov.critChance != null ? ov.critChance : atk.critChance) + P.baseCCFlat;
     const baseCD = (ov.critMult != null ? ov.critMult : atk.critMult) + P.baseCDFlat;
     const baseSC = (ov.statusChance != null ? ov.statusChance : atk.statusChance) + P.baseSCFlat;
@@ -552,7 +564,8 @@
       // arsenal-style numbers: per projectile before quantization and enemy effects, total includes multishot
       arsenal: {
         types: Object.fromEntries(Object.entries(unquant).map(([k, v]) => [k, round(v * hitMult)])),
-        total: round(Object.values(unquant).reduce((a, c) => a + c, 0) * hitMult * ms)
+        multishot: msModded,
+        total: round(Object.values(unquant).reduce((a, c) => a + c, 0) * hitMult * msModded)
       },
       dps: {
         burstDirect: round(burstDirect),

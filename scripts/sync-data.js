@@ -21,6 +21,7 @@ const OUT = path.join(ROOT, 'data');
 
 function getPackageDir() {
   if (process.argv[2]) return path.resolve(process.argv[2]);
+  if (process.env.WFCD_DIR) return path.resolve(process.env.WFCD_DIR);
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'wfcd-'));
   console.log('Downloading @wfcd/items from npm...');
   const out = execSync('npm pack @wfcd/items --silent', { cwd: tmp, encoding: 'utf8', shell: true }).trim().split(/\r?\n/).pop();
@@ -28,9 +29,34 @@ function getPackageDir() {
   return path.join(tmp, 'package');
 }
 
+function npmPackage(name) {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'pkg-'));
+  console.log(`Downloading ${name} from npm...`);
+  const out = execSync(`npm pack ${name} --silent`, { cwd: tmp, encoding: 'utf8', shell: true }).trim().split(/\r?\n/).pop();
+  execSync(`tar -xzf "${out}"`, { cwd: tmp, shell: true });
+  return path.join(tmp, 'package');
+}
+
+// Optional second source: DE Public Export repackaged (https://www.npmjs.com/package/warframe-public-export-plus)
+function loadPep() {
+  try {
+    const dir = process.env.PEP_DIR ? path.resolve(process.env.PEP_DIR) : npmPackage('warframe-public-export-plus');
+    const read = f => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+    const version = read('package.json').version;
+    let published = null;
+    try { published = JSON.parse(execSync('npm view warframe-public-export-plus time --json', { encoding: 'utf8', shell: true }))[version] || null; } catch (e) { /* offline */ }
+    return { version, published, weapons: read('ExportWeapons.json'), enemies: read('ExportEnemies.json'), warframes: read('ExportWarframes.json') };
+  } catch (e) { console.warn('warframe-public-export-plus not available:', e.message); return null; }
+}
+function readOptional(file) {
+  const p = path.join(OUT, file);
+  return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : null;
+}
+
 function build(dir) {
   const version = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8')).version;
-  return buildData(file => JSON.parse(fs.readFileSync(path.join(dir, 'data', 'json', file), 'utf8')), version);
+  const extras = { pep: loadPep(), web: readOptional('web-data.json'), overrides: readOptional('overrides.json') };
+  return buildData(file => JSON.parse(fs.readFileSync(path.join(dir, 'data', 'json', file), 'utf8')), version, extras);
 }
 
 function main() {

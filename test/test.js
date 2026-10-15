@@ -152,5 +152,29 @@ eq('Torid cloud hits per shot in a 4 s fight (shots in each second get 3, 2, 1, 
 r = E.calculate({ weapon: 'Torid', attack: 0, extraAttacks: [1], mods: ['Serration', 'Hellfire', 'Infected Clip'], enemy: { faction: 'Grineer', health: 100000, armor: 1000 } }, data);
 eq('Fight length = TTK (within 1%)', Math.abs(r.fightSeconds / r.ttk.seconds - 1) < 0.01, true);
 
+// 19. In-game calibration (Ethan's Torid, Update 44.1, arsenal screenshots 2026-10-14):
+//     Final Fusillade + Swift Deliverance + Survivor's Edge, Galvanized Chamber / Vital Sense / Critical Delay / Serration /
+//     Thermite Rounds / Primed Cryo Rounds / High Voltage / Vile Acceleration. Normal-mode arsenal: Blast 511.9, Corrosive 364
+//     (matches the Poison Cloud attack); Incarnon Form: Blast 573.8, Corrosive 408, crit 132%, crit dmg 6.8x, status 118.8%, FR 13.6.
+{
+  const inc = { II: 'Final Fusillade', III: 'Swift Deliverance', IV: "Survivor's Edge" };
+  const mods = ['Galvanized Chamber', 'Vital Sense', 'Critical Delay', 'Serration', 'Thermite Rounds', 'Primed Cryo Rounds', 'High Voltage', 'Vile Acceleration', 'Vigilante Supplies'];
+  const c = { assumeMax: false, selfStatus: false };
+  const cloud = E.calculate({ weapon: 'Torid', attack: 1, mods, arcanes: ['Primary Merciless'], incarnon: inc, conditions: c }, data);
+  eq('Torid cloud arsenal Blast (in-game 511.9)', Math.round(cloud.arsenal.types.blast * 10) / 10, 511.9);
+  eq('Torid cloud arsenal Corrosive (in-game 364)', Math.round(cloud.arsenal.types.corrosive), 364);
+  const beam = E.calculate({ weapon: 'Torid', attack: 2, mods, arcanes: ['Primary Merciless'], incarnon: inc, conditions: c }, data);
+  eq('Torid Incarnon Blast (in-game 573.8)', Math.round(beam.arsenal.types.blast * 10) / 10, 573.8);
+  eq('Torid Incarnon crit chance (in-game 132%)', Math.round(beam.stats.critChance * 1000) / 10, 132);
+  eq('Torid Incarnon status (in-game 118.8%)', Math.round(beam.stats.statusChance * 1000) / 10, 118.8);
+  eq('Torid Incarnon fire rate (in-game 13.6)', Math.round(beam.stats.fireRate * 10) / 10, 13.6);
+}
+
+// 20. Generated Incarnon presets pick the variant's own column (wiki Braton Incarnon Genesis: Braton Prime X = 4)
+if (data.incarnon) {
+  const bp = WF.incarnonFor('Braton Prime', data);
+  eq('Braton Prime Daring Reverie base damage (wiki X = 4)', bp.tiers[0].perks[0].effects[0].value, 4);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

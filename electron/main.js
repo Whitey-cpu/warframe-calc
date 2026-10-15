@@ -43,9 +43,9 @@ ipcMain.handle('wf:update-data', async () => {
   const fetchFn = async url => {
     try { return await net.fetch(url); } catch (e) { return await fetch(url); }
   };
-  const res = await fetchLatest(fetchFn, cur && cur.meta && cur.meta.version);
+  const res = await fetchLatest(fetchFn, cur && cur.meta && cur.meta.version, cur && cur.meta && cur.meta.builtAt);
   if (res.upToDate) return { upToDate: true, version: res.version };
-  if (cur && cur.meta) {
+  if (cur && cur.meta && cur.meta.version !== res.data.meta.version) {
     try { res.data.meta.changes = diffData(cur, res.data); res.data.meta.previousVersion = cur.meta.version; } catch (e) { /* diff is optional */ }
   }
   fs.mkdirSync(path.dirname(userDataFile()), { recursive: true });

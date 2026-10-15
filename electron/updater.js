@@ -6,7 +6,7 @@ const zlib = require('zlib');
 const { buildData } = require('../src/build-data.js');
 
 const REGISTRY = 'https://registry.npmjs.org/@wfcd/items/latest';
-const NEEDED = ['Primary.json', 'Secondary.json', 'Melee.json', 'Mods.json', 'Arcanes.json', 'Warframes.json'];
+const NEEDED = ['Primary.json', 'Secondary.json', 'Melee.json', 'Mods.json', 'Arcanes.json', 'Warframes.json', 'Enemy.json'];
 
 // Minimal tar reader: returns { 'package/data/json/Mods.json': Buffer, ... } for wanted paths.
 function untar(buf, want) {
@@ -28,7 +28,20 @@ function untar(buf, want) {
   return files;
 }
 
-async function fetchLatest(fetchFn, current) {
+// The published site carries the full multi-source build (wfcd + DE export + wiki Incarnon data + corrections),
+// rebuilt weekly by GitHub Actions. Prefer it; fall back to rebuilding from @wfcd/items alone.
+const SITE_DATA = 'https://warframe.hardn.net/data/game-data.json';
+async function fetchLatest(fetchFn, current, currentBuiltAt) {
+  try {
+    const r = await fetchFn(SITE_DATA);
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.meta && data.weapons && data.weapons.length > 100) {
+        if (currentBuiltAt && data.meta.builtAt <= currentBuiltAt) return { upToDate: true, version: data.meta.version };
+        return { upToDate: false, version: data.meta.version, data, source: 'site' };
+      }
+    }
+  } catch (e) { /* fall back to npm */ }
   const metaRes = await fetchFn(REGISTRY);
   if (!metaRes.ok) throw new Error(`npm registry returned ${metaRes.status}`);
   const meta = await metaRes.json();

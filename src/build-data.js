@@ -35,6 +35,8 @@ function slimWeapon(w) {
   }
   return {
     name: w.name,
+    uid: w.uniqueName,
+    omega: w.omegaAttenuation != null ? Math.round(w.omegaAttenuation * 1000) / 1000 : null,
     category: w.category,        // Primary / Secondary / Melee
     type: w.type,                // Rifle, Shotgun, Sniper, Bow, Launcher, Pistol, Melee...
     trigger: w.trigger || null,
@@ -59,7 +61,7 @@ function maxStats(item) {
   return ls.length ? ls[ls.length - 1].stats : [];
 }
 
-function buildData(load, version) {
+function buildData(load, version, extras) {
 
   const weapons = []
     .concat(load('Primary.json'), load('Secondary.json'), load('Melee.json'))
@@ -125,6 +127,7 @@ function buildData(load, version) {
     .filter(f => f.productCategory === 'Suits')
     .map(f => ({
       name: f.name,
+      uid: f.uniqueName,
       image: f.imageName || null,
       isPrime: !!f.isPrime,
       health: f.health, shield: f.shield, armor: f.armor, energy: f.power,
@@ -143,17 +146,80 @@ function buildData(load, version) {
     .map(e => {
       const res = (e.resistances || []).map(r => r.type);
       return {
-        name: e.name, health: e.health, shield: e.shield || 0, armor: e.armor || 0,
+        name: e.name, uid: e.uniqueName, health: e.health, shield: e.shield || 0, armor: e.armor || 0,
         faction: FACTION_GUESS[e.type] || (res.some(t => /Shield/.test(t)) && e.shield ? 'Corpus' : null),
         image: e.imageName || null
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  return {
-    meta: { source: '@wfcd/items', version, builtAt: new Date().toISOString() },
+  const data = {
+    meta: { source: '@wfcd/items', version, builtAt: new Date().toISOString(), sources: [
+      { name: '@wfcd/items', version, url: 'https://www.npmjs.com/package/@wfcd/items', role: 'Base data: weapons, mods, arcanes, frames, enemy list (built from DE Public Export plus wiki attack breakdowns)' }
+    ] },
     weapons, mods, arcanes, frames, enemies
   };
+  if (extras) applyExtras(data, extras);
+  return data;
+}
+
+// ---------- enrichment from other public sources ----------
+// extras = { pep: { weapons, enemies, warframes, version, published }, web: data/web-data.json, overrides: data/overrides.json }
+const PEP_FACTION = { Grineer: 'Grineer', Corpus: 'Corpus', Infestation: 'Infested', Orokin: 'Orokin (Corrupted)', Sentient: 'Sentient', Narmer: 'Narmer', Murmur: 'The Murmur', Scaldra: 'Scaldra', Techrot: 'Techrot', Anarch: 'Anarchs' };
+function addNote(item, text) { (item.dataNotes = item.dataNotes || []).push(text); }
+function applyExtras(data, x) {
+  const pep = x.pep, web = x.web, ov = x.overrides;
+  if (pep) {
+    data.meta.sources.push({ name: 'warframe-public-export-plus', version: pep.version, published: pep.published, url: 'https://www.npmjs.com/package/warframe-public-export-plus',
+      role: 'DE Public Export repackaged: enemy health/shield/armor/faction, cross-check of weapon and frame stats' });
+    // Enemies: DE export values replace @wfcd/items values (the wfcd enemy table is older, e.g. Crewman 60/150 vs 90/120 since the Corpus rework)
+    let fixed = 0;
+    for (const e of data.enemies) {
+      const a = pep.enemies.avatars[e.uid];
+      if (!a) { e.src = '@wfcd/items'; continue; }
+      const dc = pep.enemies.damageControllers[a.damageController] || {};
+      const before = [e.health, e.shield, e.armor].join('/');
+      if (a.health != null) e.health = a.health;
+      if (dc.shield != null) e.shield = dc.shield;
+      if (dc.armor != null) e.armor = dc.armor;
+      if (a.faction && PEP_FACTION[a.faction]) e.faction = PEP_FACTION[a.faction];
+      e.src = 'DE Public Export';
+      if (before !== [e.health, e.shield, e.armor].join('/')) { fixed++; addNote(e, `Base stats updated from DE Public Export (was ${before} in @wfcd/items).`); }
+    }
+    data.meta.enemiesUpdatedFromDE = fixed;
+    // Weapons: flag where the per-attack numbers (wiki) differ from the weapon-level numbers (DE export)
+    for (const w of data.weapons) {
+      const d = pep.weapons[w.uid];
+      if (!d || !w.attacks.length) continue;
+      const a = w.attacks[0], diffs = [];
+      const pct = v => Math.round(v * 1000) / 10 + '%';
+      if (d.criticalChance != null && Math.abs(a.critChance - d.criticalChance) > 0.005) diffs.push(`crit ${pct(a.critChance)} vs ${pct(d.criticalChance)}`);
+      if (d.criticalMultiplier != null && Math.abs(a.critMult - d.criticalMultiplier) > 0.01) diffs.push(`crit multiplier ${a.critMult}x vs ${Math.round(d.criticalMultiplier * 100) / 100}x`);
+      if (d.procChance != null && Math.abs(a.statusChance - d.procChance) > 0.005) diffs.push(`status ${pct(a.statusChance)} vs ${pct(d.procChance)}`);
+      if (diffs.length) addNote(w, `"${a.name}" stats (wiki, per attack) differ from the DE Public Export weapon value: ${diffs.join(', ')}. Often the export value is for a different fire mode or per pellet; check in the arsenal.`);
+    }
+    for (const f of data.frames) {
+      const p = pep.warframes[f.uid];
+      if (!p) continue;
+      const a = [f.health, f.shield, f.armor].join('/'), b = [p.health, p.shield, p.armor].join('/');
+      if (a !== b) addNote(f, `Health/shield/armor differ between sources: ${a} (@wfcd/items) vs ${b} (DE Public Export). Not used by weapon math.`);
+    }
+  }
+  if (web && web.incarnon) {
+    data.meta.sources.push({ name: 'WARFRAME Wiki (Incarnon evolutions)', scrapedAt: web.scrapedAt, url: 'https://wiki.warframe.com/w/Incarnon',
+      role: `Incarnon evolution perks for ${web.incarnon.weapons.length} weapons, each with its page and last edit time` });
+    data.incarnon = web.incarnon.weapons;
+  }
+  if (web && web.build && (web.build.latestHotfix || web.build.latestUpdate)) data.meta.gameBuild = web.build;
+  if (ov) {
+    data.meta.sources.push({ name: 'Manual corrections', url: 'data/overrides.json', role: 'Official values checked by hand where the datasets lag (each entry lists its source)' });
+    if (!data.meta.gameBuild && ov.gameBuild) data.meta.gameBuild = ov.gameBuild;
+    for (const o of ov.weapons || []) {
+      for (const w of data.weapons.filter(x => x.name === o.name || (o.variants && o.variants.includes(x.name)))) {
+        for (const [k, v] of Object.entries(o.set || {})) { const old = w[k]; w[k] = v; addNote(w, `${k} ${old} -> ${v} (${o.source})`); }
+      }
+    }
+  }
 }
 
 function diffData(prev, next) {

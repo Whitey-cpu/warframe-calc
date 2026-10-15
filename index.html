@@ -20,7 +20,7 @@
     <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="16" cy="16" r="2.5" fill="currentColor"/><path d="M16 1v8M16 23v8M1 16h8M23 16h8" stroke="currentColor" stroke-width="2.5"/></svg>
     <h1>Warframe Damage Calc</h1>
   </div>
-  <span id="dataInfo" class="muted small"></span>
+  <a id="dataInfo" class="muted small" href="#dataSources"></a>
   <span class="spacer"></span>
   <button type="button" id="themeToggle" class="btn ghost sm" title="Switch light/dark theme" aria-label="Switch theme">&#9680;</button>
   <a id="feedbackLink" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/issues/new" target="_blank" rel="noopener" title="Report a bug or wrong number">Feedback</a>
@@ -40,6 +40,7 @@
           <div class="kicker" id="weaponKicker">Weapon</div>
           <div class="hero-name" id="weaponName">Choose a weapon</div>
           <div class="hero-stats" id="weaponStats">Click to browse all weapons</div>
+          <div class="data-notes muted small" id="weaponNotes" hidden></div>
         </div>
       </button>
 
@@ -282,8 +283,9 @@
 </dialog>
 
 <footer class="muted small">
+  <details id="dataSources"><summary>Data sources and freshness</summary><div id="dataSourcesBody"></div></details>
   Formulas: <a href="https://wiki.warframe.com/w/Damage_calculation" target="_blank" rel="noopener">WARFRAME Wiki</a>.
-  Data: <a href="https://www.npmjs.com/package/@wfcd/items" target="_blank" rel="noopener">@wfcd/items</a>; images via the warframestat.us CDN.
+  Data: public sources only (listed above); images via the warframestat.us CDN.
   Lines marked ASSUMPTION in the notes are modeling choices the wiki does not state outright.
   <br>A free fan-made tool by <a href="https://hardn.net" target="_blank" rel="noopener">hardn</a>
   (<a href="https://github.com/Whitey-cpu/warframe-calc" target="_blank" rel="noopener">source</a>, <a href="privacy.html">privacy</a>).

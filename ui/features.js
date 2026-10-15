@@ -148,11 +148,12 @@ window.WFFeatures = function (UI) {
     const preset = state.weapon && WF.incarnonFor(state.weapon.name);
     if (!preset) { panel.hidden = true; panel.innerHTML = ''; incWeapon = state.weapon && state.weapon.name; return; }
     panel.hidden = false;
-    panel.innerHTML = `<div class="sec-head"><h2>Incarnon evolutions</h2><span class="muted small">Source: <a href="${esc(preset.source)}" target="_blank" rel="noopener">wiki</a></span></div>
+    panel.innerHTML = `<div class="sec-head"><h2>Incarnon evolutions</h2><span class="muted small">Source: <a href="${esc(preset.source)}" target="_blank" rel="noopener">wiki</a>${preset.lastEdited ? ', page edited ' + esc(preset.lastEdited.slice(0, 10)) : ''}</span></div>
+      <p class="muted small">Faded perks have no damage effect in the calculator; perks marked * are only partly modeled (hover for details and the wiki's notes).</p>
       <div class="inc-tiers">${preset.tiers.map(t => `<fieldset class="inc-tier"><legend>Tier ${esc(t.tier)}</legend>
         <label class="check small"><input type="radio" name="inc-${esc(t.tier)}" value="" ${!state.incarnon[t.tier] ? 'checked' : ''}> None</label>
-        ${t.perks.map(p => `<label class="check small${p.modeled === false ? ' muted' : ''}" title="${esc(p.text)}${p.attack ? ' (applies to ' + esc(p.attack) + ' attack)' : ''}${p.modeled === false ? ' (no damage effect modeled)' : ''}">
-          <input type="radio" name="inc-${esc(t.tier)}" value="${esc(p.name)}" ${state.incarnon[t.tier] === p.name ? 'checked' : ''}> ${esc(p.name)}</label>`).join('')}
+        ${t.perks.map(p => `<label class="check small${p.modeled === false ? ' muted' : ''}" title="${esc(p.text)}${p.attack ? ' (applies to ' + esc(p.attack) + ' attack)' : ''}${p.modeled === false ? '\n(no damage effect modeled)' : ''}${p.unparsed && p.unparsed.length ? '\nNot modeled: ' + esc(p.unparsed.join('; ')) : ''}${p.assumed && p.assumed.length ? '\nAssumption: ' + esc(p.assumed.join(' ')) : ''}${p.notes ? '\nWiki notes: ' + esc(p.notes) : ''}">
+          <input type="radio" name="inc-${esc(t.tier)}" value="${esc(p.name)}" ${state.incarnon[t.tier] === p.name ? 'checked' : ''}> ${esc(p.name)}${p.modeled === 'partial' ? ' *' : ''}</label>`).join('')}
       </fieldset>`).join('')}</div>`;
     incWeapon = state.weapon.name;
   }
@@ -170,7 +171,7 @@ window.WFFeatures = function (UI) {
   // ---------------- enemy unit picker ----------------
   function renderEnemyUnit() {
     const u = state.enemyUnit && D.enemies.find(x => x.name === state.enemyUnit);
-    $('enemyName').innerHTML = u ? `<b>${esc(u.name)}</b> <span class="muted">base HP ${u.health} &middot; shield ${u.shield} &middot; armor ${u.armor}</span>` : 'Manual armor (no unit)';
+    $('enemyName').innerHTML = u ? `<b>${esc(u.name)}</b> <span class="muted" title="${esc('Source: ' + (u.src || '@wfcd/items') + (u.dataNotes ? '. ' + u.dataNotes.join(' ') : ''))}">base HP ${u.health} &middot; shield ${u.shield} &middot; armor ${u.armor}${u.src ? ' &middot; ' + esc(u.src) : ''}</span>` : 'Manual armor (no unit)';
     $('clearEnemy').hidden = !u;
     $('unitFields').classList.toggle('dim', !u);
     if (!u) { $('unitStats').textContent = ''; $('armor').disabled = false; }

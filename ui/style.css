@@ -317,3 +317,10 @@ details.lb > summary::after { content: ' \25BE'; color: var(--muted); }
 .extra-attacks { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin: -4px 0 6px; }
 .extra-attacks label { margin: 0; }
 #selfStatusBox:empty { display: none; }
+
+.data-notes { margin-top: 6px; line-height: 1.35; }
+.data-notes div + div { margin-top: 3px; }
+#dataSources { margin-bottom: 10px; }
+#dataSources ul { margin: 6px 0; padding-left: 18px; }
+#dataInfo { text-decoration: none; }
+#dataInfo:hover { text-decoration: underline; }

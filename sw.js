@@ -3,7 +3,7 @@
  * App files: served from cache, refreshed in the background (stale-while-revalidate).
  * Item images (cdn.warframestat.us): cache-first, capped. The accounts API is never cached.
  */
-const VERSION = 'wfcalc-v5';
+const VERSION = 'wfcalc-v6';
 const SHELL = [
   './', 'index.html', 'privacy.html', 'manifest.webmanifest', 'favicon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png',
   'ui/style.css', 'ui/app.js', 'ui/features.js',

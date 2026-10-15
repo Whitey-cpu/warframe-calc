@@ -24,28 +24,44 @@ In the UI, **Copy build JSON** gives you a build you can paste to Claude or feed
 - Mods by slot order, element combination (HCET rules, innate elements merge or go last), quantization (1/32 of base)
 - Base damage pool (Serration, Galvanized, arcane damage stacks, Vex Armor), separate multipliers (Eclipse), faction pool (Bane, Roar), extra Void (Xata's Whisper)
 - Crit tiers (orange/red), flat crit (Arcane Avenger etc.), headshot crit x2, weak point and headshot bonuses
-- Status chance, proc weighting, Hunter Munitions, Slash/Heat/Toxin/Electricity/Gas DoTs (faction applied twice)
-- Enemy faction vulnerabilities (x1.5 / x0.5), armor DR `0.9 * sqrt(armor/2700)`, Corrosive/Heat/flat armor strip, Viral stacks
-- Fire rate, charge time, magazine, reload, burst and sustained DPS
+- Status chance and proc weighting; Slash/Heat/Toxin/Electricity/Gas DoTs (faction applied twice), Heat refresh, Blast fuse and 10-stack burst
+- Statuses you apply yourself (Viral, Corrosive, Magnetic, Puncture, Cold, Heat strip) build up over the fight and feed back into damage
+- Fight length: DoT ticks, lingering clouds and status build-up all need time, so the calculator solves time-to-kill = fight length
+- Extra attacks per shot (grenade + cloud), lingering damage fields (Torid cloud: 1 hit/s for 10 s), multi-target group DPS
+- Enemy level scaling, Steel Path, shields, Overguard, faction vulnerabilities, armor DR `0.9 * sqrt(armor/2700)`
+- Incarnon evolutions for 53 weapons, generated from the wiki (perk text turned into effects; unmodeled lines are listed)
+- Mod rules: "Fire Rate / Multishot cannot be modified", trigger-only mods (Cannonades, incl. the Incarnon both-modes rule), weak point triggers
 - Conditional buffs (On Kill stacks, per status type, combo) with per-buff stack overrides
-- Riven stats and custom buffs for anything not built in
-- Optimizer: greedy + local search with slot reordering, exilus, weapon arcane, locked and excluded mods
+- Riven stats (including spliced weak point traits) and custom buffs for anything not built in
+- Optimizer: beam search plus local search (single and pair swaps, slot order, exilus, weapon arcane), locked and excluded mods
 
 ## Not modeled yet
 
-Shields/Overguard, mod capacity and forma, burst-fire delay, Incarnon perk trees (use overrides/custom buffs),
-heavy attacks/melee stances, Blast/Cold/Radiation/Magnetic status effects beyond damage, ability damage.
-Mod text the parser does not understand is listed under "Not modeled" so nothing is dropped silently.
+Burst-fire delay, heavy attacks/melee stances, Radiation/Magnetic side effects beyond damage, ability damage,
+ammo economy (Plentiful Mayhem style ammo use). Mod and perk text the parser does not understand is listed
+under "Not modeled" so nothing is dropped silently.
 
 ## Where values come from
 
-- Game data: [@wfcd/items](https://www.npmjs.com/package/@wfcd/items) (community dataset)
+Public sources only. Nothing is read from the game client or a player account.
+
+| Data | Source | Refreshed |
+|---|---|---|
+| Weapons, mods, arcanes, frames, enemy list | [@wfcd/items](https://www.npmjs.com/package/@wfcd/items) | weekly (GitHub Actions) |
+| Enemy health/shield/armor/faction, cross-checks | [warframe-public-export-plus](https://www.npmjs.com/package/warframe-public-export-plus) (DE Public Export) | weekly |
+| Incarnon evolutions | [WARFRAME Wiki](https://wiki.warframe.com) Incarnon Genesis pages, via the MediaWiki API | weekly |
+| Current game build label | [warframe.com patch notes](https://www.warframe.com/en/patch-notes) | weekly |
+| Corrections where datasets lag | `data/overrides.json` (each entry names its official source) | by hand |
+
+- The app shows the game build, each source's version and fetch date ("Data sources and freshness" at the bottom),
+  and a "Data note" on any weapon, enemy or frame where sources disagree or a value was corrected.
 - Formulas: [Damage calculation](https://wiki.warframe.com/w/Damage_calculation), [Quantization](https://wiki.warframe.com/w/Quantization),
   [Critical Hit](https://wiki.warframe.com/w/Critical_Hit), [Status Effect](https://wiki.warframe.com/w/Status_Effect),
   [Damage over Time](https://wiki.warframe.com/w/Damage_over_Time), [Armor](https://wiki.warframe.com/w/Armor),
   [Weak Point](https://wiki.warframe.com/w/Weak_Point), [Damage/Overview Table](https://wiki.warframe.com/w/Damage/Overview_Table)
-- Hand-maintained constants (factions, abilities, incompatible mods) live in `src/static.js` with a source link on each.
-- Anything the wiki does not state outright is tagged **ASSUMPTION** in the code and shown in the results notes.
+- Hand-maintained constants (factions, statuses, incompatible mods) live in `src/static.js` with a source link on each.
+- Anything the sources do not state outright is tagged **ASSUMPTION** in the code and shown in the results notes.
+- `test/test.js` includes in-game calibration checks (Torid arsenal numbers from Update 44.1).
 
 ## Features
 

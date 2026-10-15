@@ -1,0 +1,13 @@
+{
+ "_readme": "Hand-checked official values applied on top of the datasets when they lag. Every entry names its source. Edit with care.",
+ "gameBuild": {
+  "latestHotfix": "44.1.1",
+  "latestHotfixDate": "2026-10-08",
+  "latestUpdate": { "number": "44.1.0", "name": "Iceblade of Narin: The Icebind", "date": "Oct 7, 2026" },
+  "source": "https://www.warframe.com/en/patch-notes",
+  "checkedAt": "2026-10-14"
+ },
+ "weapons": [
+  { "name": "Cyath", "set": { "omega": 1.05 }, "source": "September 2026 Riven Dispositions, [DE]Connor, 2026-09-15: Cyath 1->1.05 (https://forums.warframe.com/topic/1523355-september-2026-riven-dispositions/)" }
+ ]
+}

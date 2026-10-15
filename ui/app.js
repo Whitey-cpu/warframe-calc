@@ -28,7 +28,16 @@
   const initials = n => esc(String(n || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 3));
 
   // ---------- header / desktop ----------
-  $('dataInfo').textContent = `Data: ${D.meta.source} ${D.meta.version} (${D.meta.builtAt.slice(0, 10)})`;
+  const gb = D.meta.gameBuild;
+  const buildLabel = gb ? (gb.latestHotfix ? `Hotfix ${gb.latestHotfix}` : `Update ${gb.latestUpdate.number}`) : null;
+  $('dataInfo').textContent = `Data: ${buildLabel ? 'game ' + buildLabel + ', ' : ''}built ${D.meta.builtAt.slice(0, 10)}`;
+  $('dataInfo').title = 'Where the numbers come from (opens the list at the bottom of the page)';
+  $('dataInfo').onclick = () => { $('dataSources').open = true; };
+  $('dataSourcesBody').innerHTML = `<p>${gb ? `Current game build when the data was built: <b>${esc(buildLabel)}</b>${gb.latestUpdate ? ` (${esc('Update ' + gb.latestUpdate.number + ' ' + gb.latestUpdate.name + ', ' + gb.latestUpdate.date)})` : ''}, from <a href="${esc(gb.source)}" target="_blank" rel="noopener">patch notes</a> checked ${esc(String(gb.checkedAt).slice(0, 10))}.` : 'Game build unknown.'}
+    Dataset built ${esc(D.meta.builtAt.slice(0, 16).replace('T', ' '))} UTC.</p>
+    <ul>${(D.meta.sources || [{ name: D.meta.source, version: D.meta.version }]).map(x => `<li><b>${x.url && /^https?:/.test(x.url) ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>` : esc(x.name)}</b>
+      ${x.version ? esc(x.version) : ''}${x.published ? ', published ' + esc(x.published.slice(0, 10)) : ''}${x.scrapedAt ? ', fetched ' + esc(x.scrapedAt.slice(0, 10)) : ''}: ${esc(x.role || '')}</li>`).join('')}</ul>
+    <p>Items with a data note (a weapon, enemy or frame where sources disagree or a value was corrected) show it next to their stats. Nothing is read from the game client or any player account.</p>`;
   if (window.wfApp && window.wfApp.isDesktop) {
     const dl = $('downloadApp'); if (dl) dl.remove();
     const btn = $('updateData');
@@ -131,8 +140,12 @@
     $('weaponStats').innerHTML = [
       ['Dmg', fmt(total)], ['Crit', pct(a.critChance) + ' x' + a.critMult], ['Status', pct(a.statusChance)],
       [w.category === 'Melee' ? 'Speed' : 'Rate', a.fireRate], w.category !== 'Melee' ? ['Multishot', w.multishot] : null,
-      w.magazine ? ['Mag', w.magazine] : null, w.reload ? ['Reload', w.reload + 's'] : null, ['MR', w.mastery], w.disposition ? ['Riven', '&#9679;'.repeat(Math.round(w.disposition))] : null
+      w.magazine ? ['Mag', w.magazine] : null, w.reload ? ['Reload', +(+w.reload).toFixed(2) + 's'] : null, ['MR', w.mastery],
+      w.disposition ? ['Riven', '&#9679;'.repeat(Math.round(w.disposition)) + (w.omega ? ' ' + w.omega + 'x' : '')] : null
     ].filter(Boolean).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+    const wn = $('weaponNotes');
+    wn.hidden = !(w.dataNotes && w.dataNotes.length);
+    wn.innerHTML = wn.hidden ? '' : w.dataNotes.map(n => `<div>Data note: ${esc(n)}</div>`).join('');
   }
 
   // ---------- frame ----------
@@ -415,6 +428,7 @@
     ['damage', 'Damage'], ['critChance', 'Critical Chance'], ['critDamage', 'Critical Damage'], ['statusChance', 'Status Chance'],
     ['multishot', 'Multishot'], ['fireRate', 'Fire Rate / Attack Speed'], ['magazine', 'Magazine'], ['reloadSpeed', 'Reload Speed'],
     ['statusDuration', 'Status Duration'], ['faction', 'Faction Damage (current enemy)'],
+    ['weakPoint', 'Weak Point Damage (spliced)'], ['weakPointCrit', 'Weak Point Critical Chance (spliced)'],
     ...S.ALL_TYPES.filter(t => t !== 'true' && t !== 'tau').map(t => ['element:' + t, t[0].toUpperCase() + t.slice(1)])
   ];
   const CUSTOM_KINDS = [
