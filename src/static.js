@@ -69,14 +69,44 @@
 
   // Status DoTs. Source: https://wiki.warframe.com/w/Status_Effect and
   // https://wiki.warframe.com/w/Damage_over_Time
-  // Total ticks = floor(tickRate * (duration - delay)) + 1
+  // Total ticks = floor(tickRate * (duration - delay)) + 1; Electricity and Gas: last tick deals no damage
+  // (https://wiki.warframe.com/w/Damage_over_Time table)
   S.DOT = {
     slash:       { pct: 0.35, duration: 6, delay: 1, bypassArmor: true },
     heat:        { pct: 0.50, duration: 6, delay: 1 },
     toxin:       { pct: 0.50, duration: 6, delay: 1 },
-    electricity: { pct: 0.50, duration: 6, delay: 0 },
-    gas:         { pct: 0.50, duration: 6, delay: 0 }
+    electricity: { pct: 0.50, duration: 6, delay: 0, lastTickNoDamage: true, aoe: true },
+    gas:         { pct: 0.50, duration: 6, delay: 0, lastTickNoDamage: true, aoe: true },
+    // Blast (Detonate): 30% of base damage once, after a 1.5s fuse. The 300% burst at 10 stacks hits only nearby enemies, not the target.
+    blast:       { pct: 0.30, duration: 1.5, delay: 1.5, fixedTicks: 1, noElementBonus: true }
   };
+  // Status durations (seconds) and max stacks, used to estimate the statuses a build keeps on its own target.
+  // Source: https://wiki.warframe.com/w/Status_Effect (table). void: ASSUMPTION (duration not listed in our source).
+  S.STATUS = {
+    impact: { duration: 1, max: 5 }, puncture: { duration: 10, max: 5 }, slash: { duration: 6, max: Infinity },
+    heat: { duration: 6, max: Infinity }, cold: { duration: 6, max: 10 }, electricity: { duration: 6, max: Infinity },
+    toxin: { duration: 6, max: Infinity }, blast: { duration: 1.5, max: 10 }, radiation: { duration: 12, max: 10 },
+    gas: { duration: 6, max: 10 }, magnetic: { duration: 6, max: 10 }, viral: { duration: 6, max: 10 },
+    corrosive: { duration: 8, max: 10 }, tau: { duration: 8, max: 10 }, void: { duration: 3, max: 1, assumption: true }
+  };
+  // Weakened (Puncture): +5% crit chance per stack (max +25%), flat after mods, not for AoE.
+  // Freeze (Cold): +0.1 crit multiplier on the first stack, +0.05 per extra, max +0.5 at stack 9 (stack 10 freezes: +1.0 for 3s), not for AoE.
+  S.PUNCTURE_CC = 0.05;
+  // Lingering damage fields (clouds) that hit everything inside them repeatedly.
+  // Torid Poison Cloud: lasts 10 s (https://wiki.warframe.com/w/Torid, Characteristics). The in-game arsenal labels
+  // the radial attack "Damage/S", and the wiki's own DPS figure (46 burst = 40 x 1.15 crit at 1.00 attacks/s) treats
+  // it as one hit per second. ASSUMPTION: first hit 1 s after landing (the wiki says clouds "do not instantly do damage")
+  // and overlapping clouds from separate shots each deal their full damage.
+  S.LINGERING = {
+    'torid|poison cloud': { duration: 10, tickRate: 1, firstTick: 1, source: 'https://wiki.warframe.com/w/Torid' }
+  };
+  // Incarnon weapons that can equip Semi-Auto-only Cannonade mods (both firing modes Semi-Auto). Sources:
+  // https://wiki.warframe.com/w/Semi-Rifle_Cannonade (Latron, Vectis), https://wiki.warframe.com/w/Semi-Pistol_Cannonade
+  // (Bronco, Lato, Lex named as examples), https://wiki.warframe.com/w/Semi-Shotgun_Cannonade (Strun).
+  S.SEMI_INCARNON_OK = ['latron', 'vectis', 'bronco', 'lato', 'lex', 'strun'];
+  S.BLAST_BURST = 3.0; // 10 Blast stacks: 300% of base damage to nearby enemies, excluding the target
+  S.COLD_CD = { first: 0.1, perExtra: 0.05, max: 0.5 };
+
   // Debuff statuses (per-stack). Same source.
   S.VIRAL = { first: 1.0, perExtra: 0.25, max: 10 };      // +100%, +25%/stack, max +325%
   S.CORROSIVE = { first: 0.26, perExtra: 0.06, max: 10 }; // -26%, -6%/stack, max -80%

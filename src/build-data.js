@@ -84,8 +84,13 @@ function buildData(load, version) {
   }
   const mods = [...byKey.values()].map(m => {
     const stats = maxStats(m);
-    const parsed = WF.parser.parseStats(stats, { name: m.name });
+    const desc = m.description ? WF.parser.clean(m.description) : '';
+    // rules that live in the mod description, e.g. Semi-Rifle Cannonade
+    const descSentences = desc.split(/\.\s*/).map(x => x.trim()).filter(Boolean);
+    const parsed = WF.parser.parseStats(stats.concat(descSentences.filter(x => /cannot be modified/i.test(x)).map(x => x + '.')), { name: m.name });
+    const trig = desc.match(/Only compatible with ([\w-]+) Trigger/i);
     return {
+      requiresTrigger: trig ? trig[1].replace(/-Auto$/i, '').replace(/^Semi$/i, 'Semi') : null,
       name: m.name,
       type: m.type,
       compat: m.compatName,

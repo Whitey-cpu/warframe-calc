@@ -100,9 +100,24 @@
     }
     const att = $('attack');
     att.innerHTML = w.attacks.map((a, i) => `<option value="${i}">${esc(a.name)}</option>`).join('');
+    // ASSUMPTION: area attacks (explosions, clouds) belong to the first attack and are added to it by default
+    state.extraAttacks = keepMods && state.extraAttacks ? state.extraAttacks : w.attacks.map((a, i) => i).filter(i => i > 0 && w.attacks[i].shotType === 'AoE' && !/incarnon/i.test(w.attacks[i].name));
+    renderExtraAttacks();
     renderWeapon();
     renderModBrowser();
   }
+  function renderExtraAttacks() {
+    const w = state.weapon; const el = $('extraAttacks');
+    if (!w) { el.innerHTML = ''; return; }
+    const main = parseInt($('attack').value, 10) || 0;
+    const opts = w.attacks.map((a, i) => i).filter(i => i !== main);
+    el.innerHTML = opts.length ? `<span class="muted small">Also count each shot:</span> ` + opts.map(i => `<label class="check small"><input type="checkbox" data-extra="${i}" ${(state.extraAttacks || []).includes(i) ? 'checked' : ''}> ${esc(w.attacks[i].name)}${w.attacks[i].shotType === 'AoE' ? ' (area)' : ''}</label>`).join('') : '';
+  }
+  $('extraAttacks').addEventListener('change', e => {
+    const c = e.target.closest('[data-extra]'); if (!c) return;
+    const i = +c.dataset.extra; const set = new Set(state.extraAttacks || []);
+    c.checked ? set.add(i) : set.delete(i); state.extraAttacks = [...set].sort(); update();
+  });
   function renderWeapon() {
     const w = state.weapon;
     const im = $('weaponImg');
@@ -474,11 +489,13 @@
       frame: state.frame ? state.frame.name : undefined,
       buffs,
       customBuffs: readRows($('custom')).map(r => Object.assign(toEffect(r), { kind: r.kind.startsWith('element:') ? 'element' : r.kind, label: r.label || undefined })),
-      conditions: { assumeMax: $('assumeMax').checked, aiming: $('aiming').checked, combo: ev('combo') || 1, statusTypes: ev('statusTypes'), stacks },
+      extraAttacks: (state.extraAttacks || []).filter(i => i !== (parseInt($('attack').value, 10) || 0)),
+      conditions: { assumeMax: $('assumeMax').checked, aiming: $('aiming').checked, combo: ev('combo') || 1, statusTypes: ev('statusTypes'), stacks,
+        selfStatus: $('selfStatus').checked, fightSeconds: $('fightSeconds').value === '' ? undefined : ev('fightSeconds') },
       overrides,
       enemy: Object.assign({
         faction: $('faction').value, armor: ev('armor'), headshotRate: ev('headshotRate') / 100,
-        magneticStacks: ev('magneticStacks'),
+        magneticStacks: ev('magneticStacks'), targets: Math.max(1, ev('targets') || 1),
         weakPointMult: $('weakPointMult').value === '' ? undefined : ev('weakPointMult'),
         viralStacks: ev('viralStacks'), corrosiveStacks: ev('corrosiveStacks'), armorStripPct: ev('armorStripPct') / 100, heatStrip: $('heatStrip').checked
       }, enemyUnitStats())
@@ -542,6 +559,9 @@
     const c = b.conditions || {};
     $('assumeMax').checked = c.assumeMax !== false; $('aiming').checked = c.aiming !== false;
     $('combo').value = c.combo || 1; $('statusTypes').value = c.statusTypes || 0;
+    $('selfStatus').checked = c.selfStatus !== false; $('fightSeconds').value = c.fightSeconds || '';
+    $('targets').value = (b.enemy && b.enemy.targets) || 1;
+    state.extraAttacks = Array.isArray(b.extraAttacks) ? b.extraAttacks.slice() : state.extraAttacks; renderExtraAttacks();
     document.querySelectorAll('[data-ov]').forEach(i => { i.value = (b.overrides && b.overrides[i.dataset.ov] != null) ? b.overrides[i.dataset.ov] : ''; });
     const e = b.enemy || {};
     $('faction').value = e.faction || 'None (neutral)'; $('armor').value = e.armor || 0;
@@ -567,7 +587,7 @@
     $('tiles').innerHTML = [
       ['Sustained DPS', r.dps.sustainedTotal, true], ['Burst DPS', r.dps.burstTotal], ['Avg per shot', r.perShotVsEnemy],
       ['Burst direct', r.dps.burstDirect], ['Burst DoT', r.dps.burstDot]
-    ].concat(r.ttk ? [['Time to kill', r.ttk.seconds < 100 ? r.ttk.seconds.toFixed(2) + 's' : fmt(r.ttk.seconds) + 's'], ['Shots to kill', Math.ceil(r.ttk.shots)]] : [])
+    ].concat((r.dps.groupSustained && Math.abs(r.dps.groupSustained - r.dps.sustainedTotal) > 0.5) ? [['Group DPS', r.dps.groupSustained]] : []).concat(r.ttk ? [['Time to kill', r.ttk.seconds < 100 ? r.ttk.seconds.toFixed(2) + 's' : fmt(r.ttk.seconds) + 's'], ['Shots to kill', Math.ceil(r.ttk.shots)]] : [])
       .map(([k, v, main]) => `<div class="tile${main ? ' main' : ''}"><div class="k">${k}</div><div class="v">${typeof v === 'string' ? v : fmt(v)}</div></div>`).join('');
     const types = Object.entries(r.damageTypes).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
     const max = Math.max(1, ...types.map(t => t[1]));
@@ -577,6 +597,22 @@
         ${s.magazine > 1 ? `<span>Mag <b>${s.magazine}</b></span><span>Reload <b>${fmt(s.reload)}s</b></span>` : ''}</div>
       <div class="bars">${types.map(([k, v]) => `<div class="bar"><span>${k}</span><span class="track"><span class="fill" style="width:${(v / max * 100).toFixed(1)}%;background:${TYPE_COLORS[k] || 'var(--accent)'}"></span></span><span class="num">${fmt(v)}</span></div>`).join('')}</div>
       ${r.notes.some(n => /cannot/i.test(n)) ? `<ul class="notes">${r.notes.filter(n => /cannot/i.test(n)).map(n => `<li class="warn">${esc(n)}</li>`).join('')}</ul>` : ''}`;
+    const ss = r.selfStatus;
+    $('selfStatusBox').innerHTML = ss && Object.keys(ss.stacks).length ? `<div class="statline"><span>Your statuses on target:</span>${Object.entries(ss.stacks).filter(([, v]) => v > 0.05).map(([k, v]) =>
+      `<span title="${fmt(ss.procsPerSecond[k])} procs/s, active ${Math.round((ss.uptime[k] || 0) * 100)}% of the time">${esc(k)} <b>${v >= 10 || k === 'heat' || k === 'slash' || k === 'toxin' || k === 'electricity' ? fmt(v) : v.toFixed(1)}</b></span>`).join('')}<span>status types <b>${ss.statusTypes.toFixed(1)}</b></span>${r.fightSeconds && r.ttk ? `<span>fight <b>${r.fightSeconds.toFixed(1)}s</b></span>` : ''}</div>` : '';
+    if (r.attackParts && r.attackParts.length > 1) $('selfStatusBox').innerHTML += `<div class="statline"><span>Per shot:</span>${r.attackParts.map(p =>
+      `<span title="${p.hits !== 1 ? 'hits per shot over the cloud\'s life, cut short when the target dies' : 'direct hit'}">${esc(p.attack)}${p.hits !== 1 ? ` x${p.hits.toFixed(2)}` : ''} <b>${fmt(p.perShot + (p.dotPerShot || 0))}</b></span>`).join('')}</div>`;
+    try {
+      const b = collect();
+      const ar = E.calculate(Object.assign({}, b, { buffs: [], customBuffs: b.customBuffs, enemy: { faction: 'None (neutral)', armor: 0 },
+        extraAttacks: [], conditions: Object.assign({}, b.conditions, { assumeMax: false, selfStatus: false, fightSeconds: undefined, statusTypes: 0 }) }), D);
+      const a = ar.stats;
+      $('arsenalOut').innerHTML = `<table>${[
+        ['Fire rate', fmt(a.fireRate)], ['Multishot', fmt(a.multishot)], ['Magazine', a.magazine], ['Reload', a.reload.toFixed(2) + 's'],
+        ['Critical chance', pct(a.critChance)], ['Critical damage', fmt(a.critMultiplier) + 'x'], ['Status', pct(a.statusChance)]
+      ].concat(Object.entries(ar.arsenal.types).map(([k, v]) => [k[0].toUpperCase() + k.slice(1), fmt(v)])).concat([['Total (x multishot)', fmt(ar.arsenal.total)]])
+        .map(([k, v]) => `<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join('')}</table>`;
+    } catch (e) { $('arsenalOut').textContent = e.message; }
     const dots = Object.entries(r.dots).map(([k, d]) => `<tr><td>${k}</td><td>${fmt(d.procsPerShot)}</td><td>${fmt(d.tick)} x ${d.ticks}</td><td>${fmt(d.perProc)}</td></tr>`).join('');
     const rows = [
       ['Per hit, no crit', fmt(r.perHitNonCrit)], ['Elements', r.elements.join(', ') || 'none'],
@@ -611,7 +647,7 @@
 
   // ---------- generic inputs ----------
   document.querySelector('.side').addEventListener('input', e => { if (!e.target.closest('#optPanel') && e.target.id !== 'buildName' && e.target.id !== 'jsonBox' && e.target.id !== 'excluded') update(); });
-  document.querySelector('.attack-row').addEventListener('input', () => { renderWeapon(); update(); });
+  document.querySelector('.attack-row').addEventListener('input', e => { if (e.target.id === 'attack') renderExtraAttacks(); renderWeapon(); update(); });
 
   // ---------- optimizer ----------
   $('runOpt').onclick = () => {

@@ -9,7 +9,7 @@ window.WFFeatures = function (UI) {
     get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } }
   };
-  const metricOf = (r, m) => m === 'perShotVsEnemy' ? r.perShotVsEnemy : r.dps[m];
+  const metricOf = (r, m) => m === 'ttk' ? (r.ttk && r.ttk.seconds > 0 ? 1 / r.ttk.seconds : 0) : m === 'perShotVsEnemy' ? r.perShotVsEnemy : r.dps[m];
   const typing = el => el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
 
   // ---------------- theme ----------------

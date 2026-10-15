@@ -61,6 +61,7 @@
 
     <div class="attack-row">
       <label>Attack <select id="attack"></select></label>
+      <div id="extraAttacks" class="extra-attacks"></div>
       <details class="ov">
         <summary>Base stat overrides</summary>
         <div class="grid4">
@@ -99,7 +100,7 @@
       <p class="muted small">Ranks weapons by DPS against the enemy and buffs set on the right. "Quick-optimize" builds a fresh mod set per weapon (slower); otherwise each weapon is unmodded.</p>
       <div class="row">
         <select id="lbCat"><option value="Primary">Primary</option><option value="Secondary">Secondary</option><option value="Melee">Melee</option></select>
-        <select id="lbMetric"><option value="sustainedTotal">Sustained DPS</option><option value="burstTotal">Burst DPS</option><option value="perShotVsEnemy">Damage per shot</option></select>
+        <select id="lbMetric"><option value="sustainedTotal">Sustained DPS</option><option value="burstTotal">Burst DPS</option><option value="perShotVsEnemy">Damage per shot</option><option value="groupSustained">Group DPS</option></select>
         <label class="check small"><input type="checkbox" id="lbOpt" checked> Quick-optimize</label>
         <label class="check small"><input type="checkbox" id="lbPrimeOnly"> Prime/Incarnon only</label>
         <button type="button" class="btn sm" id="lbRun">Rank weapons</button>
@@ -131,6 +132,12 @@
       <h2>Results</h2>
       <div id="tiles" class="tiles"></div>
       <div id="typeBars"></div>
+      <div id="selfStatusBox" class="small"></div>
+      <details id="arsenalBox">
+        <summary>Arsenal view (compare with the in-game Upgrade screen)</summary>
+        <p class="muted small">Unconditional numbers like the in-game arsenal shows: no enemy, no ability buffs, no On Kill stacks, no quantization. Total includes multishot.</p>
+        <div id="arsenalOut"></div>
+      </details>
       <details id="detailBox">
         <summary>Full breakdown</summary>
         <div id="breakdown"></div>
@@ -176,7 +183,10 @@
         <label class="check"><input type="checkbox" id="assumeMax" checked> Conditional buffs at max</label>
         <label class="check"><input type="checkbox" id="aiming" checked> Aiming</label>
         <label>Melee combo <input type="number" id="combo" value="1" min="1" step="0.5"></label>
-        <label>Status types on target <input type="number" id="statusTypes" value="0" min="0"></label>
+        <label title="Extra status types from teammates or abilities. Your own procs are counted automatically when the box below is ticked.">Status types on target (min) <input type="number" id="statusTypes" value="0" min="0"></label>
+        <label class="check" title="Estimate the Viral, Corrosive, Heat, Magnetic, Puncture and Cold stacks your own procs keep on the target, and the number of status types for Galvanized Aptitude / Condition Overload."><input type="checkbox" id="selfStatus" checked> Count my own status effects</label>
+        <label title="DoTs stop when the target dies. Blank = use time to kill when an enemy unit is chosen.">Fight length (s) <input type="number" id="fightSeconds" min="1" step="0.5" placeholder="auto"></label>
+        <label title="How many enemies area damage (explosions, clouds, Gas, Electricity chains, Blast bursts) hits.">Enemies in area <input type="number" id="targets" value="1" min="1" max="30"></label>
       </div>
       <div id="stacks"></div>
       <details>
@@ -211,6 +221,8 @@
           <option value="burstTotal">Burst DPS</option>
           <option value="burstDirect">Burst DPS, direct only</option>
           <option value="perShotVsEnemy">Damage per shot</option>
+          <option value="ttk">Time to kill (needs enemy unit)</option>
+          <option value="groupSustained">Group DPS (enemies in area)</option>
         </select></label>
         <label>Exclude mods <input id="excluded" placeholder="comma separated"></label>
         <label class="check"><input type="checkbox" id="optArcane" checked> Pick weapon arcane</label>

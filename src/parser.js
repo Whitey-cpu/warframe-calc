@@ -125,6 +125,8 @@
         if (/Arcane Revive/i.test(line)) continue;
         const sentences = line.split(/\.\s+/).map(s => s.trim()).filter(Boolean);
         for (let s of sentences) {
+          const lock = s.match(/^(Multishot|Fire Rate) cannot be modified\.?$/i);
+          if (lock) { const e = { stat: 'lock', lock: /multishot/i.test(lock[1]) ? 'multishot' : 'fireRate', value: 1, raw: s }; effects.push(e); continue; }
           const stacks = s.match(/^Stacks up to (\d+)(?:x| times)\.?$/i);
           if (stacks) { block.forEach(e => { e.cond = Object.assign({}, e.cond || {}, { maxStacks: parseInt(stacks[1], 10) }); }); continue; }
           let chance = null;

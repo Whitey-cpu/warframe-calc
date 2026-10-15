@@ -136,5 +136,21 @@ eq('Toxin does no shield damage', r.perShotVsShield, 0);
 r = E.calculate({ weapon: testWeapon({ impact: 100 }), enemy: { health: 1000, shield: 500 } }, data);
 eq('TTK shots (500 shield + 1000 health at 100/shot)', r.ttk.shots, 15);
 
+// 16. Semi-Auto-only Cannonades: Incarnon weapons need Semi-Auto in both modes (wiki Semi-Rifle/Shotgun Cannonade notes)
+const cannon = w => E.modsFor(data, E.findWeapon(data, w)).some(m => m.requiresTrigger);
+eq('Torid (Incarnon, Held beam) cannot use a Cannonade', cannon('Torid'), false);
+eq('Latron Prime can use Semi-Rifle Cannonade', cannon('Latron Prime'), true);
+eq('Strun Wraith can use Semi-Shotgun Cannonade', cannon('Strun Wraith'), true);
+
+// 17. Lingering cloud: Torid Poison Cloud hits 1/s for 10 s (first hit at 1 s), so 10 hits per shot with no fight limit
+r = E.calculate({ weapon: 'Torid', attack: 0, extraAttacks: [1], conditions: { selfStatus: false } }, data);
+eq('Torid cloud hits per shot (open-ended)', r.attackParts[1].hits, 10);
+r = E.calculate({ weapon: 'Torid', attack: 0, extraAttacks: [1], conditions: { selfStatus: false, fightSeconds: 4 } }, data);
+eq('Torid cloud hits per shot in a 4 s fight (shots in each second get 3, 2, 1, 0 hits)', Math.round(r.attackParts[1].hits * 100) / 100, 1.5);
+
+// 18. Fight length solver is self-consistent: TTK equals the fight length it assumed
+r = E.calculate({ weapon: 'Torid', attack: 0, extraAttacks: [1], mods: ['Serration', 'Hellfire', 'Infected Clip'], enemy: { faction: 'Grineer', health: 100000, armor: 1000 } }, data);
+eq('Fight length = TTK (within 1%)', Math.abs(r.fightSeconds / r.ttk.seconds - 1) < 0.01, true);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

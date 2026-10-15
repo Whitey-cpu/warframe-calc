@@ -314,3 +314,6 @@ details.lb > summary::after { content: ' \25BE'; color: var(--muted); }
 .btn.liked { color: #ff6b8a; border-color: #ff6b8a; }
 @media (max-width: 480px) { .pub { grid-template-columns: 1fr auto auto; } .pub-img { display: none; } }
 .slot .slot-n { left: 30px; }
+.extra-attacks { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin: -4px 0 6px; }
+.extra-attacks label { margin: 0; }
+#selfStatusBox:empty { display: none; }

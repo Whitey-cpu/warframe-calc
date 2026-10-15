@@ -35,6 +35,26 @@
       ]
     },
     {
+      weapons: ['Torid'],
+      source: 'https://wiki.warframe.com/w/Torid',
+      tiers: [
+        { tier: 'II', perks: [
+          { name: 'Final Fusillade', text: '+51 base damage. +3 multishot on the last shot in the magazine.', effects: [{ stat: 'baseDamageFlat', value: 51 }, { stat: 'lastShotMultishotFlat', value: 3, attack: '^(?!Incarnon)' }] },
+          { name: 'Plentiful Mayhem', text: '+31 base damage. Multishot consumes ammo from capacity and gives +60% damage (counted as additive with Serration-type mods, ASSUMPTION; ammo use not modeled).', effects: [{ stat: 'baseDamageFlat', value: 31 }, { stat: 'damage', value: 0.6 }] }
+        ] },
+        { tier: 'III', perks: [
+          { name: 'Swift Deliverance', text: '+50% projectile speed.', modeled: false, effects: [] },
+          { name: 'Renewed Horror', text: 'Lingering damage field duration doubles on the first shot after reloading from empty (modeled as once per magazine).', effects: [{ stat: 'lingeringFirstShotDouble', value: 1 }] },
+          { name: 'Extended Volley', text: '+9 base magazine capacity (not the Incarnon magazine).', attack: '^(?!Incarnon)', effects: [{ stat: 'baseMagazineFlat', value: 9 }] }
+        ] },
+        { tier: 'IV', perks: [
+          { name: "Commodore's Fortune", text: '+20% base critical chance.', effects: [{ stat: 'baseCritChance', value: 0.2 }] },
+          { name: "Survivor's Edge", text: '+15% base critical chance and +15% base status chance.', effects: [{ stat: 'baseCritChance', value: 0.15 }, { stat: 'baseStatus', value: 0.15 }] },
+          { name: 'Elemental Balance', text: '+34% base status chance.', effects: [{ stat: 'baseStatus', value: 0.34 }] }
+        ] }
+      ]
+    },
+    {
       weapons: ['Laetum'],
       source: 'https://wiki.warframe.com/w/Laetum',
       tiers: [
