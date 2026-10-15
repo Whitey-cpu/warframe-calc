@@ -317,5 +317,10 @@ window.WFFeatures = function (UI) {
   // ---------------- installable app (PWA) ----------------
   if ('serviceWorker' in navigator && location.protocol === 'https:' && !(window.wfApp && window.wfApp.isDesktop)) {
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* optional */ }); });
+    // When a new version of the site takes over, reload once so returning visitors see it right away
+    // (not on the very first visit, when there was no previous version).
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (!hadController || reloading) return; reloading = true; location.reload(); });
   }
 };
