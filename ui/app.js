@@ -16,6 +16,7 @@
   const SITE_ORIGIN = 'https://warframe.hardn.net';
   const API = 'https://warframe-api.hardn.net';
   const ACCOUNTS = location.origin === SITE_ORIGIN;
+  let ACCOUNTS_UP = true;
 
   if (!D) { document.body.innerHTML = '<p style="padding:20px">No game data found. Run <code>node cli.js sync</code> in this folder, then reload.</p>'; return; }
 
@@ -576,7 +577,7 @@
   }
   function renderAccount() {
     const el = $('account');
-    if (!ACCOUNTS) { el.innerHTML = ''; return; }
+    if (!ACCOUNTS || !ACCOUNTS_UP) { el.innerHTML = ''; $('shareBuild').hidden = true; $('myShares').hidden = true; $('cloudNote').textContent = 'Builds are saved in this browser.'; return; }
     if (!user) {
       el.innerHTML = `<a class="btn discord sm" href="${API}/auth/discord/login?return=${encodeURIComponent(location.href.split('#')[0])}">Sign in with Discord</a>`;
     } else {
@@ -741,7 +742,9 @@
       if (last && last.weapon) apply(last); else update();
     }
     if (ACCOUNTS) {
-      try { user = (await api('/me')).user; } catch (e) { user = null; }
+      let apiUp = true;
+      try { user = (await api('/me')).user; } catch (e) { user = null; if (e.status !== 401) apiUp = false; }
+      if (!apiUp) { ACCOUNTS_UP = false; } // API not reachable (not deployed yet or offline): hide account features
       if (user) afterAuthChange(); else renderAccount();
     }
   })();
