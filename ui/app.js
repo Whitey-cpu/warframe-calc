@@ -143,6 +143,10 @@
       w.magazine ? ['Mag', w.magazine] : null, w.reload ? ['Reload', +(+w.reload).toFixed(2) + 's'] : null, ['MR', w.mastery],
       w.disposition ? ['Riven', '&#9679;'.repeat(Math.round(w.disposition)) + (w.omega ? ' ' + w.omega + 'x' : '')] : null
     ].filter(Boolean).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+    $('valenceRow').hidden = !S.isAdversaryWeapon(w.name);
+    const pas = S.WEAPON_PASSIVES[w.name];
+    $('passiveNote').hidden = !pas;
+    $('passiveNote').innerHTML = pas ? `Weapon passive: <b>${esc(pas.name)}</b>. ${esc(pas.text)} <a href="${esc(pas.source)}" target="_blank" rel="noopener">wiki</a>` : '';
     const wn = $('weaponNotes');
     wn.hidden = !(w.dataNotes && w.dataNotes.length);
     wn.innerHTML = wn.hidden ? '' : w.dataNotes.map(n => `<div>Data note: ${esc(n)}</div>`).join('');
@@ -466,7 +470,8 @@
     const keep = {};
     document.querySelectorAll('[data-stack]').forEach(i => { if (i.value !== '') keep[i.dataset.stack] = i.value; });
     const items = [];
-    state.mods.filter(Boolean).map(findModByName).concat(state.arcanes.filter(Boolean).map(n => E.findArcane(D, n))).forEach(it => {
+    const pas = state.weapon && S.WEAPON_PASSIVES[state.weapon.name];
+    state.mods.filter(Boolean).map(findModByName).concat(state.arcanes.filter(Boolean).map(n => E.findArcane(D, n))).concat(pas ? [{ name: pas.name, effects: pas.effects }] : []).forEach(it => {
       if (!it) return;
       it.effects.forEach((eff, idx) => {
         if (!eff.cond || eff.cond.trigger === 'When Aiming') return;
@@ -497,6 +502,7 @@
       slotRanks: state.ranks.slice(),
       slotPolarities: state.pols.slice(),
       incarnon: Object.keys(state.incarnon).length ? Object.assign({}, state.incarnon) : undefined,
+      valence: S.isAdversaryWeapon(state.weapon.name) && $('valenceEl').value ? { element: $('valenceEl').value, pct: Math.min(60, Math.max(25, parseFloat($('valencePct').value) || 60)) / 100 } : undefined,
       arcanes: state.arcanes.filter(Boolean),
       arcaneSlots: state.arcanes.slice(),
       riven: readRows($('riven')).map(toEffect),
@@ -554,6 +560,7 @@
     if (b.slotPolarities) b.slotPolarities.slice(0, SLOT_COUNT + 1).forEach((p, i) => { state.pols[i] = p || null; });
     else if (w) { (w.polarities || []).slice(0, SLOT_COUNT).forEach((p, i) => { state.pols[i] = p; }); state.pols[SLOT_COUNT] = w.exilusPolarity || null; }
     state.incarnon = Object.assign({}, b.incarnon || {});
+    $('valenceEl').value = (b.valence && b.valence.element) || ''; $('valencePct').value = b.valence && b.valence.pct ? Math.round(b.valence.pct * 1000) / 10 : 60;
     if (b.arcaneSlots) state.arcanes = [b.arcaneSlots[0] || null, b.arcaneSlots[1] || null];
     else {
       const arcs = (b.arcanes || []).map(n => E.findArcane(D, n)).filter(Boolean);

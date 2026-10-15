@@ -129,6 +129,8 @@
       if (!a) { notes.push(`Arcane not found: ${name}`); return; }
       sources.push({ key: a.name, kind: 'arcane', slot: 100, item: a, scale: 1 });
     });
+    const passive = S.WEAPON_PASSIVES && S.WEAPON_PASSIVES[weapon.name];
+    if (passive && build.weaponPassive !== false) sources.push({ key: passive.name, kind: 'passive', slot: 90, item: { name: passive.name, effects: passive.effects }, scale: 1 });
     if (build.riven && build.riven.length) {
       sources.push({ key: 'Riven', kind: 'riven', slot: build.rivenSlot != null ? build.rivenSlot : 99,
         item: { name: 'Riven', effects: build.riven.map(e => Object.assign({}, e)) }, scale: 1 });
@@ -140,6 +142,10 @@
   // melee-kill triggers need a melee weapon, critical-hit triggers need some crit chance.
   function triggerPossible(trigger, ctx) {
     const t = String(trigger || '').toLowerCase();
+    // Weak point KILL buffs (Deadhead, Galvanized Scope stacks) are kept up by occasional headshot kills, so they count
+    // with "Conditional buffs at max" even when the DPS itself is worked out on body shots (ASSUMPTION).
+    // Weak point HIT buffs need the hits themselves, so they need a headshot rate. Area attacks cannot weak-point at all.
+    if (/weak point kill|headshot kill/.test(t)) return !ctx.isAoE;
     if (/weak point|headshot/.test(t)) return !ctx.isAoE && ctx.hsRate > 0;
     if (/melee kill/.test(t)) return ctx.isMelee;
     if (/critical hit/.test(t)) return ctx.baseCC > 0;
@@ -306,6 +312,14 @@
       for (const k of Object.keys(base)) base[k] *= f;
       baseTotal += P.baseDmgFlat;
       notes.push('ASSUMPTION: flat base damage bonuses are split across damage types in proportion to the base damage.');
+    }
+    // Valence bonus (Kuva / Tenet / Coda): extra base damage of one type, a share of the attack's base damage
+    const val = build.valence;
+    if (val && val.element && val.pct > 0 && baseTotal > 0) {
+      const extra = baseTotal * Math.min(0.6, val.pct);
+      base[val.element] = (base[val.element] || 0) + extra;
+      baseTotal += extra;
+      if (!S.isAdversaryWeapon(weapon.name)) notes.push(`Valence bonus set on ${weapon.name}, which is not a Kuva, Tenet or Coda weapon.`);
     }
     const scale = baseTotal / 32;
 

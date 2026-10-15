@@ -104,6 +104,22 @@
   // https://wiki.warframe.com/w/Semi-Rifle_Cannonade (Latron, Vectis), https://wiki.warframe.com/w/Semi-Pistol_Cannonade
   // (Bronco, Lato, Lex named as examples), https://wiki.warframe.com/w/Semi-Shotgun_Cannonade (Strun).
   S.SEMI_INCARNON_OK = ['latron', 'vectis', 'bronco', 'lato', 'lex', 'strun'];
+  // Weapon-specific passives the item data does not carry. Each lists its source; triggers behave like mod
+  // conditionals (counted when "Conditional buffs at max" is on, overridable per buff).
+  S.WEAPON_PASSIVES = {
+    'Coda Bassocyst': {
+      name: 'Mercy Kill buff', source: 'https://wiki.warframe.com/w/Coda_Bassocyst',
+      text: 'Performing a Mercy Kill grants +100% damage and Multishot for 20 seconds (stacks additively with mods).',
+      effects: [
+        { stat: 'damage', value: 1.0, cond: { trigger: 'On Mercy Kill', maxStacks: 1 }, raw: '+100% Damage for 20s' },
+        { stat: 'multishot', value: 1.0, cond: { trigger: 'On Mercy Kill', maxStacks: 1 }, raw: '+100% Multishot for 20s' }
+      ]
+    }
+  };
+  // Adversary weapons (Kuva, Tenet, Coda) carry a Valence bonus: 25-60% of base damage as one extra damage type,
+  // applied as base damage (elemental mods scale from it). Source: https://wiki.warframe.com/w/Kuva_Weapons (Elemental Bonus)
+  S.VALENCE_TYPES = ['impact', 'heat', 'cold', 'electricity', 'toxin', 'magnetic', 'radiation'];
+  S.isAdversaryWeapon = name => /^(Kuva|Tenet|Coda) /.test(name || '');
   S.BLAST_BURST = 3.0; // 10 Blast stacks: 300% of base damage to nearby enemies, excluding the target
   S.COLD_CD = { first: 0.1, perExtra: 0.05, max: 0.5 };
 

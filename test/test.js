@@ -176,5 +176,18 @@ if (data.incarnon) {
   eq('Braton Prime Daring Reverie base damage (wiki X = 4)', bp.tiers[0].perks[0].effects[0].value, 4);
 }
 
+// 21. Valence bonus is base damage (wiki Kuva Weapons): Coda Bassocyst 808 base + 60% Electricity = 1292.8 base,
+//     elemental mods scale from it. Overframe build 815939 shows 13,302.9 total per shot (x2.1 multishot) with conditionals off.
+{
+  const of = ['Primed Charged Shell', 'Primed Chilling Grasp', 'Toxic Barrage', 'Shotgun Barrage', 'Primed Ravage', 'Critical Deceleration', 'Galvanized Savvy', 'Galvanized Hell', 'Galvanized Acceleration'];
+  const r = E.calculate({ weapon: 'Coda Bassocyst', mods: of, valence: { element: 'electricity', pct: 0.6 }, conditions: { assumeMax: false, selfStatus: false } }, data);
+  eq('Coda Bassocyst + 60% Electricity arsenal total (Overframe 13,302.9)', Math.round(r.arsenal.total * 10) / 10, 13302.9);
+  const noDh = E.calculate({ weapon: 'Coda Bassocyst', mods: of, arcanes: [] }, data);
+  const dh = E.calculate({ weapon: 'Coda Bassocyst', mods: of, arcanes: ['Primary Deadhead'] }, data);
+  eq('Primary Deadhead On Weak Point Kill stacks count with conditionals on (0% headshots)', dh.stats.damagePool - noDh.stats.damagePool > 3.5, true);
+  const merc = E.calculate({ weapon: 'Coda Bassocyst', mods: [], conditions: { assumeMax: true, selfStatus: false } }, data);
+  eq('Coda Bassocyst Mercy Kill buff: +100% multishot', merc.stats.multishot, 2);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

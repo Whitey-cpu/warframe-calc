@@ -555,3 +555,8 @@ dialog#bgDialog[open] { display: grid; grid-template-rows: auto auto auto 1fr au
   .bg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   html[data-layout="arsenal"] #bgButton { font-size: .72rem; padding: 4px 7px; }
 }
+
+.valence-row { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; }
+.valence-row label { margin: 0; }
+.valence-row input { width: 5.5em; }
+#passiveNote { margin: 2px 0 0; flex-basis: 100%; }
