@@ -44,19 +44,23 @@
       .replace(/\s+/g, ' ')
       .replace(/<strong[^>]*>([\s\S]*?)<\/strong>/gi, (m, t) => '\u0001' + t + '\u0002')
       .replace(/<li[^>]*>/gi, '\n\u0003')
-      .replace(/<\/?(p|ul|ol|li|div|h[1-6]|table|tr|blockquote)\b[^>]*>|<br\s*\/?>/gi, '\n')
+      .replace(/<(ul|ol)\b[^>]*>/gi, '\n\u0004\n').replace(/<\/(ul|ol)>/gi, '\n\u0005\n')
+      .replace(/<\/?(p|li|div|h[1-6]|table|tr|blockquote)\b[^>]*>|<br\s*\/?>/gi, '\n')
       .replace(/<[^>]+>/g, '');
     h = tidy(decode(h));
     const lines = [];
+    let depth = 0;
     for (let raw of h.split('\n')) {
-      raw = raw.replace(/[ \t ]+/g, ' ').trim();
+      raw = raw.replace(/[ \t\u00a0]+/g, ' ').trim();
+      if (raw === '\u0004') { depth++; continue; }
+      if (raw === '\u0005') { depth = Math.max(0, depth - 1); continue; }
       if (!raw || raw === '\u0003') continue;
       const bullet = raw.startsWith('\u0003');
       if (bullet) raw = raw.slice(1).trim();
       const plain = raw.replace(/[\u0001\u0002]/g, '').trim();
       if (!plain) continue;
       const heading = !bullet && /^\u0001[^\u0001\u0002]+\u0002\s*:?\s*$/.test(raw);
-      lines.push({ k: heading ? 'h' : bullet ? 'b' : 'p', t: plain });
+      lines.push({ k: heading ? 'h' : bullet ? 'b' : 'p', t: plain, d: Math.max(0, depth - 1) });
     }
     return lines;
   }
@@ -81,27 +85,45 @@
     const newPart = title => { part = { title, sections: [] }; parts.push(part); section = null; };
     const newSection = title => { if (!part) newPart(fallbackTitle || ''); section = { title, items: [] }; part.sections.push(section); };
     for (const ln of htmlToLines(body)) {
-      if (ln.k === 'h' && PART_RE.test(ln.t.replace(/:$/, ''))) { newPart(ln.t.replace(/:$/, '')); continue; }
+      if (ln.k === 'h' && PART_RE.test(ln.t.replace(/:$/, ''))) {
+        // a Hotfix heading always starts a part; an Update heading only renames the start of the page
+        const t = ln.t.replace(/:$/, '');
+        const hasBullets = part && part.sections.some(s => s.items.some(it => typeof it === 'string' || it.d != null));
+        if (/hotfix/i.test(t) || !part) newPart(t); else if (hasBullets) newSection(titleCase(t));
+        continue;
+      }
       if (ln.k === 'h') { newSection(ln.t.replace(/\s*:$/, '')); continue; }
       if (!section) newSection('');
-      section.items.push(ln.k === 'p' ? { p: ln.t } : ln.t);
+      section.items.push(ln.k === 'p' ? { p: ln.t } : ln.d ? { t: ln.t, d: ln.d } : ln.t);
     }
     return { date: isoDate(dateText), forum, parts: parts.filter(p => p.sections.some(s => s.items.length)) };
   }
 
   // --------------- summary ---------------
+  // DE writes the main sections of big updates in capitals ("NEW WARFRAME: NARIN"); show them in title case
+  const SMALL = new Set(['a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'of', 'on', 'or', 'the', 'to', 'with', 'vs']);
+  function titleCase(t) {
+    if (/[a-z]/.test(t)) return t;
+    return t.toLowerCase().replace(/[a-z0-9'][^\s:/()-]*/g, (w, i) => (i > 0 && SMALL.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+      .replace(/\(([a-z]{2,3})\)/gi, (m, w) => `(${w.toUpperCase()})`);
+  }
+  const isCaps = t => /[A-Z]{3}/.test(t) && !/[a-z]/.test(t);
+  const BUCKET_RE = /^(script errors?|crash(es)?(\s*(&|and)\s*script errors?)?|performance( issues)?|cosmetic|ui|mission|equipment|quest|misc(ellaneous)?|other|general|level design(\s*(&|and)\s*environment)?|mission and equipment)$/i;
+
   function summarize(parts) {
     let fixes = 0, changes = 0;
     const highlights = [];
+    // big updates: only the capitalised main sections become highlights
+    const capsOnly = parts.some(p => p.sections.some(s => isCaps(s.title) && !GENERIC_RE.test(s.title)));
     for (const p of parts) for (const s of p.sections) {
       const fixSection = /fix/i.test(s.title) && !/change|addition|improve/i.test(s.title);
       for (const it of s.items) {
-        if (typeof it !== 'string') continue;   // paragraphs are not counted
+        if (typeof it !== 'string') continue;   // paragraphs and sub-points are not counted
         if (/^fix(ed|es)?\b/i.test(it) || fixSection) fixes++; else changes++;
       }
-      if (s.title && !GENERIC_RE.test(s.title)) {
-        const name = s.title.replace(/\s+(changes|fixes|additions|improvements)(\s*(&|and)\s*(changes|fixes))?$/i, '').replace(/\s+-\s+Begins\b.*$/i, '').trim();
-        if (name && !GENERIC_RE.test(name) && !highlights.includes(name)) highlights.push(name);
+      if (s.title && !GENERIC_RE.test(s.title) && (!capsOnly || isCaps(s.title)) && !/^group\s+(one|two|three|four|five|six|\d+)$/i.test(s.title)) {
+        const name = titleCase(s.title.replace(/\s+(changes|fixes|additions|improvements)(\s*(&|and)\s*(changes|fixes))?$/i, '').replace(/\s+-\s+Begins\b.*$/i, '').trim());
+        if (name && !GENERIC_RE.test(name) && !BUCKET_RE.test(name) && !highlights.includes(name)) highlights.push(name);
       }
     }
     const hl = highlights.slice(0, 6);
@@ -124,7 +146,7 @@
     if (!matcher) return [];
     const hits = new Map();
     for (const p of parts) for (const s of p.sections) for (const it of s.items) {
-      const t = typeof it === 'string' ? it : it.p;
+      const t = typeof it === 'string' ? it : it.p || it.t;
       for (const m of t.matchAll(matcher.re)) hits.set(m[1], (hits.get(m[1]) || 0) + 1);
     }
     return [...hits].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name, n]) => ({ name, kind: matcher.kinds.get(name), n }));
@@ -134,6 +156,9 @@
   const versionOf = slug => slug.replace(/-/g, '.');
   const kindOf = title => /hotfix/i.test(title) ? 'hotfix' : 'update';
 
-  const api = { parseIndex, parsePage, htmlToLines, summarize, buildMatcher, mentions, isoDate, versionOf, kindOf, decode };
+  // the first post date on the official forum thread, for pages that show no date
+  const forumDate = html => (/<time[^>]+datetime=['"](\d{4}-\d{2}-\d{2})T/.exec(html || '') || [])[1] || null;
+
+  const api = { parseIndex, parsePage, htmlToLines, summarize, buildMatcher, mentions, isoDate, versionOf, kindOf, decode, titleCase, forumDate };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.WFPatchNotes = api;
 })(typeof self !== 'undefined' ? self : this);

@@ -47,9 +47,13 @@ async function main() {
     if (old && reuseOk && i >= REFRESH) { releases.push(old); continue; }
     try {
       const page = P.parsePage(await get(it.url), it.title);
+      let dateSource = 'patch notes';
+      if (!page.date && page.forum) {   // some pages carry no date; use the official forum thread's post date
+        try { page.date = P.forumDate(await get(page.forum)); dateSource = 'forum thread'; } catch (e) { console.warn(`no forum date for ${it.slug}: ${e.message}`); }
+      }
       const sum = P.summarize(page.parts);
       releases.push({
-        slug: it.slug, version: P.versionOf(it.slug), kind: P.kindOf(it.title), title: it.title, url: it.url, forum: page.forum, date: page.date,
+        slug: it.slug, version: P.versionOf(it.slug), kind: P.kindOf(it.title), title: it.title, url: it.url, forum: page.forum, date: page.date, dateSource: page.date ? dateSource : null,
         tldr: sum.tldr, fixes: sum.fixes, changes: sum.changes, highlights: sum.highlights,
         mentions: P.mentions(page.parts, matcher).slice(0, 15), parts: page.parts
       });
