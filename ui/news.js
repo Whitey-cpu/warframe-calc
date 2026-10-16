@@ -89,7 +89,7 @@
     const fresh = live && (live.news || []).filter(n => n.update && n.link && /patch-notes/.test(n.link) && !known.has(safeUrl(n.link)) && new Date(n.date) > new Date(R[0].date || 0)) || [];
     pane.innerHTML = `
       <p class="pn-head small muted">Current game build: <b>${esc(pnLabel(fresh[0] ? { title: fresh[0].message } : R[0]))}</b>${fresh[0] ? '' : R[0].date ? ` (${esc(fmtDay(R[0].date))})` : ''}.
-        From DE's ${link(data.source, 'official patch notes')}, checked ${esc(fmtWhen(data.checkedAt))}. The TL;DR lists DE's own section headings and counts the bullet points.</p>
+        From DE's ${link(data.source, 'official patch notes')}, checked ${esc(fmtWhen(data.checkedAt))}. The TL;DR lists DE's own section headings and counts the bullet points.${R.some(r => r.dateSource && r.dateSource !== 'patch notes') ? ' * Date from the WARFRAME Wiki (that patch notes page shows none).' : ''}</p>
       ${fresh.map(n => `<div class="pn-fresh"><b>Just released:</b> ${link(n.link, n.message)} <span class="muted">(${esc(fmtWhen(n.date))}). Summary added within a few hours.</span></div>`).join('')}
       <div class="cl-tldr-all"><h3>TL;DR</h3><ul>${R.slice(0, 3).map(r => `<li><b>${esc(pnLabel(r))}</b>${r.date ? ` <span class="muted">${esc(fmtDay(r.date))}</span>` : ''}: ${esc(r.tldr || 'No summary.')}</li>`).join('')}</ul></div>
       <label class="pn-search"><span class="sr-only">Search the patch notes</span><input type="search" id="pnSearch" placeholder="Search these patch notes (e.g. a weapon or mod name)" autocomplete="off"></label>
@@ -97,7 +97,7 @@
     const list = pane.querySelector('#pnList');
     const renderList = () => {
       list.innerHTML = R.map((r, i) => `<details class="cl-entry pn-entry" data-i="${i}" ${i === 0 ? 'open' : ''}>
-        <summary><span class="cl-ver">${esc(showNum(r))}</span><span class="pn-kind ${r.kind}">${r.kind === 'hotfix' ? 'Hotfix' : 'Update'}</span><span class="cl-date">${esc(fmtDay(r.date))}</span>
+        <summary><span class="cl-ver">${esc(showNum(r))}</span><span class="pn-kind ${r.kind}">${r.kind === 'hotfix' ? 'Hotfix' : 'Update'}</span><span class="cl-date" title="${esc(r.dateSource ? `Release date from the ${r.dateSource}` : '')}">${esc(fmtDay(r.date))}${r.dateSource && r.dateSource !== 'patch notes' ? '*' : ''}</span>
           <span class="cl-sum"><span class="pn-title">${esc(r.title)}</span><br>${esc(r.tldr)}</span></summary><div class="pn-body"></div></details>`).join('');
       const fill = d => { const b = d.querySelector('.pn-body'); if (!b.dataset.done) { const r = R[+d.dataset.i]; b.innerHTML = releaseBody(r, mentionRegex(r)); b.dataset.done = '1'; } };
       list.querySelectorAll('details').forEach(d => { if (d.open) fill(d); d.addEventListener('toggle', () => d.open && fill(d)); });
