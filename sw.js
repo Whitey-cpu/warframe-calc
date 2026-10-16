@@ -3,7 +3,7 @@
  * App files: served from cache, refreshed in the background (stale-while-revalidate).
  * Item images (cdn.warframestat.us): cache-first, capped. The accounts API is never cached.
  */
-const VERSION = 'wfcalc-v11';
+const VERSION = 'wfcalc-v12';
 const SHELL = [
   './', 'index.html', 'privacy.html', 'manifest.webmanifest', 'favicon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png',
   'ui/style.css', 'ui/app.js', 'ui/features.js', 'ui/layout.js', 'ui/background.js', 'ui/changelog.js', 'data/changelog.js',
@@ -14,7 +14,8 @@ const IMG_CACHE = 'wfcalc-img';
 const IMG_MAX = 600;
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: 'reload' skips the browser HTTP cache so a new version never stores old files
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== IMG_CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
@@ -40,7 +41,8 @@ self.addEventListener('fetch', e => {
   if (url.origin !== self.location.origin) return;
   e.respondWith(caches.open(VERSION).then(async c => {
     const hit = await c.match(req, { ignoreSearch: true });
-    const net = fetch(req).then(res => { if (res.ok) c.put(req, res.clone()); return res; }).catch(() => hit);
+    // revalidate past the HTTP cache, and store under the plain path so cache-busting query strings do not pile up
+    const net = fetch(req, { cache: 'no-cache' }).then(res => { if (res.ok) c.put(url.origin + url.pathname, res.clone()); return res; }).catch(() => hit);
     return hit || net;
   }));
 });
