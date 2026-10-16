@@ -4,9 +4,26 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.6.0**: What's new now has Game updates (DE's official patch notes with a TL;DR and search) and live Events (Baro, events, resets, open world cycles, DE news).
 - **v0.5.1**: Kuva, Tenet and Coda weapons now get their Valence bonus, Coda Bassocyst gets its Mercy Kill buff, Deadhead-style buffs count properly, and this change log was added.
 - **v0.5.0**: New in-game arsenal layout with a proper phone layout, Config A-D per weapon, and backgrounds from the official Warframe Fansite Kit.
-- **v0.4.0**: Big math overhaul (status build-up, fight length, lingering clouds, group DPS, faster optimizer) and game data pulled from several public sources, current to Hotfix 44.1.1.
+
+## v0.6.0 (2026-10-16)
+
+**TL;DR:** What's new now has Game updates (DE's official patch notes with a TL;DR and search) and live Events (Baro, events, resets, open world cycles, DE news).
+
+### Game updates
+
+- The last 15 Warframe updates and hotfixes from DE's official patch notes, refreshed every 3 hours.
+- Each one has a TL;DR built from DE's own section headings and a count of fixes and other changes, the full notes, and links to the official page and forum thread.
+- Weapons, Warframes, mods and arcanes from the calculator are highlighted where the notes mention them.
+- Search box to find every line about a weapon or mod across those releases.
+- A patch posted in the last few hours shows as "Just released" with a link, until its summary is added.
+
+### Events
+
+- Live world state: current and upcoming events, Baro Ki'Teer, Prime Resurgence, Nightwave, daily and weekly resets, open world cycles and DE's latest news and devstreams, with countdowns.
+- Read from the public warframestat.us API when you open the tab. Nothing is read from anyone's game account.
 
 ## v0.5.1 (2026-10-15)
 

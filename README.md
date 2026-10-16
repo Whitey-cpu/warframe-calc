@@ -51,6 +51,8 @@ Public sources only. Nothing is read from the game client or a player account.
 | Enemy health/shield/armor/faction, cross-checks | [warframe-public-export-plus](https://www.npmjs.com/package/warframe-public-export-plus) (DE Public Export) | weekly |
 | Incarnon evolutions | [WARFRAME Wiki](https://wiki.warframe.com) Incarnon Genesis pages, via the MediaWiki API | weekly |
 | Current game build label | [warframe.com patch notes](https://www.warframe.com/en/patch-notes) | weekly |
+| Game updates tab (patch notes, TL;DR, search) | [warframe.com patch notes](https://www.warframe.com/en/patch-notes), release dates from the WARFRAME Wiki when a page shows none (`scripts/scrape-patches.js`) | every 3 hours |
+| Events tab (events, Baro, resets, cycles, DE news) | [warframestat.us](https://docs.warframestat.us/) community API (reads DE's public world state) | live, when the tab opens |
 | Corrections where datasets lag | `data/overrides.json` (each entry names its official source) | by hand |
 
 - The app shows the game build, each source's version and fetch date ("Data sources and freshness" at the bottom),
@@ -79,6 +81,8 @@ Public sources only. Nothing is read from the game client or a player account.
 - Enemy units with level scaling and Steel Path (`src/enemy.js`), shields, Overguard, Magnetic, time to kill
 - Build compare (pin A vs current), weapon leaderboard (optionally quick-optimized per weapon)
 - Community builds (public share links, likes, reports), Discord link previews
+- What's new: Game updates (DE patch notes with a TL;DR from DE's own headings, full notes, search, calculator items highlighted),
+  live Events (events, Baro Ki'Teer, Prime Resurgence, Nightwave, resets, open world cycles, DE news) and this site's change log
 - Installable web app with offline support (`sw.js`), light/dark toggle, feedback button, patch-change banner
 - Desktop app: Discord sign-in, cloud sync, update notifications
 
@@ -119,6 +123,7 @@ src/parser.js          Mod/arcane text -> structured effects
 src/engine.js          Damage math
 src/optimizer.js       Build search
 scripts/sync-data.js   Data download/build
+scripts/scrape-patches.js, scripts/patch-notes.js   Game updates feed (data/game-updates.json/.js)
 data/                  Generated game data (game-data.json for CLI, game-data.js for UI), changelog.js
 examples/, test/       Sample builds, wiki-based tests
 ```

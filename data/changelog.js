@@ -5,6 +5,23 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.6.0', date: '2026-10-16',
+    tldr: 'What\'s new now has Game updates (DE\'s official patch notes with a TL;DR and search) and live Events (Baro, events, resets, open world cycles, DE news).',
+    sections: [
+      { title: 'Game updates', items: [
+        'The last 15 Warframe updates and hotfixes from DE\'s official patch notes, refreshed every 3 hours.',
+        'Each one has a TL;DR built from DE\'s own section headings and a count of fixes and other changes, the full notes, and links to the official page and forum thread.',
+        'Weapons, Warframes, mods and arcanes from the calculator are highlighted where the notes mention them.',
+        'Search box to find every line about a weapon or mod across those releases.',
+        'A patch posted in the last few hours shows as "Just released" with a link, until its summary is added.'
+      ] },
+      { title: 'Events', items: [
+        'Live world state: current and upcoming events, Baro Ki\'Teer, Prime Resurgence, Nightwave, daily and weekly resets, open world cycles and DE\'s latest news and devstreams, with countdowns.',
+        'Read from the public warframestat.us API when you open the tab. Nothing is read from anyone\'s game account.'
+      ] }
+    ]
+  },
+  {
     version: '0.5.1', date: '2026-10-15',
     tldr: 'Kuva, Tenet and Coda weapons now get their Valence bonus, Coda Bassocyst gets its Mercy Kill buff, Deadhead-style buffs count properly, and this change log was added.',
     sections: [

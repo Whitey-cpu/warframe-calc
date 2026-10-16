@@ -159,9 +159,19 @@
   const versionOf = slug => slug.replace(/-/g, '.');
   const kindOf = title => /hotfix/i.test(title) ? 'hotfix' : 'update';
 
-  // the first post date on the official forum thread, for pages that show no date
-  const forumDate = html => (/<time[^>]+datetime=['"](\d{4}-\d{2}-\d{2})T/.exec(html || '') || [])[1] || null;
+  // release dates from a WARFRAME Wiki update page's wikitext ({{Update|update number=44.0.3|...|date=September 30, 2026|...}}),
+  // for patch notes pages that show no date
+  function wikiDates(wikitext) {
+    const out = {};
+    const w = String(wikitext || '');
+    for (const m of w.matchAll(/\{\{Update\s*\|/g)) {
+      const head = w.slice(m.index, m.index + 500);
+      const num = (/\|\s*update number\s*=\s*([\d.]+)/.exec(head) || [])[1], date = isoDate((/\|\s*date\s*=\s*([^|\n]+)/.exec(head) || [])[1]);
+      if (num && date && !out[num]) out[num] = date;
+    }
+    return out;
+  }
 
-  const api = { parseIndex, parsePage, htmlToLines, summarize, buildMatcher, mentions, isoDate, versionOf, kindOf, decode, titleCase, forumDate };
+  const api = { parseIndex, parsePage, htmlToLines, summarize, buildMatcher, mentions, isoDate, versionOf, kindOf, decode, titleCase, wikiDates };
   if (typeof module === 'object' && module.exports) module.exports = api; else root.WFPatchNotes = api;
 })(typeof self !== 'undefined' ? self : this);

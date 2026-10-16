@@ -1,6 +1,7 @@
 /*
- * "What's new": change log dialog (data/changelog.js) with a one-line summary (TL;DR) per update,
- * plus a banner the first time someone visits after a new version. Nothing here needs the calculator state.
+ * "What's new" dialog with three tabs: Game updates and Events (ui/news.js) and This site, the change log
+ * (data/changelog.js) with a one-line summary (TL;DR) per update, plus a banner the first time someone visits
+ * after a new version. Nothing here needs the calculator state.
  */
 (function () {
   const $ = id => document.getElementById(id);
@@ -27,7 +28,43 @@
         ${e.sections.map(s => `<h4>${esc(s.title)}</h4><ul>${s.items.map(it => `<li>${esc(it)}</li>`).join('')}</ul>`).join('')}
       </details>`).join('');
   }
-  $('whatsNew').addEventListener('click', () => { render(); $('changelogDialog').showModal(); markSeen(); $('updateBanner').hidden = true; });
+  // tabs: Game updates (DE patch notes), Events (live world state), This site (this change log)
+  const EXT = {
+    game: ['Official patch notes', 'https://www.warframe.com/en/patch-notes'],
+    events: ['DE news', 'https://www.warframe.com/news'],
+    site: ['Full log on GitHub', 'https://github.com/Whitey-cpu/warframe-calc/blob/main/CHANGELOG.md']
+  };
+  const PANES = { game: 'clpane-game', events: 'clpane-events', site: 'changelogBody' };
+  const rendered = {};
+  function showTab(name) {
+    for (const [k, id] of Object.entries(PANES)) {
+      const on = k === name;
+      $(id).hidden = !on;
+      const t = $('cltab-' + k);
+      t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1;
+    }
+    $('clExt').textContent = EXT[name][0]; $('clExt').href = EXT[name][1];
+    const W = window.WFNews;
+    if (name === 'site') { render(); markSeen(); $('updateBanner').hidden = true; }
+    else if (W && name === 'game' && !rendered.game) { rendered.game = true; W.renderGame($(PANES.game)); }
+    else if (W && name === 'events') W.renderEvents($(PANES.events), false);
+    try { localStorage.setItem('wfcalc.clTab', name); } catch (e) { /* ignore */ }
+  }
+  $('clTabs').addEventListener('click', e => { const t = e.target.closest('[data-cl]'); if (t) showTab(t.dataset.cl); });
+  $('clTabs').addEventListener('keydown', e => {
+    const tabs = [...$('clTabs').querySelectorAll('[role=tab]')], i = tabs.indexOf(document.activeElement);
+    if (i < 0) return;
+    const j = e.key === 'ArrowRight' ? (i + 1) % tabs.length : e.key === 'ArrowLeft' ? (i + tabs.length - 1) % tabs.length : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+    if (j < 0) return;
+    e.preventDefault(); tabs[j].focus(); showTab(tabs[j].dataset.cl);
+  });
+  const open = tab => { $('changelogDialog').showModal(); showTab(tab); };
+  $('whatsNew').addEventListener('click', () => {
+    let last = null;
+    try { last = localStorage.getItem('wfcalc.clTab'); } catch (e) { /* ignore */ }
+    // an unseen site update opens "This site"; otherwise the tab used last time, starting with Game updates
+    open($('whatsNew').classList.contains('has-new') ? 'site' : PANES[last] ? last : 'game');
+  });
   $('changelogDialog').addEventListener('click', e => { if (e.target === $('changelogDialog')) $('changelogDialog').close(); });
 
   if (!seen) { markSeen(); return; }            // first visit ever: nothing to announce
@@ -37,7 +74,7 @@
     b.innerHTML = `<b>Updated to v${esc(latest.version)}.</b> <span class="cl-banner-tldr">TL;DR: ${esc(latest.tldr)}</span>
       <button type="button" class="btn sm" id="ubOpen">See what changed</button> <button type="button" class="btn ghost sm" id="ubClose">Dismiss</button>`;
     b.hidden = false;
-    $('ubOpen').onclick = () => $('whatsNew').click();
+    $('ubOpen').onclick = () => open('site');
     $('ubClose').onclick = () => { b.hidden = true; markSeen(); };
   }
 })();

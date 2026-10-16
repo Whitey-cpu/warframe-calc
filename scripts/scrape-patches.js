@@ -15,7 +15,7 @@ const OUT_JSON = path.join(ROOT, 'data', 'game-updates.json');
 const OUT_JS = path.join(ROOT, 'data', 'game-updates.js');
 const INDEX = 'https://www.warframe.com/en/patch-notes';
 const UA = 'warframe-calc patch notes sync (https://warframe.hardn.net; public pages only)';
-const KEEP = 15, REFRESH = 3, PARSER = 1;
+const KEEP = 15, REFRESH = 3, PARSER = 2;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function get(url) {
@@ -28,6 +28,21 @@ async function get(url) {
     await sleep(2000 * attempt);
   }
   throw new Error('failed ' + url);
+}
+
+// some patch notes pages show no date; the WARFRAME Wiki update page lists every release date (one request per major update)
+const wikiCache = {};
+async function wikiDate(version) {
+  const major = version.split('.')[0];
+  if (!(major in wikiCache)) {
+    wikiCache[major] = {};
+    try {
+      const url = `https://wiki.warframe.com/api.php?action=parse&page=Update_${major}&redirects=1&prop=wikitext&format=json&formatversion=2`;
+      const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json' } });
+      if (r.ok) wikiCache[major] = P.wikiDates(((await r.json()).parse || {}).wikitext);
+    } catch (e) { console.warn(`wiki dates for Update ${major}: ${e.message}`); }
+  }
+  return wikiCache[major][version] || wikiCache[major][version.replace(/\.0$/, '')] || wikiCache[major][version.replace(/(\.0)+$/, '')] || null;
 }
 
 async function main() {
@@ -48,9 +63,7 @@ async function main() {
     try {
       const page = P.parsePage(await get(it.url), it.title);
       let dateSource = 'patch notes';
-      if (!page.date && page.forum) {   // some pages carry no date; use the official forum thread's post date
-        try { page.date = P.forumDate(await get(page.forum)); dateSource = 'forum thread'; } catch (e) { console.warn(`no forum date for ${it.slug}: ${e.message}`); }
-      }
+      if (!page.date) { page.date = await wikiDate(P.versionOf(it.slug)); dateSource = 'WARFRAME Wiki'; }
       const sum = P.summarize(page.parts);
       releases.push({
         slug: it.slug, version: P.versionOf(it.slug), kind: P.kindOf(it.title), title: it.title, url: it.url, forum: page.forum, date: page.date, dateSource: page.date ? dateSource : null,

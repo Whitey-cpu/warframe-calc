@@ -3,10 +3,10 @@
  * App files: served from cache, refreshed in the background (stale-while-revalidate).
  * Item images (cdn.warframestat.us): cache-first, capped. The accounts API is never cached.
  */
-const VERSION = 'wfcalc-v12';
+const VERSION = 'wfcalc-v13';
 const SHELL = [
   './', 'index.html', 'privacy.html', 'manifest.webmanifest', 'favicon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png',
-  'ui/style.css', 'ui/app.js', 'ui/features.js', 'ui/layout.js', 'ui/background.js', 'ui/changelog.js', 'data/changelog.js',
+  'ui/style.css', 'ui/app.js', 'ui/features.js', 'ui/layout.js', 'ui/background.js', 'ui/news.js', 'ui/changelog.js', 'data/changelog.js',
   'src/static.js', 'src/parser.js', 'src/engine.js', 'src/optimizer.js', 'src/enemy.js', 'src/capacity.js', 'src/incarnon.js',
   'data/game-data.js'
 ];
@@ -25,6 +25,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.hostname === 'warframe-api.hardn.net') return; // never cache account data
+  if (url.hostname === 'api.warframestat.us') return; // live world state, always from the network
   if (url.hostname === 'cdn.warframestat.us') {
     e.respondWith(caches.open(IMG_CACHE).then(async c => {
       const hit = await c.match(req);

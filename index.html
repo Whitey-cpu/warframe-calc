@@ -24,7 +24,7 @@
   </div>
   <a id="dataInfo" class="muted small" href="#dataSources"></a>
   <span class="spacer"></span>
-  <button type="button" id="whatsNew" class="btn ghost sm" title="Change log: what changed in each update">What's new</button>
+  <button type="button" id="whatsNew" class="btn ghost sm" title="Game updates, live events and site changes">What's new</button>
   <button type="button" id="bgButton" class="btn ghost sm" title="Choose a background from the official Warframe Fansite Kit">Background</button>
   <button type="button" id="layoutToggle" class="btn ghost sm" title="Switch between the arsenal layout and the classic layout">Classic view</button>
   <button type="button" id="themeToggle" class="btn ghost sm" title="Switch light/dark theme" aria-label="Switch theme">&#9680;</button>
@@ -335,10 +335,17 @@
   <form method="dialog" class="picker-head">
     <h2 id="clTitle">What's new</h2>
     <span class="spacer"></span>
-    <a class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Full log on GitHub</a>
+    <a class="btn ghost sm" id="clExt" href="https://www.warframe.com/en/patch-notes" target="_blank" rel="noopener">Official patch notes</a>
     <button class="btn ghost sm" value="close">Close</button>
   </form>
-  <div id="changelogBody" class="cl-body"></div>
+  <div class="stat-tabs cl-tabs" role="tablist" aria-label="What's new" id="clTabs">
+    <button type="button" role="tab" id="cltab-game" aria-controls="clpane-game" data-cl="game">Game updates</button>
+    <button type="button" role="tab" id="cltab-events" aria-controls="clpane-events" data-cl="events">Events</button>
+    <button type="button" role="tab" id="cltab-site" aria-controls="changelogBody" data-cl="site">This site</button>
+  </div>
+  <div id="clpane-game" class="cl-body" role="tabpanel" aria-labelledby="cltab-game" tabindex="0"></div>
+  <div id="clpane-events" class="cl-body" role="tabpanel" aria-labelledby="cltab-events" tabindex="0" hidden></div>
+  <div id="changelogBody" class="cl-body" role="tabpanel" aria-labelledby="cltab-site" tabindex="0" hidden></div>
 </dialog>
 
 <dialog id="bgDialog" closedby="any" aria-labelledby="bgTitle">
@@ -377,6 +384,7 @@
 <script src="src/capacity.js"></script>
 <script src="src/incarnon.js"></script>
 <script src="data/changelog.js"></script>
+<script src="ui/news.js"></script>
 <script src="ui/changelog.js"></script>
 <script src="ui/background.js"></script>
 <script src="ui/layout.js"></script>

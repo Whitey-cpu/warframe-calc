@@ -198,5 +198,25 @@ if (data.incarnon) {
   eq('Every change log entry has a TL;DR and sections', log.every(e => e.tldr && e.tldr.length > 20 && e.sections.length), true);
 }
 
+// 23. Patch notes parser, on markup copied from the structure of warframe.com/en/patch-notes/pc/44-1-2 (trimmed)
+{
+  const PN = require('../scripts/patch-notes.js');
+  const same = (name, got, want) => { if (got !== want) console.log(`   got:  ${got}\n   want: ${want}`); eq(name, got === want, true); };
+  const idx = PN.parseIndex('<li><a href="https://www.warframe.com/en/patch-notes/pc/44-1-2">Iceblade of Narin: The Icebind: Hotfix 44.1.2 + 2.1</a></li><li><a href="https://www.warframe.com/en/patch-notes/pc/44-1-1">Iceblade of Narin: The Icebind: Hotfix 44.1.1</a></li><a href="/patch-notes/pc/44-1-0">READ</a>');
+  same('Patch index: absolute links only, in order', idx.map(x => x.slug).join(), '44-1-2,44-1-1');
+  const html = '<div class="record"><div class="folio"><date class="date">Oct 15, 2026</date></div><div class="content">\n<p>\r\n<span style="font-size:20px;"><strong>Iceblade of Narin: The Icebind: Hotfix 44.1.2.1</strong></span></p><p><strong>Fixes:</strong></p><ul><li>\r\nFixed crashing near the Torid&nbsp;cloud.\r\n</li></ul>' +
+    '<p><span style="font-size:20px;"><strong>Iceblade of Narin: The Icebind: Hotfix 44.1.2</strong></span></p><p><img src="x.png"><span><em>Image Description: a Vessel.</em></span></p>' +
+    '<p><span style="font-size:20px;"><strong>Tau Prologue Quest Series</strong></span>\r\n<br> New quests.</p><p><strong>Changes:</strong></p><ul><li>Reduced the Bronco Prime Barrel price.</li><li>Nurinarim changes:<ul><li>Sub point.</li></ul></li></ul>' +
+    '<p><strong>The Icebind Changes &amp; Fixes:</strong></p><ul><li>Added SFX.</li><li>Fixed Secondary Enervate procs.</li></ul></div><div class="ButtonGroup detail-navigation"><a href="https://forums.warframe.com/topic/1528620-x/">Discuss</a></div>';
+  const pg = PN.parsePage(html, 'T');
+  same('Patch page: date, forum link, two hotfix parts', [pg.date, !!pg.forum, pg.parts.length].join(), '2026-10-15,true,2');
+  same('Patch page: image descriptions dropped, sub-points kept with depth', JSON.stringify(pg.parts[1].sections[1].items), JSON.stringify(['Reduced the Bronco Prime Barrel price.', 'Nurinarim changes:', { t: 'Sub point.', d: 1 }]));
+  const sum = PN.summarize(pg.parts);
+  same('Patch TL;DR from DE headings and counts', sum.tldr, 'Tau Prologue Quest Series; The Icebind. 2 fixes, 3 other changes.');
+  const names = PN.mentions(pg.parts, PN.buildMatcher(data)).map(m => m.name).join();
+  same('Patch mentions: calculator items found by exact name', names, 'Bronco Prime,Secondary Enervate,Torid');
+  same('Title case for DE capitals', PN.titleCase("NEW GAMEMODE: THE ICEBIND") + ' / ' + PN.titleCase('MEMETICA GLYPH PACK III'), 'New Gamemode: The Icebind / Memetica Glyph Pack III');
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
