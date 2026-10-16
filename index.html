@@ -24,6 +24,7 @@
   </div>
   <a id="dataInfo" class="muted small" href="#dataSources"></a>
   <span class="spacer"></span>
+  <button type="button" id="whatsNew" class="btn ghost sm" title="Change log: what changed in each update">What's new</button>
   <button type="button" id="bgButton" class="btn ghost sm" title="Choose a background from the official Warframe Fansite Kit">Background</button>
   <button type="button" id="layoutToggle" class="btn ghost sm" title="Switch between the arsenal layout and the classic layout">Classic view</button>
   <button type="button" id="themeToggle" class="btn ghost sm" title="Switch light/dark theme" aria-label="Switch theme">&#9680;</button>
@@ -33,6 +34,7 @@
   <div id="account"></div>
 </header>
 
+<div id="updateBanner" class="banner" role="status" hidden></div>
 <div id="patchBanner" class="banner" hidden></div>
 <main class="layout" id="appMain">
   <!-- ================= TOP: weapon, capacity, configs ================= -->
@@ -329,6 +331,16 @@
   <div id="pickerGrid" class="card-grid"></div>
 </dialog>
 
+<dialog id="changelogDialog" closedby="any" aria-labelledby="clTitle">
+  <form method="dialog" class="picker-head">
+    <h2 id="clTitle">What's new</h2>
+    <span class="spacer"></span>
+    <a class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Full log on GitHub</a>
+    <button class="btn ghost sm" value="close">Close</button>
+  </form>
+  <div id="changelogBody" class="cl-body"></div>
+</dialog>
+
 <dialog id="bgDialog" closedby="any" aria-labelledby="bgTitle">
   <form method="dialog" class="picker-head">
     <h2 id="bgTitle">Background</h2>
@@ -364,6 +376,8 @@
 <script src="src/enemy.js"></script>
 <script src="src/capacity.js"></script>
 <script src="src/incarnon.js"></script>
+<script src="data/changelog.js"></script>
+<script src="ui/changelog.js"></script>
 <script src="ui/background.js"></script>
 <script src="ui/layout.js"></script>
 <script src="ui/features.js"></script>

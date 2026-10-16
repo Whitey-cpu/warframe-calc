@@ -189,5 +189,14 @@ if (data.incarnon) {
   eq('Coda Bassocyst Mercy Kill buff: +100% multishot', merc.stats.multishot, 2);
 }
 
+// 22. Change log: newest entry matches package.json, every entry has a TL;DR
+{
+  global.window = global.window || {};
+  require('../data/changelog.js');
+  const log = global.window.WF_CHANGELOG;
+  eq('Change log top version = package.json version', log[0].version === require('../package.json').version, true);
+  eq('Every change log entry has a TL;DR and sections', log.every(e => e.tldr && e.tldr.length > 20 && e.sections.length), true);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

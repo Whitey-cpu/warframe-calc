@@ -1,7 +1,7 @@
 {
   "name": "warframe-calc",
   "productName": "Warframe Damage Calc",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "private": true,
   "description": "Personal Warframe damage calculator and build optimizer",
   "author": "Ethan",
@@ -35,6 +35,7 @@
       "src/**",
       "data/game-data.json",
       "data/game-data.js",
+      "data/changelog.js",
       "electron/**",
       "build/icon.png",
       "package.json",

@@ -99,6 +99,13 @@ The desktop app signs in through a Discord window and syncs the same way. Openin
 Needs Node 18+. `npm install` then `npm start` (run in a window) or `npm run dist:win` (build the installer into `dist/`).
 Building the Windows installer on Linux also needs Wine.
 
+## Releasing
+
+1. Bump `version` in `package.json`.
+2. Add an entry at the top of `data/changelog.js` with the same version, the date, a one-line `tldr` and the changes. The site shows it in "What's new" and in a one-time banner for returning visitors. A test fails if the top entry does not match `package.json`.
+3. Run `node scripts/changelog-md.js` to regenerate `CHANGELOG.md`, then `npm test`.
+4. Bump `VERSION` in `sw.js` so browsers pick up the new files.
+
 ## Files
 
 ```
@@ -112,6 +119,6 @@ src/parser.js          Mod/arcane text -> structured effects
 src/engine.js          Damage math
 src/optimizer.js       Build search
 scripts/sync-data.js   Data download/build
-data/                  Generated game data (game-data.json for CLI, game-data.js for UI)
+data/                  Generated game data (game-data.json for CLI, game-data.js for UI), changelog.js
 examples/, test/       Sample builds, wiki-based tests
 ```
