@@ -1,0 +1,35 @@
+name: Game updates feed
+
+# Every 3 hours: reads DE's official patch notes (public pages, https://www.warframe.com/en/patch-notes)
+# and commits data/game-updates.json/.js only when there is a new or edited release.
+on:
+  schedule:
+    - cron: "41 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: game-updates
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Read patch notes
+        run: node scripts/scrape-patches.js
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- data/game-updates.json && [ -z "$(git ls-files --others --exclude-standard data/game-updates.json)" ]; then echo "No changes"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898729+github-actions[bot]@users.noreply.github.com"
+          git add data/game-updates.json data/game-updates.js
+          git commit -m "Game updates: $(node -p "require('./data/game-updates.json').releases[0].title")"
+          for i in 1 2 3; do git pull --rebase -q && git push && exit 0; sleep 5; done
+          exit 1
