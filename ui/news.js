@@ -132,8 +132,10 @@
     ['zarimanCycle', 'Zariman', s => `${s} control`], ['duviriCycle', 'Duviri', s => `${s} mood`], ['earthCycle', 'Earth', s => s]
   ];
   const cap = s => String(s || '').replace(/^\w/, c => c.toUpperCase());
-  // the API sometimes passes DE's untranslated key through, e.g. "Road To Tau Event Name"
+  // the API sometimes passes DE's untranslated keys through ("Road To Tau Event Name", "Event Alert Title", "... Short Event Desc")
+  const PLACEHOLDER = /(^|\s)(Short\s+)?(Event\s+(Name|Desc|Description)|Alert\s+Title)$/i;
   const evName = d => String(d || 'Event').replace(/\s+Event Name$/i, '');
+  const tagName = t => String(t || '').replace(/Event$/, '').replace(/([a-z])([A-Z])/g, '$1 $2').trim();
   const row = (title, sub, iso, verb, now) => `<li class="ev-row"><div><b>${title}</b>${sub ? `<div class="muted small">${sub}</div>` : ''}</div>
     <div class="ev-time" data-at="${esc(iso)}" data-verb="${esc(verb)}" title="${esc(fmtWhen(iso))}">${esc(verb)} ${esc(left(iso, now))}</div></li>`;
 
@@ -151,7 +153,7 @@
     const active = [], upcoming = [];
     for (const e of j.events || []) {
       if (e.expiry && new Date(e.expiry) < now) continue;
-      const sub = [e.node, e.tooltip && e.tooltip !== e.description ? e.tooltip : ''].filter(Boolean).map(esc).join(' · ');
+      const sub = [e.node, e.tooltip && e.tooltip !== e.description && !PLACEHOLDER.test(e.tooltip) ? e.tooltip : ''].filter(Boolean).map(esc).join(' · ');
       if (e.activation && new Date(e.activation) > now) upcoming.push(row(esc(evName(e.description)), sub, e.activation, 'starts in', now));
       else active.push(row(esc(evName(e.description)), sub, e.expiry, 'ends in', now));
     }
@@ -165,7 +167,13 @@
     if (vault && vault.expiry && new Date(vault.expiry) > now) active.push(row('Prime Resurgence', `${(vault.inventory || []).length} items with Varzia`, vault.expiry, 'rotates in', now));
     const nw = j.nightwave;
     if (nw && nw.expiry) active.push(row(`Nightwave${nw.season != null ? ` season ${esc(nw.season)}` : ''}`, `${(nw.activeChallenges || []).length} active acts`, nw.expiry, 'ends in', now));
-    for (const a of j.alerts || []) if (a.expiry && new Date(a.expiry) > now) active.push(row(esc(a.mission && a.mission.description || 'Alert'), esc([a.mission && a.mission.node, a.mission && a.mission.reward && a.mission.reward.asString].filter(Boolean).join(' · ')), a.expiry, 'ends in', now));
+    for (const a of j.alerts || []) {
+      if (!a.expiry || new Date(a.expiry) < now) continue;
+      const m = a.mission || {};
+      const title = m.description && !PLACEHOLDER.test(m.description) ? m.description : `${[tagName(a.tag), m.type].filter(Boolean).join(' ')} alert`;
+      const lvl = m.minEnemyLevel ? `level ${m.minEnemyLevel}${m.maxEnemyLevel && m.maxEnemyLevel !== m.minEnemyLevel ? '-' + m.maxEnemyLevel : ''}` : '';
+      active.push(row(esc(title), esc([m.node, m.faction, lvl, m.reward && m.reward.asString].filter(Boolean).join(' · ')), a.expiry, 'ends in', now));
+    }
 
     const resets = [];
     if (j.sortie && j.sortie.expiry) resets.push(row('Daily Sortie', esc(j.sortie.boss ? `${j.sortie.boss} (${j.sortie.faction || ''})` : ''), j.sortie.expiry, 'resets in', now));
