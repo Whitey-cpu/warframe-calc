@@ -11,7 +11,11 @@
   const newer = (a, b) => { const x = a.split('.').map(Number), y = (b || '0').split('.').map(Number); for (let i = 0; i < 3; i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); } return false; };
   const latest = LOG[0];
   let seen = null;
-  try { seen = localStorage.getItem(KEY); } catch (e) { seen = latest.version; }
+  try {
+    seen = localStorage.getItem(KEY);
+    // visited before the change log existed (other saved settings, no seen version): announce the latest release once
+    if (!seen && LOG[1] && Object.keys(localStorage).some(k => k.startsWith('wfcalc.') && k !== KEY)) seen = LOG[1].version;
+  } catch (e) { seen = latest.version; }
   const markSeen = () => { try { localStorage.setItem(KEY, latest.version); } catch (e) { /* ignore */ } $('whatsNew').classList.remove('has-new'); };
   const fmtDate = d => { try { return new Date(d + 'T12:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }); } catch (e) { return d; } };
 
