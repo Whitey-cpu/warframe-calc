@@ -80,20 +80,23 @@ ipcMain.handle('wf:check-app-update', async () => {
 ipcMain.handle('wf:open-external', (e, url) => { if (/^https:\/\/(github\.com|warframe\.hardn\.net|wiki\.warframe\.com)\//.test(url)) shell.openExternal(url); });
 
 // ---- Discord sign-in + API calls from the main process (cookies live in the default session) ----
-ipcMain.handle('wf:login', () => new Promise(resolve => {
-  const w = new BrowserWindow({ width: 520, height: 780, parent: win, modal: true, title: 'Sign in with Discord', autoHideMenuBar: true,
+ipcMain.handle('wf:login', () => authWindow(`${API}/auth/discord/login?return=${encodeURIComponent(SITE + '/#desktop-login')}`, 'Sign in with Discord'));
+// Twitch link uses the same cookie session; success lands on the site with #twitch-linked
+ipcMain.handle('wf:link-twitch', () => authWindow(`${API}/auth/twitch/link?return=${encodeURIComponent(SITE + '/')}`, 'Link Twitch', /twitch-linked/));
+function authWindow(startUrl, title, okRe) { return new Promise(resolve => {
+  const w = new BrowserWindow({ width: 520, height: 780, parent: win, modal: true, title, autoHideMenuBar: true,
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true } });
   let done = false;
   const finish = ok => { if (done) return; done = true; resolve(ok); if (!w.isDestroyed()) w.close(); };
   const check = url => {
-    if (url.startsWith(SITE)) finish(!/login-error/.test(url));
+    if (url.startsWith(SITE)) finish(okRe ? okRe.test(url) : !/login-error/.test(url));
   };
   w.webContents.on('will-redirect', (e, url) => { if (url.startsWith(SITE)) { e.preventDefault(); check(url); } });
   w.webContents.on('will-navigate', (e, url) => { if (url.startsWith(SITE)) { e.preventDefault(); check(url); } });
   w.webContents.on('did-navigate', (e, url) => check(url));
   w.on('closed', () => finish(false));
-  w.loadURL(`${API}/auth/discord/login?return=${encodeURIComponent(SITE + '/#desktop-login')}`);
-}));
+  w.loadURL(startUrl);
+}); }
 ipcMain.handle('wf:api', async (e, path, opts = {}) => {
   if (typeof path !== 'string' || !path.startsWith('/')) throw new Error('bad path');
   const headers = { 'X-WF-Client': 'desktop' };

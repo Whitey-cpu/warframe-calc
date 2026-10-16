@@ -64,3 +64,18 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at INTEGER NOT NULL,
   PRIMARY KEY (share_id, user_id)
 );
+
+-- Linked Twitch account (optional, one per user). Only public profile info, no Twitch token is kept.
+CREATE TABLE IF NOT EXISTS twitch_links (
+  user_id TEXT PRIMARY KEY REFERENCES users(id),
+  twitch_id TEXT NOT NULL UNIQUE,
+  login TEXT NOT NULL,
+  display_name TEXT,
+  avatar TEXT,
+  public INTEGER NOT NULL DEFAULT 1,      -- show the Twitch channel on this user's public builds
+  linked_at INTEGER NOT NULL,
+  live INTEGER NOT NULL DEFAULT 0,        -- cached from Twitch Get Streams
+  live_title TEXT,
+  live_game TEXT,
+  live_checked INTEGER NOT NULL DEFAULT 0
+);

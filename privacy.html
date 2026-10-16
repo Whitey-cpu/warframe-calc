@@ -33,6 +33,11 @@
   <p>The desktop app keeps your sign-in in its own app data, the same way a browser keeps a cookie.</p>
   <p>Data is stored in a Cloudflare D1 database and served by a Cloudflare Worker at warframe-api.hardn.net. We do not sell or share your data, and we do not use analytics or advertising trackers.</p>
 
+  <h2>If you link Twitch (optional)</h2>
+  <p>Signed in, you can link a Twitch channel from the account menu. We ask Twitch for no extra permissions (public profile only). We store your Twitch user ID, login name, display name and profile picture link. The Twitch sign-in token is used once to read that profile and is then revoked; we do not keep it and cannot act on your Twitch account.</p>
+  <p>While "Show on my public builds" is ticked, your Twitch name and a link to your channel appear on your public community builds, with a Live badge and the game when you are streaming. To show that badge the server asks Twitch, at most every 2 minutes, whether linked channels are live. Twitch profile pictures load from static-cdn.jtvnw.net.</p>
+  <p>Unlink any time from the account menu. You can also remove the app in Twitch under Settings &gt; Connections.</p>
+
   <h2>Share links and community builds</h2>
   <p>A share link makes that one build readable by anyone who has the link. It does not show your Discord name. Link previews (for example in Discord) show the build title, weapon, image and DPS.</p>
   <p>If you tick <b>Make public</b>, the build's title, weapon, mods and DPS are listed under Community builds for everyone. Likes and reports are stored with your Discord user ID so each person counts once; they are not shown publicly. Builds with several reports are hidden automatically, and the site admin can remove builds that break the rules.</p>
@@ -42,7 +47,7 @@
   <p>Item images load from the community image server cdn.warframestat.us, and Discord avatars load from cdn.discordapp.com. Those services receive your IP address when your browser requests an image, under their own privacy policies.</p>
 
   <h2>Deleting your data</h2>
-  <p>Signed in, open your name in the top right and choose <b>Delete account and data</b>. This permanently removes your account, cloud builds, owned-mods list, share links and sessions. To remove data stored in your browser, clear this site's data in your browser settings. You can also revoke the app's access in Discord under User Settings &gt; Authorized Apps.</p>
+  <p>Signed in, open your name in the top right and choose <b>Delete account and data</b>. This permanently removes your account, cloud builds, owned-mods list, share links, linked Twitch channel and sessions. To remove data stored in your browser, clear this site's data in your browser settings. You can also revoke the app's access in Discord under User Settings &gt; Authorized Apps.</p>
 
   <h2>Contact</h2>
   <p>Questions: <a href="mailto:Info@hardn.net">Info@hardn.net</a></p>

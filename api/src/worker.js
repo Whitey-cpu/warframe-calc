@@ -4,8 +4,12 @@
  * Auth:   GET  /auth/discord/login      -> redirect to Discord
  *         GET  /auth/discord/callback   -> sets session cookie, redirects back to the site
  *         POST /auth/logout
- * User:   GET  /me                      -> { user } or 401
+ * User:   GET  /me                      -> { user } or 401 (user.twitch when a Twitch account is linked)
  *         DELETE /me                    -> deletes the account and everything stored for it
+ * Twitch: GET  /auth/twitch/link        -> (signed in) redirect to Twitch to link a channel
+ *         GET  /auth/twitch/callback    -> stores the Twitch ID, login, display name and avatar, redirects back
+ *         PATCH /me/twitch              -> body { public } show/hide the channel on your public builds
+ *         DELETE /me/twitch             -> unlink
  * Builds: GET  /builds                  -> { builds: [{ name, data, updatedAt }] }
  *         PUT  /builds/:name            -> body { data }
  *         DELETE /builds/:name
@@ -27,10 +31,14 @@
  * - OAuth "state" is checked against a short-lived HttpOnly cookie (CSRF protection on login).
  * - Writes require the request Origin to be the site (or the desktop app header with no Origin) and a JSON body.
  * - Discord scope is "identify" only: Discord ID, username, avatar. No email.
+ * - Twitch linking asks for no scopes (public profile only). The user token is used once to read the profile
+ *   and then revoked; only an app token (client credentials) is kept in memory to check who is live.
  */
 
 const SESSION_COOKIE = 'wf_session';
 const STATE_COOKIE = 'wf_oauth_state';
+const TWITCH_STATE_COOKIE = 'wf_twitch_state';
+const LIVE_TTL = 120;   // seconds between Twitch live checks per channel
 const SESSION_DAYS = 30;
 const MAX_BODY = 64 * 1024;
 const MAX_BUILDS = 300;
@@ -94,12 +102,16 @@ async function route(request, env, url, origin, allowed) {
     if (weapon) { where.push('sm.weapon LIKE ?'); binds.push('%' + weapon.replace(/[%_]/g, '') + '%'); }
     const order = sort === 'new' ? 's.created_at DESC' : 'likes DESC, s.created_at DESC';
     const sql = `SELECT s.id, s.created_at, sm.title, sm.weapon, sm.image, sm.dps, sm.summary,
+        tl.twitch_id, tl.login AS tw_login, tl.display_name AS tw_name, tl.live AS tw_live, tl.live_game AS tw_game, tl.live_checked AS tw_checked,
         (SELECT COUNT(*) FROM likes l WHERE l.share_id = s.id) AS likes
         ${viewer ? ', EXISTS(SELECT 1 FROM likes l2 WHERE l2.share_id = s.id AND l2.user_id = ?) AS liked' : ''}
-      FROM shares s JOIN share_meta sm ON sm.id = s.id WHERE ${where.join(' AND ')} ORDER BY ${order} LIMIT 50 OFFSET ?`;
+      FROM shares s JOIN share_meta sm ON sm.id = s.id LEFT JOIN twitch_links tl ON tl.user_id = s.user_id AND tl.public = 1
+      WHERE ${where.join(' AND ')} ORDER BY ${order} LIMIT 50 OFFSET ?`;
     const args = (viewer ? [viewer.id] : []).concat(binds, [offset]);
     const { results } = await env.DB.prepare(sql).bind(...args).all();
-    return json({ builds: results.map(r => ({ id: r.id, title: r.title, weapon: r.weapon, image: r.image, dps: r.dps, summary: r.summary, likes: r.likes, liked: !!r.liked, createdAt: r.created_at })) });
+    const live = await refreshLive(env, results.filter(r => r.twitch_id && now() - r.tw_checked > LIVE_TTL).map(r => r.twitch_id));
+    return json({ builds: results.map(r => ({ id: r.id, title: r.title, weapon: r.weapon, image: r.image, dps: r.dps, summary: r.summary, likes: r.likes, liked: !!r.liked, createdAt: r.created_at,
+      twitch: r.twitch_id ? twitchPublic(r, live) : null })) });
   }
 
   // everything below needs a session; writes also need a trusted Origin + JSON
@@ -111,9 +123,24 @@ async function route(request, env, url, origin, allowed) {
     return json({ ok: true }, 200, { 'Set-Cookie': clearCookie(SESSION_COOKIE, env) });
   }
 
+  if (p === '/auth/twitch/link' && m === 'GET') return twitchLink(env, url, user);
+  if (p === '/auth/twitch/callback' && m === 'GET') return twitchCallback(request, env, url, user);
+
   if (!user) throw httpError(401, 'Not signed in');
 
-  if (p === '/me' && m === 'GET') return json({ user: publicUser(user) });
+  if (p === '/me' && m === 'GET') {
+    const tw = await env.DB.prepare('SELECT login, display_name, avatar, public FROM twitch_links WHERE user_id = ?').bind(user.id).first();
+    return json({ user: Object.assign(publicUser(user), { twitch: tw ? { login: tw.login, displayName: tw.display_name || tw.login, avatarUrl: tw.avatar, public: !!tw.public, url: `https://www.twitch.tv/${tw.login}` } : null, twitchEnabled: !!(env.TWITCH_CLIENT_ID && env.TWITCH_CLIENT_SECRET) }) });
+  }
+  if (p === '/me/twitch' && m === 'DELETE') {
+    await env.DB.prepare('DELETE FROM twitch_links WHERE user_id = ?').bind(user.id).run();
+    return json({ ok: true });
+  }
+  if (p === '/me/twitch' && m === 'PATCH') {
+    const body = await readJson(request);
+    await env.DB.prepare('UPDATE twitch_links SET public = ? WHERE user_id = ?').bind(body.public ? 1 : 0, user.id).run();
+    return json({ ok: true, public: !!body.public });
+  }
   if (p === '/me' && m === 'DELETE') {
     await env.DB.batch([
       env.DB.prepare('DELETE FROM builds WHERE user_id = ?').bind(user.id),
@@ -123,6 +150,7 @@ async function route(request, env, url, origin, allowed) {
       env.DB.prepare('DELETE FROM share_meta WHERE id IN (SELECT id FROM shares WHERE user_id = ?)').bind(user.id),
       env.DB.prepare('DELETE FROM shares WHERE user_id = ?').bind(user.id),
       env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(user.id),
+      env.DB.prepare('DELETE FROM twitch_links WHERE user_id = ?').bind(user.id),
       env.DB.prepare('DELETE FROM users WHERE id = ?').bind(user.id)
     ]);
     return json({ ok: true, deleted: true }, 200, { 'Set-Cookie': clearCookie(SESSION_COOKIE, env) });
@@ -311,6 +339,99 @@ async function discordCallback(request, env, url) {
   headers.append('Set-Cookie', cookie(SESSION_COOKIE, token, SESSION_DAYS * 86400, env));
   headers.append('Set-Cookie', clearCookie(STATE_COOKIE, env));
   return new Response(null, { status: 302, headers });
+}
+
+// ---------------- Twitch link (optional, on top of a Discord sign-in) ----------------
+// Docs: https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/ (authorization code + client credentials)
+//       https://dev.twitch.tv/docs/api/reference/#get-users , #get-streams
+function twitchRedirectUri(env, url) { return env.TWITCH_REDIRECT_URI || `${url.origin}/auth/twitch/callback`; }
+function twitchLink(env, url, user) {
+  const site = siteUrl(env);
+  if (!user) return new Response(null, { status: 302, headers: { Location: `${site}#twitch-error=signin` } });
+  if (!env.TWITCH_CLIENT_ID || !env.TWITCH_CLIENT_SECRET) return new Response(null, { status: 302, headers: { Location: `${site}#twitch-error=not-configured` } });
+  const state = randomId(24);
+  const returnTo = safeReturn(url.searchParams.get('return'), env);
+  const q = new URLSearchParams({ client_id: env.TWITCH_CLIENT_ID, redirect_uri: twitchRedirectUri(env, url), response_type: 'code', scope: '', state });
+  return new Response(null, { status: 302, headers: {
+    Location: `${env.TWITCH_AUTHORIZE_URL || 'https://id.twitch.tv/oauth2/authorize'}?${q}`,
+    'Set-Cookie': cookie(TWITCH_STATE_COOKIE, `${state}|${user.id}|${encodeURIComponent(returnTo)}`, 600, env)
+  } });
+}
+
+async function twitchCallback(request, env, url, user) {
+  const site = siteUrl(env);
+  const saved = getCookie(request, TWITCH_STATE_COOKIE) || '';
+  const [savedState, savedUser, savedReturn] = saved.split('|');
+  const back = savedReturn ? safeReturn(decodeURIComponent(savedReturn), env) : site;
+  const go = (frag) => {
+    const h = new Headers({ Location: back.split('#')[0] + '#' + frag });
+    h.append('Set-Cookie', clearCookie(TWITCH_STATE_COOKIE, env));
+    return new Response(null, { status: 302, headers: h });
+  };
+  if (url.searchParams.get('error')) return go('twitch-error=' + encodeURIComponent(url.searchParams.get('error')));
+  const code = url.searchParams.get('code'), state = url.searchParams.get('state');
+  if (!user) return go('twitch-error=signin');
+  if (!code || !state || !savedState || !timingSafeEqual(state, savedState) || savedUser !== user.id) return go('twitch-error=state');
+
+  const tokenRes = await fetch('https://id.twitch.tv/oauth2/token', {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: env.TWITCH_CLIENT_ID, client_secret: env.TWITCH_CLIENT_SECRET, code, grant_type: 'authorization_code', redirect_uri: twitchRedirectUri(env, url) })
+  });
+  if (!tokenRes.ok) return go('twitch-error=token');
+  const tok = await tokenRes.json();
+  const meRes = await fetch('https://api.twitch.tv/helix/users', { headers: { Authorization: `Bearer ${tok.access_token}`, 'Client-Id': env.TWITCH_CLIENT_ID } });
+  // the user token is not needed again: revoke it straight away (best effort)
+  await fetch('https://id.twitch.tv/oauth2/revoke', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: env.TWITCH_CLIENT_ID, token: tok.access_token }) }).catch(() => {});
+  if (!meRes.ok) return go('twitch-error=profile');
+  const tw = ((await meRes.json()).data || [])[0];
+  if (!tw || !/^\d{1,20}$/.test(String(tw.id)) || !/^[A-Za-z0-9_]{1,25}$/.test(String(tw.login || ''))) return go('twitch-error=profile');
+  const avatar = /^https:\/\/static-cdn\.jtvnw\.net\/[\w./%-]+$/.test(String(tw.profile_image_url || '')) ? tw.profile_image_url : null;
+  // a Twitch channel belongs to one site account: proving ownership again moves the link
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM twitch_links WHERE twitch_id = ? OR user_id = ?').bind(String(tw.id), user.id),
+    env.DB.prepare('INSERT INTO twitch_links (user_id, twitch_id, login, display_name, avatar, public, linked_at) VALUES (?, ?, ?, ?, ?, 1, ?)')
+      .bind(user.id, String(tw.id), tw.login.toLowerCase(), cleanText(tw.display_name, 40), avatar, now())
+  ]);
+  return go('twitch-linked');
+}
+
+// App access token for Get Streams, cached per Worker instance until shortly before it expires
+let appToken = null;
+async function twitchAppToken(env) {
+  if (appToken && appToken.exp > Date.now() + 60000) return appToken.token;
+  const r = await fetch('https://id.twitch.tv/oauth2/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: env.TWITCH_CLIENT_ID, client_secret: env.TWITCH_CLIENT_SECRET, grant_type: 'client_credentials' }) });
+  if (!r.ok) throw new Error('twitch app token ' + r.status);
+  const j = await r.json();
+  appToken = { token: j.access_token, exp: Date.now() + (j.expires_in || 3600) * 1000 };
+  return appToken.token;
+}
+// Refresh live status for up to 100 channels; returns Map twitch_id -> { live, game } for the ones checked now
+async function refreshLive(env, ids) {
+  const out = new Map();
+  const uniq = [...new Set(ids)].slice(0, 100);
+  if (!uniq.length || !env.TWITCH_CLIENT_ID || !env.TWITCH_CLIENT_SECRET) return out;
+  try {
+    const token = await twitchAppToken(env);
+    const r = await fetch('https://api.twitch.tv/helix/streams?' + uniq.map(id => 'user_id=' + encodeURIComponent(id)).join('&') + '&first=100',
+      { headers: { Authorization: `Bearer ${token}`, 'Client-Id': env.TWITCH_CLIENT_ID } });
+    if (!r.ok) throw new Error('twitch streams ' + r.status);
+    const live = new Map(((await r.json()).data || []).filter(s => s.type === 'live').map(s => [String(s.user_id), s]));
+    const t = now();
+    await env.DB.batch(uniq.map(id => {
+      const s = live.get(id);
+      out.set(id, { live: !!s, game: s ? cleanText(s.game_name, 60) : null });
+      return env.DB.prepare('UPDATE twitch_links SET live = ?, live_title = ?, live_game = ?, live_checked = ? WHERE twitch_id = ?')
+        .bind(s ? 1 : 0, s ? cleanText(s.title, 140) : null, s ? cleanText(s.game_name, 60) : null, t, id);
+    }));
+  } catch (e) { console.error(e && e.message || e); }
+  return out;
+}
+function twitchPublic(r, fresh) {
+  const f = fresh.get(r.twitch_id);
+  return { login: r.tw_login, displayName: r.tw_name || r.tw_login, url: `https://www.twitch.tv/${r.tw_login}`,
+    live: f ? f.live : !!r.tw_live, game: f ? f.game : (r.tw_live ? r.tw_game : null) };
 }
 
 // ---------------- sessions ----------------

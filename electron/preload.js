@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('wfApp', {
   checkAppUpdate: () => ipcRenderer.invoke('wf:check-app-update'),
   openExternal: url => ipcRenderer.invoke('wf:open-external', url),
   login: () => ipcRenderer.invoke('wf:login'),
+  linkTwitch: () => ipcRenderer.invoke('wf:link-twitch'),
   api: (path, opts) => ipcRenderer.invoke('wf:api', path, opts),
   config: () => ipcRenderer.invoke('wf:config')
 });

@@ -4,9 +4,23 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.7.0**: Link your Twitch channel to your account: your public builds show your channel with a Live badge while you stream.
 - **v0.6.0**: What's new now has Game updates (DE's official patch notes with a TL;DR and search) and live Events (Baro, events, resets, open world cycles, DE news).
 - **v0.5.1**: Kuva, Tenet and Coda weapons now get their Valence bonus, Coda Bassocyst gets its Mercy Kill buff, Deadhead-style buffs count properly, and this change log was added.
-- **v0.5.0**: New in-game arsenal layout with a proper phone layout, Config A-D per weapon, and backgrounds from the official Warframe Fansite Kit.
+
+## v0.7.0 (2026-10-16)
+
+**TL;DR:** Link your Twitch channel to your account: your public builds show your channel with a Live badge while you stream.
+
+### Accounts
+
+- Link Twitch from the account menu (after signing in with Discord). Twitch is asked for no permissions beyond your public profile, and its sign-in token is revoked right after reading it.
+- Your Twitch name and channel link show on your public community builds, with a LIVE badge and the game while you are streaming (checked at most every 2 minutes). Untick "Show on my public builds" to hide it, or unlink any time.
+- Works in the desktop app too.
+
+### Not included
+
+- Warframe loadouts are not imported from Twitch. DE's Warframe Arsenal Twitch extension shows opted-in loadouts on Twitch, but DE does not offer that data to other sites.
 
 ## v0.6.0 (2026-10-16)
 

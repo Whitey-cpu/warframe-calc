@@ -91,6 +91,9 @@ Public sources only. Nothing is read from the game client or a player account.
 Optional Discord sign-in syncs saved builds and the owned-mods list, and lets you create share links
 (`https://warframe.hardn.net/#share=ID`). Without signing in, everything is stored in the browser.
 The desktop app signs in through a Discord window and syncs the same way. Opening `index.html` from disk keeps using local storage.
+- Optional Twitch link (account menu): shows the creator's channel and a Live badge on their public builds. Needs the repository
+  secrets `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET` from a Twitch app at https://dev.twitch.tv/console/apps with the OAuth
+  Redirect URL `https://warframe-api.hardn.net/auth/twitch/callback`. Without them the Link Twitch button stays hidden.
 - Moderation: set the optional repository secret `ADMIN_DISCORD_IDS` (comma-separated Discord user IDs) to use `/admin/reports` and remove builds.
 
 - API: `api/` (Cloudflare Worker + D1) served at `https://warframe-api.hardn.net`. Deployed by `.github/workflows/deploy-api.yml`.

@@ -724,9 +724,11 @@
     } else {
       el.innerHTML = `<details class="acct"><summary>${user.avatarUrl ? `<img src="${esc(user.avatarUrl)}" alt="">` : ''}<span>${esc(user.displayName || user.username)}</span></summary>
         <div class="acct-menu"><div class="muted small">Signed in with Discord as ${esc(user.username)}</div>
+        ${twitchBlock()}
         <button type="button" class="btn ghost sm" id="signOut">Sign out</button>
         <button type="button" class="btn ghost sm danger" id="deleteAcct">Delete account and data</button>
         <a class="small" href="privacy.html">Privacy</a></div></details>`;
+      wireTwitch();
       $('signOut').onclick = async () => { try { await api('/auth/logout', { method: 'POST', body: '{}' }); } catch (e) { /* ignore */ } user = null; afterAuthChange(); };
       $('deleteAcct').onclick = async () => {
         const typed = prompt('This permanently deletes your account, cloud builds, owned-mods list and share links. Type DELETE to confirm.');
@@ -738,6 +740,37 @@
     $('shareBuild').hidden = !ACCOUNTS;
     $('sharePublic').parentElement.hidden = !user;
     $('myShares').hidden = !user;
+  }
+  // ---------- Twitch link (optional): Twitch name, avatar and live badge on your public builds ----------
+  function twitchBlock() {
+    const tw = user && user.twitch;
+    if (!tw && user && user.twitchEnabled === false) return '';   // server has no Twitch app configured yet
+    if (!tw) return `<div class="acct-twitch"><button type="button" class="btn twitch sm" id="twLink">Link Twitch</button>
+      <span class="muted small">Shows your channel and a Live badge on your public builds. Twitch shares only your public profile.</span></div>`;
+    return `<div class="acct-twitch">${tw.avatarUrl ? `<img src="${esc(tw.avatarUrl)}" alt="">` : ''}<span>Twitch: <a href="${esc(tw.url)}" target="_blank" rel="noopener">${esc(tw.displayName)}</a></span>
+      <label class="small"><input type="checkbox" id="twPublic"${tw.public ? ' checked' : ''}> Show on my public builds</label>
+      <button type="button" class="linkbtn small" id="twUnlink">Unlink Twitch</button></div>`;
+  }
+  function wireTwitch() {
+    const link = $('twLink');
+    if (link) link.onclick = async () => {
+      if (DESKTOP) {
+        const ok = window.wfApp.linkTwitch ? await window.wfApp.linkTwitch() : false;
+        if (!ok) { flashMsg('Twitch link did not complete.'); return; }
+        try { user = (await api('/me')).user; } catch (e) { /* keep */ }
+        renderAccount(); flashMsg('Twitch linked.');
+      } else location.href = `${API}/auth/twitch/link?return=${encodeURIComponent(location.href.split('#')[0])}`;
+    };
+    const pub = $('twPublic');
+    if (pub) pub.onchange = async () => {
+      try { await api('/me/twitch', { method: 'PATCH', body: JSON.stringify({ public: pub.checked }) }); user.twitch.public = pub.checked; if (window.WFUI && WFUI.loadPublic) WFUI.loadPublic(); }
+      catch (e) { pub.checked = !pub.checked; flashMsg('Could not save: ' + e.message); }
+    };
+    const un = $('twUnlink');
+    if (un) un.onclick = async () => {
+      try { await api('/me/twitch', { method: 'DELETE' }); user.twitch = null; renderAccount(); flashMsg('Twitch unlinked. You can also remove the app in Twitch under Settings > Connections.'); if (window.WFUI && WFUI.loadPublic) WFUI.loadPublic(); }
+      catch (e) { flashMsg('Unlink failed: ' + e.message); }
+    };
   }
   function flashMsg(t) { $('buildMsg').textContent = t; clearTimeout(flashMsg.t); flashMsg.t = setTimeout(() => { $('buildMsg').textContent = ''; }, 4000); }
   async function afterAuthChange() {
@@ -899,6 +932,11 @@
   (async () => {
     const err = location.hash.match(/login-error=([\w-]+)/);
     if (err) { flashMsg('Discord sign-in did not complete (' + err[1] + '). Please try again.'); history.replaceState(null, '', location.pathname); }
+    const twErr = location.hash.match(/twitch-error=([\w-]+)/);
+    if (twErr) {
+      const why = { signin: 'sign in with Discord first', 'not-configured': 'Twitch linking is not set up on the server yet', access_denied: 'cancelled on Twitch' }[twErr[1]] || twErr[1];
+      flashMsg('Twitch link did not complete (' + why + ').'); history.replaceState(null, '', location.pathname);
+    } else if (/twitch-linked/.test(location.hash)) { flashMsg('Twitch linked.'); history.replaceState(null, '', location.pathname); }
     const shared = await openShareFromHash();
     if (!shared) {
       let last = null;

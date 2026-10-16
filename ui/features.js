@@ -286,7 +286,7 @@ window.WFFeatures = function (UI) {
       const j = await UI.api(`/public?sort=${encodeURIComponent($('pubSort').value)}${q ? '&weapon=' + encodeURIComponent(q) : ''}`);
       $('pubList').innerHTML = j.builds.length ? j.builds.map(x => `<div class="pub">
           <span class="pub-img">${img(x.image, x.weapon)}</span>
-          <span class="pub-t"><b>${esc(x.title || x.weapon)}</b><span class="muted small">${esc(x.weapon)}${x.dps ? ' &middot; ' + fmt(x.dps) + ' DPS' : ''}</span></span>
+          <span class="pub-t"><b>${esc(x.title || x.weapon)}</b><span class="muted small">${esc(x.weapon)}${x.dps ? ' &middot; ' + fmt(x.dps) + ' DPS' : ''}</span>${x.twitch ? `<span class="pub-tw small"><a href="${esc(x.twitch.url)}" target="_blank" rel="noopener" title="Creator's Twitch channel">${esc(x.twitch.displayName)}</a>${x.twitch.live ? ` <span class="live-badge" title="Live on Twitch now${x.twitch.game ? ': ' + esc(x.twitch.game) : ''}">LIVE${x.twitch.game ? ' &middot; ' + esc(x.twitch.game) : ''}</span>` : ''}</span>` : ''}</span>
           <button type="button" class="btn ghost sm${x.liked ? ' liked' : ''}" data-like="${esc(x.id)}" title="${UI.getUser() ? 'Like' : 'Sign in to like'}">&#9829; ${x.likes}</button>
           <button type="button" class="btn ghost sm" data-open="${esc(x.id)}">Open</button>
           <button type="button" class="linkbtn" data-report="${esc(x.id)}" title="Report this build">report</button>

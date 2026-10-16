@@ -1,14 +1,33 @@
 import { Miniflare } from 'miniflare';
 import fs from 'fs';
+let twitchRevoked = null, streamCalls = 0;
 const W = new URL('..', import.meta.url).pathname;
 const mf = new Miniflare({
   modules: true, script: fs.readFileSync(`${W}/src/worker.js`, 'utf8'), scriptPath: 'worker.js', compatibilityDate: '2026-08-01',
   d1Databases: { DB: 'test-db' },
-  bindings: { ADMIN_IDS: '1234567890', ALLOWED_ORIGINS: 'https://warframe.hardn.net', DISCORD_CLIENT_ID: 'cid', DISCORD_CLIENT_SECRET: 'secret', DISCORD_REDIRECT_URI: 'https://warframe-api.hardn.net/auth/discord/callback' },
+  bindings: { ADMIN_IDS: '1234567890', ALLOWED_ORIGINS: 'https://warframe.hardn.net', DISCORD_CLIENT_ID: 'cid', DISCORD_CLIENT_SECRET: 'secret', DISCORD_REDIRECT_URI: 'https://warframe-api.hardn.net/auth/discord/callback', TWITCH_CLIENT_ID: 'tcid', TWITCH_CLIENT_SECRET: 'tsecret' },
   outboundService: async (req) => {
     const u = new URL(req.url);
     if (u.pathname === '/api/oauth2/token') { const b = new URLSearchParams(await req.text()); if (b.get('code') !== 'good' || b.get('client_secret') !== 'secret') return new Response('bad', { status: 400 }); return Response.json({ access_token: 'at' }); }
     if (u.pathname === '/api/users/@me') return Response.json({ id: '1234567890', username: 'ethan', global_name: 'Ethan', avatar: 'abc' });
+    // Twitch (mocked)
+    if (u.hostname === 'id.twitch.tv' && u.pathname === '/oauth2/token') {
+      const b = new URLSearchParams(await req.text());
+      if (b.get('client_secret') !== 'tsecret') return new Response('bad', { status: 400 });
+      if (b.get('grant_type') === 'client_credentials') return Response.json({ access_token: 'app', expires_in: 3600 });
+      if (b.get('code') !== 'twgood') return new Response('bad', { status: 400 });
+      return Response.json({ access_token: 'usertok' });
+    }
+    if (u.hostname === 'id.twitch.tv' && u.pathname === '/oauth2/revoke') { twitchRevoked = new URLSearchParams(await req.text()).get('token'); return new Response(null, { status: 200 }); }
+    if (u.hostname === 'api.twitch.tv' && u.pathname === '/helix/users') {
+      if (req.headers.get('authorization') !== 'Bearer usertok' || req.headers.get('client-id') !== 'tcid') return new Response('no', { status: 401 });
+      return Response.json({ data: [{ id: '4242', login: 'HardnTV', display_name: 'HardnTV', profile_image_url: 'https://static-cdn.jtvnw.net/jtv_user_pictures/x-profile_image-300x300.png' }] });
+    }
+    if (u.hostname === 'api.twitch.tv' && u.pathname === '/helix/streams') {
+      streamCalls++;
+      if (req.headers.get('authorization') !== 'Bearer app') return new Response('no', { status: 401 });
+      return Response.json({ data: u.searchParams.getAll('user_id').includes('4242') ? [{ user_id: '4242', type: 'live', title: 'Torid testing', game_name: 'Warframe' }] : [] });
+    }
     return new Response('nope', { status: 404 });
   }
 });
@@ -78,6 +97,36 @@ r = await go('/owned', { method: 'PUT', headers: { ...C, 'Content-Type': 'applic
 check('write with no Origin and no header blocked', r.status === 403);
 r = await go('/owned', { method: 'PUT', headers: { ...C, Origin: 'https://evil.example', 'Content-Type': 'application/json', 'X-WF-Client': 'desktop' }, body: JSON.stringify({ mods: [] }) });
 check('desktop header with foreign Origin blocked', r.status === 403);
+// Twitch link
+r = await go('/auth/twitch/link?return=' + encodeURIComponent(SITE + '/'));
+check('twitch link needs sign-in', r.status === 302 && r.headers.get('location').includes('twitch-error=signin'));
+r = await go('/auth/twitch/link?return=' + encodeURIComponent(SITE + '/'), { headers: C });
+const twLoc = r.headers.get('location') || '';
+check('twitch link redirects to Twitch with no scopes', r.status === 302 && twLoc.startsWith('https://id.twitch.tv/oauth2/authorize') && new URL(twLoc).searchParams.get('scope') === '' && new URL(twLoc).searchParams.get('client_id') === 'tcid', twLoc);
+const twState = new URL(twLoc).searchParams.get('state');
+const twCookie = r.headers.get('set-cookie').split(';')[0];
+r = await go(`/auth/twitch/callback?code=twgood&state=WRONG`, { headers: { Cookie: `${C.Cookie}; ${twCookie}` } });
+check('twitch bad state rejected', r.headers.get('location').includes('twitch-error=state'));
+r = await go(`/auth/twitch/callback?code=twgood&state=${twState}`, { headers: { Cookie: twCookie } });
+check('twitch callback without session rejected', r.headers.get('location').includes('twitch-error=signin'));
+r = await go(`/auth/twitch/callback?code=twgood&state=${twState}`, { headers: { Cookie: `${C.Cookie}; ${twCookie}` } });
+check('twitch callback links + returns to site', r.status === 302 && r.headers.get('location') === SITE + '/#twitch-linked', r.headers.get('location'));
+check('twitch user token revoked after use', twitchRevoked === 'usertok');
+r = await go('/me', { headers: C }); j = await r.json();
+check('me shows linked twitch', j.user.twitchEnabled === true && j.user.twitch && j.user.twitch.login === 'hardntv' && j.user.twitch.public === true && j.user.twitch.url === 'https://www.twitch.tv/hardntv', JSON.stringify(j.user.twitch));
+const twRow = await db.prepare('SELECT * FROM twitch_links').first();
+check('no twitch token stored', !JSON.stringify(twRow).includes('usertok'));
+r = await W8('POST', '/shares', { data: { weapon: 'Torid' }, public: true, title: 'Torid' }); const tid = (await r.json()).id;
+r = await go('/public'); j = await r.json();
+check('public build shows creator twitch + live', j.builds[0].twitch && j.builds[0].twitch.login === 'hardntv' && j.builds[0].twitch.live === true && j.builds[0].twitch.game === 'Warframe', JSON.stringify(j.builds[0].twitch));
+const calls = streamCalls; r = await go('/public'); await r.json();
+check('live status cached (no second Twitch call within 2 min)', streamCalls === calls);
+r = await W8('PATCH', '/me/twitch', { public: false }); r = await go('/public'); j = await r.json();
+check('hide twitch on public builds', j.builds[0].twitch === null);
+r = await W8('DELETE', '/me/twitch'); r = await go('/me', { headers: C }); j = await r.json();
+check('unlink twitch', j.user.twitch === null);
+r = await W8('DELETE', `/shares/${tid}`);
+
 r = await W8('DELETE', '/builds/' + encodeURIComponent('Soma SP')); check('delete build', r.status === 200);
 r = await W8('DELETE', '/me'); check('delete account', r.status === 200);
 const left = await db.prepare("SELECT (SELECT COUNT(*) FROM users)+(SELECT COUNT(*) FROM sessions)+(SELECT COUNT(*) FROM shares)+(SELECT COUNT(*) FROM owned)+(SELECT COUNT(*) FROM share_meta)+(SELECT COUNT(*) FROM likes WHERE user_id='1234567890') AS n").first();

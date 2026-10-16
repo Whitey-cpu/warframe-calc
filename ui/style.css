@@ -309,6 +309,16 @@ details.lb > summary::after { content: ' \25BE'; color: var(--muted); }
 .pub-img img.broken { display: none; }
 .pub-t { min-width: 0; display: grid; }
 .pub-t b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pub-tw { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pub-tw a, .acct-twitch a { color: #a970ff; }
+.live-badge { font-size: .64rem; font-weight: 700; letter-spacing: .05em; padding: 1px 6px; border-radius: 4px; background: #e91916; color: #fff; }
+.acct-twitch { display: grid; grid-template-columns: auto 1fr; gap: 4px 8px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.acct-twitch > :not(img) { grid-column: 1 / -1; }
+.acct-twitch > img + span { grid-column: 2; }
+.btn.twitch { background: #9146ff; color: #fff; justify-self: start; }
+.acct-twitch label { display: flex; flex-direction: row; gap: 6px; align-items: center; margin: 0; }
+.acct-twitch label input { width: auto; margin: 0; }
+.acct-twitch .linkbtn { justify-self: start; }
 .btn.liked { color: #ff6b8a; border-color: #ff6b8a; }
 @media (max-width: 480px) { .pub { grid-template-columns: 1fr auto auto; } .pub-img { display: none; } }
 .slot .slot-n { left: 30px; }

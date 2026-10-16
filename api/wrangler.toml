@@ -12,7 +12,8 @@ custom_domain = true
 [vars]
 ALLOWED_ORIGINS = "https://warframe.hardn.net"
 DISCORD_REDIRECT_URI = "https://warframe-api.hardn.net/auth/discord/callback"
-# DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET are set as Worker secrets by the deploy workflow.
+TWITCH_REDIRECT_URI = "https://warframe-api.hardn.net/auth/twitch/callback"
+# DISCORD_CLIENT_ID/SECRET and (optional) TWITCH_CLIENT_ID/SECRET are set as Worker secrets by the deploy workflow.
 
 [[d1_databases]]
 binding = "DB"

@@ -5,6 +5,20 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.7.0', date: '2026-10-16',
+    tldr: 'Link your Twitch channel to your account: your public builds show your channel with a Live badge while you stream.',
+    sections: [
+      { title: 'Accounts', items: [
+        'Link Twitch from the account menu (after signing in with Discord). Twitch is asked for no permissions beyond your public profile, and its sign-in token is revoked right after reading it.',
+        'Your Twitch name and channel link show on your public community builds, with a LIVE badge and the game while you are streaming (checked at most every 2 minutes). Untick "Show on my public builds" to hide it, or unlink any time.',
+        'Works in the desktop app too.'
+      ] },
+      { title: 'Not included', items: [
+        'Warframe loadouts are not imported from Twitch. DE\'s Warframe Arsenal Twitch extension shows opted-in loadouts on Twitch, but DE does not offer that data to other sites.'
+      ] }
+    ]
+  },
+  {
     version: '0.6.0', date: '2026-10-16',
     tldr: 'What\'s new now has Game updates (DE\'s official patch notes with a TL;DR and search) and live Events (Baro, events, resets, open world cycles, DE news).',
     sections: [
