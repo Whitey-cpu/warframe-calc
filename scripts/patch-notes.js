@@ -104,7 +104,10 @@
   const SMALL = new Set(['a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'of', 'on', 'or', 'the', 'to', 'with', 'vs']);
   function titleCase(t) {
     if (/[a-z]/.test(t)) return t;
-    return t.toLowerCase().replace(/[a-z0-9'][^\s:/()-]*/g, (w, i) => (i > 0 && SMALL.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    return t.toLowerCase().replace(/[a-z0-9'][^\s:/()-]*/g, (w, i, all) => {
+      if (/^(ii|iii|iv|vi|vii|viii|ix|xi|xii)$/.test(w)) return w.toUpperCase();   // roman numerals (Art Pack VI)
+      return i > 0 && SMALL.has(w) && !/:\s*$/.test(all.slice(0, i)) ? w : w.charAt(0).toUpperCase() + w.slice(1);
+    })
       .replace(/\(([a-z]{2,3})\)/gi, (m, w) => `(${w.toUpperCase()})`);
   }
   const isCaps = t => /[A-Z]{3}/.test(t) && !/[a-z]/.test(t);
@@ -126,10 +129,10 @@
         if (name && !GENERIC_RE.test(name) && !BUCKET_RE.test(name) && !highlights.includes(name)) highlights.push(name);
       }
     }
-    const hl = highlights.slice(0, 6);
+    const hl = highlights.slice(0, 4);
     const counts = [fixes && `${fixes} fix${fixes === 1 ? '' : 'es'}`, changes && `${changes} other change${changes === 1 ? '' : 's'}`].filter(Boolean).join(', ');
     const tldr = (hl.length ? `${hl.join('; ')}. ` : '') + (counts ? counts.charAt(0).toUpperCase() + counts.slice(1) + '.' : '');
-    return { fixes, changes, highlights: hl, tldr: tldr.trim() };
+    return { fixes, changes, highlights: highlights.slice(0, 10), tldr: tldr.trim() };
   }
 
   // Names of weapons, Warframes, mods and arcanes that appear in the notes (whole words, exact case)
