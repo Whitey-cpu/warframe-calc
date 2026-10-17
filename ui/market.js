@@ -10,7 +10,7 @@ window.WFMarket = function (UI) {
   const KEY = 'wfcalc.prices.v1';
   const TTL = 10 * 60 * 1000;
   const cache = new Map();   // key -> { at, data }
-  let lastAt = null, busy = false, timer = 0, lastErr = null;
+  let lastAt = null, busy = false, timer = 0, lastErr = null, retryAt = 0;
   let on = true;
   try { on = localStorage.getItem(KEY) !== 'off'; } catch (e) { /* ignore */ }
   const box = $('showPrices');
@@ -28,7 +28,7 @@ window.WFMarket = function (UI) {
   const fresh = k => { const c = cache.get(k); return c && Date.now() - c.at < TTL; };
 
   async function load() {
-    if (!on || !available() || busy) return;
+    if (!on || !available() || busy || Date.now() < retryAt) { render(); return; }
     const { names, refs } = wanted();
     const needN = names.filter(n => !fresh(n)), needR = refs.filter(r => !fresh(r));
     if (!needN.length && !needR.length) { render(); return; }
@@ -43,7 +43,7 @@ window.WFMarket = function (UI) {
         Object.entries(j.prices || {}).forEach(([k, v]) => cache.set(k, { at: now, data: v }));
         lastAt = new Date(); lastErr = null;
       }
-    } catch (e) { lastErr = e.message; }
+    } catch (e) { lastErr = e.message; retryAt = Date.now() + 10 * 60 * 1000; }   // back off after a failure
     busy = false;
     render();
   }
@@ -87,6 +87,10 @@ window.WFMarket = function (UI) {
     if (setP) parts.push(`<a href="${esc(set.data.url)}" target="_blank" rel="noopener">${esc(set.data.name)}</a> <b>~${setP.v}p</b>`);
     if (counted) parts.push(`Mods${arcP ? ' + arcane' : ''} to buy <b>~${fmt(total)}p</b>${ownedSkip ? ` <span class="muted">(${ownedSkip} you own not counted)</span>` : ''}`);
     if (unknown) parts.push(`<span class="muted">${unknown} not on the market</span>`);
+    if (lastErr && !parts.length) {
+      line.innerHTML = `<span class="muted small">Plat prices are unavailable right now: ${esc(lastErr)}. Trying again in a few minutes. <a href="https://warframe.market" target="_blank" rel="noopener">warframe.market</a></span>`;
+      return;
+    }
     line.innerHTML = (parts.length ? parts.join(' &middot; ') + ' &middot; ' : (busy ? 'Loading prices... ' : '')) +
       `<span class="muted small">Prices: <a href="https://warframe.market" target="_blank" rel="noopener">warframe.market</a> (PC), median of the 5 cheapest online sellers${lastAt ? ', checked ' + esc(lastAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })) : ''}${lastErr ? ` <span class="warn-t">(${esc(lastErr)})</span>` : ''}</span>`;
   }

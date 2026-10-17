@@ -458,11 +458,16 @@ async function wfmItems() {
   if (wfmCatalog && wfmCatalog.at > Date.now() - WFM_ITEMS_TTL * 1000) return wfmCatalog;
   let cat = await cacheGet('items');
   if (!cat) {
+    // after a refusal, wait 15 minutes before asking warframe.market again (no retry storms)
+    const failed = await cacheGet('items-fail');
+    if (failed) throw httpError(503, failed.msg);
     const r = await wfmFetch('/v2/items');
     if (!r.ok) {
       // say why (a Cloudflare challenge from their side looks different from an API error)
-      const why = r.headers.get('cf-mitigated') ? 'challenge' : ((await r.text().catch(() => '')).match(/<title>([^<]{0,60})/) || [])[1] || '';
-      throw httpError(502, `warframe.market items list unavailable (${r.status}${why ? ', ' + why : ''})`);
+      const why = r.headers.get('cf-mitigated') ? 'blocked by their bot protection' : ((await r.text().catch(() => '')).match(/<title>([^<]{0,60})/) || [])[1] || '';
+      const msg = `warframe.market refused the request (${r.status}${why ? ', ' + why : ''})`;
+      await cachePut('items-fail', { msg }, 900);
+      throw httpError(503, msg);
     }
     const list = ((await r.json()) || {}).data || [];
     cat = { at: Date.now(), names: {}, refs: {}, info: {} };
