@@ -5,6 +5,28 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.8.0', date: '2026-10-17',
+    tldr: 'New Riven tab: build a riven with its real stat ranges, grade your own riven, find the best stats for your build, and save your rivens. The riven now takes a real mod slot.',
+    sections: [
+      { title: 'Riven builder', items: [
+        'Pick up to 3 positive stats and 1 negative; each shows the range it can roll for this weapon (wiki base value x disposition x stat-count multiplier x 0.9 to 1.1), with a slider and a box for the exact number.',
+        'Includes the Update 44.1 spliced traits (Weak Point Damage, Viral, Damage vs. Techrot and the rest) and shows which of your stats a Riven Splicer can combine.',
+        'The riven is a Riven Mod card that sits in a mod slot: it uses capacity (drain and polarity editable), counts its slot position for element order, and the optimizer works around it.'
+      ] },
+      { title: 'Grader', items: [
+        'Type the numbers from your riven card: each stat shows where it landed in its range, an overall grade (this site\'s own S to D scale), and a warning if a value cannot roll for that weapon.'
+      ] },
+      { title: 'Best stats and saved rivens', items: [
+        'Find best stats tries every 2 and 3 positive-stat combination at an average roll for your current build and enemy, and one click puts the winner on your riven.',
+        'Save rivens per weapon, in this browser or on your account when signed in, and load them back with one click.',
+        'Builds saved with the old riven stat rows are converted automatically.'
+      ] },
+      { title: 'Assumptions', items: [
+        'Riven values below rank 8 scale like other mods, (rank + 1) / 9, and the default drain is 18 at rank 8. The wiki does not state either, so both are marked in the app and the drain can be changed.'
+      ] }
+    ]
+  },
+  {
     version: '0.7.0', date: '2026-10-16',
     tldr: 'Link your Twitch channel to your account: your public builds show your channel with a Live badge while you stream.',
     sections: [

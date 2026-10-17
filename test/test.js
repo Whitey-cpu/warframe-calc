@@ -218,5 +218,33 @@ if (data.incarnon) {
   same('Title case for DE capitals', PN.titleCase("NEW GAMEMODE: THE ICEBIND") + ' / ' + PN.titleCase('MEMETICA GLYPH PACK III'), 'New Gamemode: The Icebind / Memetica Glyph Pack III');
 }
 
+// 24. Riven math (WARFRAME Wiki, Riven Mods: base x disposition x stat-count multiplier x roll 0.9-1.1)
+{
+  require('../src/riven.js');
+  const R = ((global.window && global.window.WF && global.window.WF.riven) ? global.window.WF : global.WF).riven;
+  const soma = E.findWeapon(data, 'Soma Prime');
+  const d = soma.omega;
+  const r = R.range('critChance', soma, 3, 1, false);
+  eq('Riven range: rifle Critical Chance, 3 positive + 1 negative, average', r.avg, 149.99 * d * 0.9375, 1e-9);
+  eq('Riven range: max roll is 1.1x the average', r.max / r.avg, 1.1, 1e-9);
+  eq('Riven range: negative Zoom uses the 0.75 malus', R.range('zoom', soma, 3, 1, true).avg, 59.99 * d * 0.75, 1e-9);
+  eq('Riven range: 2 positive, no negative uses 0.99', R.range('damage', soma, 2, 0, false).avg, 165 * d * 0.99, 1e-9);
+  const hikou = E.findWeapon(data, 'Hikou');
+  eq('Riven type: Hikou (secondary) uses pistol bases', R.range('damage', hikou, 2, 0, false).avg, 219.6 * hikou.omega * 0.99, 1e-9);
+  const bad = R.validate({ stats: [{ key: 'heat', value: 50, neg: true }, { key: 'critChance', value: 100 }] }, soma);
+  eq('Riven validate: Heat cannot be negative, needs 2 positives', bad.length, 2);
+  eq('Riven validate: two spliced traits rejected', R.validate({ stats: [{ key: 'viral', value: 90 }, { key: 'blast', value: 90 }] }, soma).some(m => /spliced/.test(m)), true);
+  const riv = { stats: [{ key: 'critChance', value: r.max }, { key: 'heat', value: 80 }, { key: 'cold', value: 80 }, { key: 'zoom', value: R.range('zoom', soma, 3, 1, true).min, neg: true }] };
+  const g = R.grade(riv, soma);
+  eq('Riven grade: max roll = 100%, smallest negative = 100%', g.rows[0].quality + g.rows[3].quality, 2, 1e-9);
+  const fx = R.toEffects(riv);
+  eq('Riven effects: elements listed bottom-up (Cold before Heat)', fx.filter(e => e.stat === 'element').map(e => e.element).join() === 'cold,heat', true);
+  eq('Riven effects: rank 4 scales by 5/9', R.toEffects(riv, 4)[0].value / fx[0].value, 5 / 9, 1e-9);
+  const tech = E.calculate({ weapon: 'Soma Prime', mods: [], riven: R.toEffects({ stats: [{ key: 'vsTechrot', value: 50 }, { key: 'damage', value: 100 }] }), enemy: { faction: 'Techrot', armor: 0 } }, data);
+  eq('Riven faction: Damage vs. Techrot (spliced) applies to Techrot', tech.stats.factionMultiplier, 1.5, 1e-9);
+  const jobs = [...R.bestStatsJobs(soma, { factionKey: 'vsGrineer' })];
+  eq('Riven best stats: 2 and 3 positive combos, with and without a negative', jobs.length, 2 * (R.combos(R.candidateKeys(soma, { factionKey: 'vsGrineer' }).positives, 3).length + R.combos(R.candidateKeys(soma, { factionKey: 'vsGrineer' }).positives, 2).length));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

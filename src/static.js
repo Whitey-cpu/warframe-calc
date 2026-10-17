@@ -42,13 +42,13 @@
     'Corpus Amalgam':  { vuln: ['electricity', 'magnetic'], resist: ['blast'], baneKey: 'Corpus' },
     'Infested':        { vuln: ['heat'], resist: [], baneKey: 'Infested' },
     'Infested Deimos': { vuln: ['slash', 'blast', 'gas'], resist: ['viral'], baneKey: 'Infested' },
-    'Orokin (Corrupted)': { vuln: ['puncture', 'viral'], resist: ['radiation'], baneKey: 'Corrupted' },
+    'Orokin (Corrupted)': { vuln: ['puncture', 'viral'], resist: ['radiation'], baneKey: 'Corrupted', rivenKey: 'Orokin' }, // ASSUMPTION: riven "Damage vs. Orokin" = Corrupted
     'Sentient':        { vuln: ['cold', 'radiation'], resist: ['corrosive'], baneKey: 'Sentient' },
     'Narmer':          { vuln: ['slash', 'toxin'], resist: ['magnetic'], baneKey: null },
     'The Murmur':      { vuln: ['electricity', 'radiation'], resist: ['viral'], baneKey: 'Murmur' },
     'Zariman':         { vuln: ['void'], resist: [], baneKey: null },
-    'Scaldra':         { vuln: ['impact', 'corrosive'], resist: ['gas'], baneKey: null },
-    'Techrot':         { vuln: ['gas', 'magnetic'], resist: ['cold'], baneKey: null },
+    'Scaldra':         { vuln: ['impact', 'corrosive'], resist: ['gas'], baneKey: null, rivenKey: 'Scaldra' },
+    'Techrot':         { vuln: ['gas', 'magnetic'], resist: ['cold'], baneKey: null, rivenKey: 'Techrot' },
     'Anarchs':         { vuln: ['impact', 'electricity'], resist: ['radiation'], baneKey: null }
   };
   // Bane/Smite/etc. of Grineer/Corpus/Infested do NOT apply to Corrupted, Narmer or Techrot.

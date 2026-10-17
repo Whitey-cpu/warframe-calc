@@ -72,6 +72,7 @@
       <button type="button" role="tab" id="tab-dps" aria-controls="pane-dps" data-tab="dps" data-mgroup="stats">DPS &amp; TTK</button>
       <button type="button" role="tab" id="tab-enemy" aria-controls="pane-enemy" data-tab="enemy" data-mgroup="enemy">Enemy</button>
       <button type="button" role="tab" id="tab-buffs" aria-controls="pane-buffs" data-tab="buffs" data-mgroup="enemy">Buffs</button>
+      <button type="button" role="tab" id="tab-riven" aria-controls="pane-riven" data-tab="riven" data-mgroup="more">Riven</button>
       <button type="button" role="tab" id="tab-optimize" aria-controls="pane-optimize" data-tab="optimize" data-mgroup="more">Optimize</button>
       <button type="button" role="tab" id="tab-builds" aria-controls="pane-builds" data-tab="builds" data-mgroup="more">Builds</button>
     </div>
@@ -196,16 +197,17 @@
       </div>
       <div id="stacks"></div>
       <details>
-        <summary>Riven</summary>
-        <div id="riven"></div>
-        <button type="button" id="addRiven" class="btn ghost sm">+ Riven stat</button>
-      </details>
-      <details>
         <summary>Custom buffs (shards, other abilities)</summary>
         <p class="muted small">Values are decimals: 0.5 = +50%.</p>
         <div id="custom"></div>
         <button type="button" id="addCustom" class="btn ghost sm">+ Custom buff</button>
       </details>
+    </section>
+
+    <!-- Riven: builder, grader, best stats, saved rivens (ui/riven.js) -->
+    <section class="pane panel" role="tabpanel" id="pane-riven" aria-labelledby="tab-riven" data-pane="riven">
+      <h2 class="pane-title">Riven mod</h2>
+      <div id="rivenPanel"><p class="muted small">Choose a weapon first.</p></div>
     </section>
 
     <!-- Optimize: optimizer + leaderboard -->
@@ -383,11 +385,13 @@
 <script src="src/enemy.js"></script>
 <script src="src/capacity.js"></script>
 <script src="src/incarnon.js"></script>
+<script src="src/riven.js"></script>
 <script src="data/changelog.js"></script>
 <script src="ui/news.js"></script>
 <script src="ui/changelog.js"></script>
 <script src="ui/background.js"></script>
 <script src="ui/layout.js"></script>
+<script src="ui/riven.js"></script>
 <script src="ui/features.js"></script>
 <script src="ui/app.js"></script>
 </body>

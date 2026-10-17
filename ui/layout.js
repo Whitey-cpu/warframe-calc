@@ -49,6 +49,7 @@
     selectTab(visible[j].dataset.tab, true);
   });
   selectTab(store.get('wfcalc.tab', 'arsenal'));
+  window.WFSelectTab = selectTab;
 
   // ---------------- phone: bottom bar views + mod browser sheet ----------------
   let mview = 'mods';
@@ -72,6 +73,12 @@
     window.scrollTo({ top: 0 });
   });
   mobileMq.addEventListener('change', applyMobileView);
+  // open a stat tab from elsewhere (e.g. the Riven Mod card): on phones switch to that tab's bottom-bar view first
+  window.WFOpenTab = name => {
+    const t = tabs.find(x => x.dataset.tab === name);
+    if (t && isMobile() && t.dataset.mgroup !== mview) { mview = t.dataset.mgroup; applyMobileView(); }
+    selectTab(name, true);
+  };
 
   const appMain = $('appMain');
   function openSheet() {
@@ -225,7 +232,7 @@
     const SLOTS = ['A', 'B', 'C', 'D'];
     let cfgs = store.get(CFG_KEY, {});
     let suppress = 0;
-    const WEAPON_FIELDS = ['attack', 'mods', 'slotLayout', 'slotLocks', 'slotRanks', 'slotPolarities', 'incarnon', 'valence', 'riven', 'extraAttacks', 'overrides'];
+    const WEAPON_FIELDS = ['attack', 'mods', 'slotLayout', 'slotLocks', 'slotRanks', 'slotPolarities', 'incarnon', 'valence', 'riven', 'rivenSlot', 'rivenMod', 'extraAttacks', 'overrides'];
     function pick(b) {
       const o = {};
       WEAPON_FIELDS.forEach(k => { if (b[k] !== undefined) o[k] = JSON.parse(JSON.stringify(b[k])); });

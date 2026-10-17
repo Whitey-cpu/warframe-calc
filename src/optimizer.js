@@ -72,7 +72,7 @@
     const baseCond = Object.assign({}, opts.conditions || {});
     const scen = {
       weapon, attack: opts.attack, extraAttacks: opts.extraAttacks, enemy: opts.enemy, buffs: opts.buffs, customBuffs: opts.customBuffs,
-      riven: opts.riven, overrides: opts.overrides, incarnon: opts.incarnon, valence: opts.valence, weaponPassive: opts.weaponPassive
+      riven: opts.riven, rivenSlot: opts.rivenSlot, overrides: opts.overrides, incarnon: opts.incarnon, valence: opts.valence, weaponPassive: opts.weaponPassive
     };
     // Fast scoring evaluates every candidate at one shared fight length (refreshed from the current best build's
     // exact fight length as the search moves), which avoids solving TTK = fight for each candidate.

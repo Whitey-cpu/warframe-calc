@@ -21,6 +21,7 @@ require('./src/optimizer.js');
 require('./src/enemy.js');
 require('./src/capacity.js');
 require('./src/incarnon.js');
+require('./src/riven.js');
 const WF = global.WF;
 
 const args = process.argv.slice(2);

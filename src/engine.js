@@ -272,6 +272,8 @@
         case 'faction':
           if (eff.faction && factionInfo.baneKey && eff.faction.toLowerCase() === factionInfo.baneKey.toLowerCase()) P.faction += v;
           else if (eff.faction === '*') P.faction += v;
+          // riven faction stats (Damage vs. Orokin / Scaldra / Techrot) for factions without a Bane mod
+          else if (eff.faction && factionInfo.rivenKey && eff.faction.toLowerCase() === factionInfo.rivenKey.toLowerCase()) P.faction += v;
           break;
         default: break;
       }

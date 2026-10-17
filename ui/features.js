@@ -97,7 +97,7 @@ window.WFFeatures = function (UI) {
       const el = document.querySelector(`.slot-val[data-val="${i}"]`);
       if (!el || !n) return;
       const mods = b.mods.filter(m => (typeof m === 'string' ? m : m.name) !== n);
-      const without = metricOf(E.calculate(Object.assign({}, b, { mods }), D), metric);
+      const without = metricOf(E.calculate(Object.assign({}, b, n === UI.RIVEN ? { riven: [] } : { mods }), D), metric);
       const gain = without > 0 ? (base / without - 1) * 100 : 0;
       el.textContent = (gain >= 0 ? '+' : '') + gain.toFixed(gain >= 10 || gain <= -10 ? 0 : 1) + '%';
       el.className = 'slot-val ' + (gain > 0.05 ? 'pos' : gain < -0.05 ? 'neg' : 'zero');
@@ -111,7 +111,7 @@ window.WFFeatures = function (UI) {
     document.querySelectorAll('#modGrid .mod-delta').forEach(el => {
       const n = el.dataset.delta;
       const m = UI.findModByName(n);
-      if (!m || equipped.has(n) || roots.has(E.variantRoot(n)) || (!emptyNormal && !(m.exilus && emptyEx))) { el.textContent = ''; return; }
+      if (!m || m.riven || equipped.has(n) || roots.has(E.variantRoot(n)) || (!emptyNormal && !(m.exilus && emptyEx))) { el.textContent = ''; return; }
       const withIt = metricOf(E.calculate(Object.assign({}, b, { mods: b.mods.concat([n]) }), D), metric);
       const gain = (withIt / base - 1) * 100;
       if (Math.abs(gain) < 0.05) { el.textContent = '+0%'; el.className = 'mod-delta zero'; return; }

@@ -61,8 +61,11 @@
     ranks: new Array(SLOT_COUNT + 1).fill(null),   // null = max rank
     pols: new Array(SLOT_COUNT + 1).fill(null),    // slot polarity (forma)
     incarnon: {},                                  // { II: 'Perk name', ... }
-    enemyUnit: null                                // name from D.enemies, or null for manual
+    enemyUnit: null,                               // name from D.enemies, or null for manual
+    riven: WF.riven.empty()                        // riven model (src/riven.js); equipped when RIVEN is in state.mods
   };
+  const R = WF.riven;
+  const RIVEN = R.NAME;
   const POL_CYCLE = [null, 'madurai', 'vazarin', 'naramon', 'zenurik', 'umbra'];
   const POL_ICON = { madurai: 'V', vazarin: 'D', naramon: '-', zenurik: '=', umbra: 'U', unairu: 'R', penjaga: 'Y' };
   let compatMods = [];
@@ -74,11 +77,12 @@
   const modFx = m => m.stats.map(WF.parser.clean).join(' / ').replace(/\n/g, ' ');
   const modDrain = (m, rank) => (m.drain || 0) + (rank != null ? rank : (m.maxRank || 0));
   const slotRank = (i, m) => state.ranks[i] != null ? Math.min(state.ranks[i], m.maxRank) : m.maxRank;
-  const findModByName = n => (state.weapon && E.findMod(D, state.weapon, n)) || null;
+  const findModByName = n => (n === RIVEN ? (state.weapon ? R.synthMod(state.riven, state.weapon) : null) : (state.weapon && E.findMod(D, state.weapon, n))) || null;
+  const rivenIndex = () => state.mods.indexOf(RIVEN);
 
   function modCard(m, opts = {}) {
     const fx = esc(modFx(m));
-    return `<div class="mod ${rarityClass(m.rarity)} ${opts.cls || ''}" draggable="true" data-mod="${esc(m.name)}" title="${fx}${m.unparsed.length ? '\n(part of this mod is not modeled)' : ''}">
+    return `<div class="mod ${rarityClass(m.rarity)}${m.riven ? ' riven' : ''} ${opts.cls || ''}" draggable="true" data-mod="${esc(m.name)}" title="${fx}${m.unparsed.length ? '\n(part of this mod is not modeled)' : ''}">
       <div class="mod-top"><span class="drain">${modDrain(m, opts.rank)}</span>${opts.own ? `<button type="button" class="own${owned.has(m.name) ? ' on' : ''}" data-own="${esc(m.name)}" aria-pressed="${owned.has(m.name)}" title="${owned.has(m.name) ? 'You own this mod' : 'Mark as owned'}">&#9733;</button>` : ''}${m.polarity ? `<span class="pol">${esc(m.polarity.slice(0, 3))}</span>` : ''}</div>
       <div class="mod-img">${img(m.image, m.name)}<span class="ph">${initials(m.name)}</span></div>
       <div class="mod-name">${esc(m.name)}</div>
@@ -96,7 +100,8 @@
     compatMods = E.modsFor(D, w);
     if (!keepMods) {
       // drop mods that do not fit the new weapon
-      state.mods = state.mods.map(n => n && compatMods.some(m => m.name === n) ? n : null);
+      state.mods = state.mods.map(n => n && compatMods.some(m => m.name === n) ? n : null);   // a riven belongs to one weapon, so it is dropped too
+      state.riven = R.empty();
       state.ranks = state.ranks.map((r, i) => state.mods[i] ? r : null);
       // ASSUMPTION: innate polarities are placed in the first slots (the data lists them without positions)
       state.pols = new Array(SLOT_COUNT + 1).fill(null);
@@ -249,6 +254,7 @@
 
   // slot interactions
   $('slots').addEventListener('click', e => {
+    if (e.target.closest('.mod.riven') && !e.target.closest('button') && window.WFUI && WFUI.openRiven) { WFUI.openRiven(); return; }
     const rk = e.target.closest('[data-rank]');
     if (rk) {
       e.stopPropagation();
@@ -345,7 +351,8 @@
       (!q || m.name.toLowerCase().includes(q) || modFx(m).toLowerCase().includes(q)));
     list.sort((a, b) => sort === 'drain' ? modDrain(b) - modDrain(a) : sort === 'rarity' ? (RANK[b.rarity] || 0) - (RANK[a.rarity] || 0) || a.name.localeCompare(b.name) : a.name.localeCompare(b.name));
     $('modCount').textContent = `${list.length} of ${compatMods.length} mods for ${state.weapon.name}. Click to add, or drag onto a slot.`;
-    $('modGrid').innerHTML = list.map(m => modCard(m, { own: true })).join('');
+    const showRiven = (modCat === 'all' || modCat === 'other') && (!q || 'riven mod'.includes(q) || q.includes('riven'));
+    $('modGrid').innerHTML = (showRiven ? modCard(R.synthMod(state.riven, state.weapon), { cls: 'riven-pick' }) : '') + list.map(m => modCard(m, { own: true })).join('');
     markUsed();
   }
   function markUsed() {
@@ -428,13 +435,6 @@
   });
 
   // ---------- riven / custom rows ----------
-  const STAT_OPTIONS = [
-    ['damage', 'Damage'], ['critChance', 'Critical Chance'], ['critDamage', 'Critical Damage'], ['statusChance', 'Status Chance'],
-    ['multishot', 'Multishot'], ['fireRate', 'Fire Rate / Attack Speed'], ['magazine', 'Magazine'], ['reloadSpeed', 'Reload Speed'],
-    ['statusDuration', 'Status Duration'], ['faction', 'Faction Damage (current enemy)'],
-    ['weakPoint', 'Weak Point Damage (spliced)'], ['weakPointCrit', 'Weak Point Critical Chance (spliced)'],
-    ...S.ALL_TYPES.filter(t => t !== 'true' && t !== 'tau').map(t => ['element:' + t, t[0].toUpperCase() + t.slice(1)])
-  ];
   const CUSTOM_KINDS = [
     ['damage', 'Base damage (adds to Serration)'], ['separate', 'Separate multiplier'], ['faction', 'Faction-type (like Roar)'],
     ['critChance', 'Crit chance (adds to Point Strike)'], ['critChanceFlat', 'Crit chance (flat)'], ['critDamage', 'Crit damage'],
@@ -453,7 +453,6 @@
     del.onclick = () => { d.remove(); update(); };
     container.appendChild(d);
   }
-  $('addRiven').onclick = () => addRow($('riven'), STAT_OPTIONS);
   $('addCustom').onclick = () => addRow($('custom'), CUSTOM_KINDS);
   function readRows(container) {
     return [...container.children].map(d => {
@@ -496,7 +495,7 @@
     return {
       weapon: state.weapon.name,
       attack: parseInt($('attack').value, 10) || 0,
-      mods: state.mods.map((n, i) => n ? (state.ranks[i] != null ? { name: n, rank: state.ranks[i] } : n) : null).filter(Boolean),
+      mods: state.mods.map((n, i) => n && n !== RIVEN ? (state.ranks[i] != null ? { name: n, rank: state.ranks[i] } : n) : null).filter(Boolean),
       slotLayout: state.mods.slice(),
       slotLocks: state.locks.slice(),
       slotRanks: state.ranks.slice(),
@@ -505,7 +504,10 @@
       valence: S.isAdversaryWeapon(state.weapon.name) && $('valenceEl').value ? { element: $('valenceEl').value, pct: Math.min(60, Math.max(25, parseFloat($('valencePct').value) || 60)) / 100 } : undefined,
       arcanes: state.arcanes.filter(Boolean),
       arcaneSlots: state.arcanes.slice(),
-      riven: readRows($('riven')).map(toEffect),
+      // riven: effects at its slot position (between the mods around it, so element order matches the game)
+      riven: rivenIndex() >= 0 ? R.toEffects(state.riven, state.ranks[rivenIndex()]) : [],
+      rivenSlot: rivenIndex() >= 0 ? state.mods.slice(0, rivenIndex()).filter(n => n && n !== RIVEN).length - 0.5 : undefined,
+      rivenMod: JSON.parse(JSON.stringify(state.riven)),
       frame: state.frame ? state.frame.name : undefined,
       buffs,
       customBuffs: readRows($('custom')).map(r => Object.assign(toEffect(r), { kind: r.kind.startsWith('element:') ? 'element' : r.kind, label: r.label || undefined })),
@@ -568,8 +570,12 @@
       state.arcanes = [(arcs.find(a => wt.includes(a.type)) || {}).name || null, (arcs.find(a => !wt.includes(a.type)) || {}).name || null];
     }
     setFrame(b.frame ? D.frames.find(f => f.name === b.frame) || null : null);
-    $('riven').innerHTML = '';
-    (b.riven || []).forEach(e => addRow($('riven'), STAT_OPTIONS, { kind: e.stat === 'element' ? 'element:' + e.element : e.stat, value: e.value }));
+    if (b.rivenMod && Array.isArray(b.rivenMod.stats)) state.riven = Object.assign(R.empty(), JSON.parse(JSON.stringify(b.rivenMod)));
+    else if (b.riven && b.riven.length) {
+      // builds saved before the riven section: convert the old stat rows and put the riven in the first free slot
+      state.riven = R.fromLegacy(b.riven, b.enemy && b.enemy.faction && (S.FACTIONS[b.enemy.faction] || {}).baneKey);
+      if (rivenIndex() < 0) { const free = state.mods.slice(0, SLOT_COUNT).indexOf(null); if (free >= 0) state.mods[free] = RIVEN; }
+    } else state.riven = R.empty();
     S.ABILITIES.forEach(a => {
       const on = (b.buffs || []).find(x => x.id === a.id);
       document.querySelector(`[data-ab="${a.id}"]`).checked = !!on;
@@ -675,9 +681,11 @@
     const b = collect(); if (!b) return;
     $('optOut').textContent = 'Searching...';
     setTimeout(() => {
-      const locked = state.mods.slice(0, SLOT_COUNT).filter((n, i) => n && state.locks[i]);
+      const rIdx = rivenIndex() >= 0 && rivenIndex() < SLOT_COUNT ? rivenIndex() : -1;
+      const locked = state.mods.slice(0, SLOT_COUNT).filter((n, i) => n && n !== RIVEN && state.locks[i]);
       const t0 = performance.now();
       const o = WF.optimizer.optimize(Object.assign({}, b, {
+        slots: rIdx >= 0 ? SLOT_COUNT - 1 : SLOT_COUNT, rivenSlot: rIdx >= 0 ? rIdx - 0.5 : undefined,
         metric: $('metric').value, locked, exilus: $('optExilus').checked, arcane: $('optArcane').checked,
         fixedArcanes: $('optArcane').checked ? [state.arcanes[1]].filter(Boolean) : b.arcanes,
         ownedOnly: $('optOwned').checked, owned: [...owned],
@@ -685,8 +693,12 @@
       }), D);
       const ms = Math.round(performance.now() - t0);
       if ($('optOwned').checked && !owned.size) { $('optOut').textContent = 'Mark the mods you own first (star on each mod card), or untick "Only mods I own".'; return; }
-      state.mods = o.mods.slice(0, SLOT_COUNT).concat(new Array(SLOT_COUNT).fill(null)).slice(0, SLOT_COUNT).concat([o.exilus || null]);
-      state.locks = state.mods.slice(0, SLOT_COUNT).map((n, i) => i < locked.length);
+      const picked = o.mods.slice(0, SLOT_COUNT);
+      if (rIdx >= 0) picked.splice(rIdx, 0, RIVEN);
+      state.mods = picked.concat(new Array(SLOT_COUNT).fill(null)).slice(0, SLOT_COUNT).concat([o.exilus || null]);
+      const rankKeep = rIdx >= 0 ? state.ranks[rIdx] : null;
+      state.ranks = new Array(SLOT_COUNT + 1).fill(null); if (rIdx >= 0) state.ranks[rIdx] = rankKeep;
+      state.locks = state.mods.slice(0, SLOT_COUNT).map((n, i) => n !== RIVEN && picked.slice(0, i).filter(x => x !== RIVEN).length < locked.length);
       if ($('optArcane').checked) state.arcanes[0] = o.arcane || null;
       renderSlots(); renderArcanes(); update();
       $('optOut').innerHTML = `<p>Best: <b>${fmt(o.score)}</b> (${o.evaluations} builds in ${ms} ms). Drain at max rank ${o.maxRankDrain}.</p><ul class="notes">${o.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`;
@@ -918,12 +930,13 @@
   window.WFUI = {
     D, E, S, WF, state, SLOT_COUNT, $, esc, fmt, pct, img, IMG, initials, modCard, modFx,
     collect, apply, update, renderSlots, renderModBrowser, renderWeapon, findModByName, openPicker,
-    getCompatMods: () => compatMods, flashMsg: m => flashMsg(m), getUser: () => user, api: (p, o) => api(p, o),
+    getCompatMods: () => compatMods, flashMsg: m => flashMsg(m), getUser: () => user, api: (p, o) => api(p, o), RIVEN, rivenIndex, addMod: (n, s) => addMod(n, s),
     accountsEnabled: () => ACCOUNTS && ACCOUNTS_UP, SITE_ORIGIN, API,
     hooks: [], onSlots: null, renderEnemyUnit: null
   };
   if (window.WFFeatures) window.WFFeatures(window.WFUI);
   if (window.WFLayout) window.WFLayout(window.WFUI);
+  if (window.WFRiven) window.WFRiven(window.WFUI);
 
   // ---------- start ----------
   renderFrame(); renderArcanes(); renderSlots(); renderModBrowser();

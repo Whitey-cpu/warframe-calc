@@ -628,3 +628,39 @@ dialog#changelogDialog[open] { display: grid; grid-template-rows: auto auto 1fr;
   html[data-layout="arsenal"] #whatsNew { font-size: .72rem; padding: 4px 7px; }
   .cl-banner-tldr { display: block; margin: 4px 0; }
 }
+
+/* ---------------- Riven tab ---------------- */
+.rv-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.rv-dots { color: var(--r-riven); letter-spacing: 1px; }
+.rv-settings { margin-bottom: 4px; }
+.rv-rows { display: grid; gap: 6px; margin: 6px 0; }
+.rv-row { display: grid; grid-template-columns: 18px 92px 36px minmax(0, 1fr) auto; grid-template-areas: "sign sel sel sel grade" ". val unit range range" ". sl sl sl sl"; gap: 4px 6px; align-items: center; padding: 6px 8px; border: 1px solid var(--border); border-left: 3px solid var(--r-riven); border-radius: 8px; }
+.rv-row > .rv-sign { grid-area: sign; } .rv-row > select { grid-area: sel; } .rv-row > .rv-grade { grid-area: grade; }
+.rv-row > input[type=number] { grid-area: val; } .rv-row > .rv-unit { grid-area: unit; } .rv-row > .rv-range { grid-area: range; } .rv-row > input[type=range] { grid-area: sl; }
+.rv-row > .rv-empty { grid-area: range; grid-column: 2 / -1; }
+.rv-row.neg { border-left-color: var(--warn); }
+.rv-row select, .rv-row input[type=number] { min-width: 0; width: 100%; }
+.rv-row input[type=range] { width: 100%; accent-color: var(--r-riven); }
+.rv-sign { font-weight: 800; text-align: center; }
+.rv-row.neg .rv-sign { color: var(--warn); }
+.rv-unit { font-size: .75rem; color: var(--muted); }
+.rv-range { white-space: nowrap; }
+.rv-grade { font-size: .74rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+.rv-grade.good { color: var(--good); border-color: var(--good); }
+.rv-grade.mid { color: var(--accent-2); }
+.rv-grade.low { color: var(--muted); }
+.rv-grade.bad { color: var(--warn); border-color: var(--warn); }
+.rv-grade-all { margin: 6px 0; }
+.rv-letter { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 6px; background: var(--r-riven); color: #fff; }
+.rv-splice { margin: 4px 0 8px; }
+.rv-sec { border-top: 1px solid var(--border); padding-top: 6px; margin-top: 8px; }
+.rv-sec > summary { font-weight: 650; cursor: pointer; }
+.rv-best { width: 100%; font-size: .82rem; margin-top: 6px; }
+.rv-best td.pos { color: var(--good); }
+.rv-save { display: flex; gap: 6px; margin: 6px 0; }
+.rv-save input { flex: 1; min-width: 0; }
+.rv-lib { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+.rv-lib li { display: flex; justify-content: space-between; gap: 8px; align-items: center; border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; font-size: .84rem; }
+.mod.riven .mod-img { background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--r-riven) 45%, transparent), transparent 70%); }
+.mod.riven-pick { outline: 1px dashed var(--r-riven); outline-offset: -3px; }
+
