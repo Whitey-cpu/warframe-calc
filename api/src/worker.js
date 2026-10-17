@@ -21,6 +21,7 @@
  *         POST /shares/:id/like         -> toggle like
  *         POST /shares/:id/report       -> report (3 reports hide a build)
  *         PATCH /shares/:id             -> body { public?, title? }
+ * Market: GET  /market/price?names=A,B&refs=/Lotus/...  -> plat prices from warframe.market (public, cached)
  * Admin:  GET /admin/reports, DELETE /admin/shares/:id   (Discord IDs listed in ADMIN_IDS)
  *         GET  /shares/:id              -> { data, createdAt }   (public, no login)
  *         GET  /shares                  -> list of your shares
@@ -77,6 +78,7 @@ async function route(request, env, url, origin, allowed) {
   if (p === '/' || p === '/health') return json({ ok: true, service: 'warframe-calc-api' });
 
   if (p === '/auth/discord/login' && m === 'GET') return discordLogin(env, url);
+  if (p === '/market/price' && m === 'GET') return marketPrices(env, url);
   if (p === '/auth/discord/callback' && m === 'GET') return discordCallback(request, env, url);
 
   // public share read
@@ -432,6 +434,92 @@ function twitchPublic(r, fresh) {
   const f = fresh.get(r.twitch_id);
   return { login: r.tw_login, displayName: r.tw_name || r.tw_login, url: `https://www.twitch.tv/${r.tw_login}`,
     live: f ? f.live : !!r.tw_live, game: f ? f.game : (r.tw_live ? r.tw_game : null) };
+}
+
+// ---------------- warframe.market prices ----------------
+// Public data from the warframe.market API (https://docs.warframe.market). Following their Rules page:
+// a descriptive User-Agent, caching (items list 24 h, prices 10 min, shared by every visitor through the
+// Cloudflare cache), at most ~3 upstream requests per second, and only the items a build actually shows.
+// The browser cannot call warframe.market directly (no CORS), which is why this goes through the Worker.
+const WFM = 'https://api.warframe.market';
+const WFM_UA = 'warframe-calc/1.0 (+https://warframe.hardn.net; Info@hardn.net)';
+const WFM_ITEMS_TTL = 86400, WFM_PRICE_TTL = 600, WFM_MAX_NAMES = 12;
+let wfmCatalog = null;   // per-instance copy of the items map
+const cacheKey = k => new Request('https://warframe-api.hardn.net/__cache/wfm/' + encodeURIComponent(k));
+async function cacheGet(k) {
+  try { const r = await caches.default.match(cacheKey(k)); return r ? await r.json() : null; } catch (e) { return null; }
+}
+async function cachePut(k, obj, ttl) {
+  try { await caches.default.put(cacheKey(k), new Response(JSON.stringify(obj), { headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${ttl}` } })); } catch (e) { /* cache unavailable */ }
+}
+function wfmFetch(path) { return fetch(WFM + path, { headers: { 'User-Agent': WFM_UA, Accept: 'application/json' } }); }
+
+async function wfmItems() {
+  if (wfmCatalog && wfmCatalog.at > Date.now() - WFM_ITEMS_TTL * 1000) return wfmCatalog;
+  let cat = await cacheGet('items');
+  if (!cat) {
+    const r = await wfmFetch('/v2/items');
+    if (!r.ok) throw httpError(502, 'warframe.market items list unavailable (' + r.status + ')');
+    const list = ((await r.json()) || {}).data || [];
+    cat = { at: Date.now(), names: {}, refs: {}, info: {} };
+    for (const it of list) {
+      if (!it || !it.slug) continue;
+      const name = it.i18n && it.i18n.en && it.i18n.en.name;
+      if (name) cat.names[name.toLowerCase()] = it.slug;
+      if (it.gameRef) cat.refs[it.gameRef] = it.slug;
+      cat.info[it.slug] = [name || it.slug, it.maxRank != null ? it.maxRank : null, (it.tags || []).includes('set') ? 1 : 0];
+    }
+    await cachePut('items', cat, WFM_ITEMS_TTL);
+  }
+  wfmCatalog = cat;
+  return cat;
+}
+
+// Summary of one item's orders: online sellers only (status ingame/online), grouped by mod rank,
+// "typical" = median of the 5 cheapest online sell orders (one 1p order does not set the price).
+function summarizeOrders(orders) {
+  const sell = {}, buy = {};
+  for (const o of orders || []) {
+    if (!o || !o.visible || !o.user || (o.user.status !== 'ingame' && o.user.status !== 'online')) continue;
+    if (o.subtype && o.subtype !== 'regular') continue;   // e.g. Atragraph variants are priced separately
+    const k = o.rank == null ? 'any' : String(o.rank);
+    const p = +o.platinum; if (!(p > 0)) continue;
+    (o.type === 'sell' ? (sell[k] = sell[k] || []) : (buy[k] = buy[k] || [])).push(p);
+  }
+  const out = { sell: {}, buy: {} };
+  for (const [k, arr] of Object.entries(sell)) {
+    arr.sort((a, b) => a - b);
+    const low = arr.slice(0, 5);
+    out.sell[k] = { min: low[0], typical: low[Math.floor((low.length - 1) / 2)], n: arr.length };
+  }
+  for (const [k, arr] of Object.entries(buy)) { arr.sort((a, b) => b - a); out.buy[k] = { max: arr[0], n: arr.length }; }
+  return out;
+}
+
+async function marketPrices(env, url) {
+  const split = v => String(v || '').split(',').map(s => s.trim()).filter(Boolean);
+  const names = split(url.searchParams.get('names')).slice(0, WFM_MAX_NAMES);
+  const refs = split(url.searchParams.get('refs')).filter(r => /^\/Lotus\/[\w/]+$/.test(r)).slice(0, 4);
+  if (!names.length && !refs.length) throw httpError(400, 'names or refs required');
+  const cat = await wfmItems();
+  const prices = {};
+  let upstream = 0;
+  for (const key of names.concat(refs)) {
+    const slug = key.startsWith('/Lotus/') ? cat.refs[key] : cat.names[key.toLowerCase()];
+    if (!slug) { prices[key] = { missing: true }; continue; }
+    const [name, maxRank, isSet] = cat.info[slug] || [slug, null, 0];
+    let sum = await cacheGet('p:' + slug);
+    if (!sum) {
+      if (upstream > 0) await new Promise(r => setTimeout(r, 350));   // stay under ~3 requests per second
+      upstream++;
+      const r = await wfmFetch('/v2/orders/item/' + encodeURIComponent(slug));
+      if (!r.ok) { prices[key] = { slug, name, error: r.status === 429 ? 'busy' : 'unavailable' }; continue; }
+      sum = Object.assign(summarizeOrders(((await r.json()) || {}).data), { at: new Date().toISOString() });
+      await cachePut('p:' + slug, sum, WFM_PRICE_TTL);
+    }
+    prices[key] = Object.assign({ slug, name, maxRank, set: !!isSet, url: `https://warframe.market/items/${slug}` }, sum);
+  }
+  return json({ source: 'https://warframe.market', platform: 'pc', prices }, 200, { 'Cache-Control': 'public, max-age=120' });
 }
 
 // ---------------- sessions ----------------

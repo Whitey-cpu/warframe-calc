@@ -4,9 +4,23 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.9.0**: Plat prices from warframe.market: each mod in your slots shows its going price at that rank, plus the Prime weapon set price and what the build would cost to buy.
 - **v0.8.0**: New Riven tab: build a riven with its real stat ranges, grade your own riven, find the best stats for your build, and save your rivens. The riven now takes a real mod slot.
 - **v0.7.0**: Link your Twitch channel to your account: your public builds show your channel with a Live badge while you stream.
-- **v0.6.0**: What's new now has Game updates (DE's official patch notes with a TL;DR and search) and live Events (Baro, events, resets, open world cycles, DE news).
+
+## v0.9.0 (2026-10-17)
+
+**TL;DR:** Plat prices from warframe.market: each mod in your slots shows its going price at that rank, plus the Prime weapon set price and what the build would cost to buy.
+
+### Prices
+
+- Each equipped mod shows "~Np": the median of the 5 cheapest sell orders from players online or in game on warframe.market (PC), at the mod's rank. If nobody sells that rank it shows the unranked price, marked R0. Click it to open the item on warframe.market.
+- Prime weapons show their set price, and a line under the mods adds up what the mods and weapon arcane would cost to buy, leaving out mods you marked as owned.
+- Turn it off with "Plat prices" under the mod slots.
+
+### How it gets them
+
+- Our server reads warframe.market's public API and caches each item for 10 minutes (the items list for a day), with a named User-Agent and under their 3 requests per second limit, as their API rules ask. Only items on screen are looked up, and nothing about you is sent.
 
 ## v0.8.0 (2026-10-17)
 

@@ -83,6 +83,8 @@ Public sources only. Nothing is read from the game client or a player account.
 - Community builds (public share links, likes, reports), Discord link previews
 - Riven tab: builder with each stat's real range for the weapon (wiki base values x disposition x stat-count multiplier), grader for
   your own riven, best stats for the current build, saved rivens (browser or account). The riven is a Riven Mod card in a real slot (`src/riven.js`, `ui/riven.js`)
+- Plat prices: equipped mods, weapon arcane and Prime weapon sets priced from the warframe.market public API (median of the 5 cheapest
+  online sellers at that rank, PC) through the accounts API `/market/price`, cached 10 minutes, following warframe.market's API rules
 - What's new: Game updates (DE patch notes with a TL;DR from DE's own headings, full notes, search, calculator items highlighted),
   live Events (events, Baro Ki'Teer, Prime Resurgence, Nightwave, resets, open world cycles, DE news) and this site's change log
 - Installable web app with offline support (`sw.js`), light/dark toggle, feedback button, patch-change banner

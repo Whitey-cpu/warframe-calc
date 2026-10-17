@@ -930,13 +930,14 @@
   window.WFUI = {
     D, E, S, WF, state, SLOT_COUNT, $, esc, fmt, pct, img, IMG, initials, modCard, modFx,
     collect, apply, update, renderSlots, renderModBrowser, renderWeapon, findModByName, openPicker,
-    getCompatMods: () => compatMods, flashMsg: m => flashMsg(m), getUser: () => user, api: (p, o) => api(p, o), RIVEN, rivenIndex, addMod: (n, s) => addMod(n, s),
+    getCompatMods: () => compatMods, flashMsg: m => flashMsg(m), getUser: () => user, api: (p, o) => api(p, o), RIVEN, rivenIndex, addMod: (n, s) => addMod(n, s), isOwned: n => owned.has(n),
     accountsEnabled: () => ACCOUNTS && ACCOUNTS_UP, SITE_ORIGIN, API,
     hooks: [], onSlots: null, renderEnemyUnit: null
   };
   if (window.WFFeatures) window.WFFeatures(window.WFUI);
   if (window.WFLayout) window.WFLayout(window.WFUI);
   if (window.WFRiven) window.WFRiven(window.WFUI);
+  if (window.WFMarket) window.WFMarket(window.WFUI);
 
   // ---------- start ----------
   renderFrame(); renderArcanes(); renderSlots(); renderModBrowser();

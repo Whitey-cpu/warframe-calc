@@ -1,6 +1,6 @@
 import { Miniflare } from 'miniflare';
 import fs from 'fs';
-let twitchRevoked = null, streamCalls = 0;
+let twitchRevoked = null, streamCalls = 0, wfmCalls = 0, wfmUA = '';
 const W = new URL('..', import.meta.url).pathname;
 const mf = new Miniflare({
   modules: true, script: fs.readFileSync(`${W}/src/worker.js`, 'utf8'), scriptPath: 'worker.js', compatibilityDate: '2026-08-01',
@@ -10,6 +10,17 @@ const mf = new Miniflare({
     const u = new URL(req.url);
     if (u.pathname === '/api/oauth2/token') { const b = new URLSearchParams(await req.text()); if (b.get('code') !== 'good' || b.get('client_secret') !== 'secret') return new Response('bad', { status: 400 }); return Response.json({ access_token: 'at' }); }
     if (u.pathname === '/api/users/@me') return Response.json({ id: '1234567890', username: 'ethan', global_name: 'Ethan', avatar: 'abc' });
+    // warframe.market (mocked)
+    if (u.hostname === 'api.warframe.market') {
+      wfmCalls++; wfmUA = req.headers.get('user-agent') || '';
+      if (u.pathname === '/v2/items') return Response.json({ apiVersion: '0.25.0', data: [
+        { slug: 'serration', gameRef: '/Lotus/Upgrades/Mods/Rifle/WeaponDamageAmountMod', tags: ['mod'], maxRank: 10, i18n: { en: { name: 'Serration' } } },
+        { slug: 'soma_prime_set', gameRef: '/Lotus/Weapons/Tenno/LongGuns/PrimeSoma/PrimeSomaRifle', tags: ['weapon', 'prime', 'set'], i18n: { en: { name: 'Soma Prime Set' } } }] });
+      const on = (p, rank, status = 'ingame', type = 'sell', subtype) => ({ type, platinum: p, rank, subtype, visible: true, user: { status } });
+      if (u.pathname === '/v2/orders/item/serration') return Response.json({ data: [on(1, 10), on(9, 10), on(10, 10), on(12, 10), on(15, 10), on(20, 10), on(2, 10, 'offline'), on(30, 10, 'online', 'sell', 'atragraph'), on(3, 0), on(8, 10, 'online', 'buy')] });
+      if (u.pathname === '/v2/orders/item/soma_prime_set') return Response.json({ data: [on(60, null), on(55, null, 'online')] });
+      return new Response('nope', { status: 404 });
+    }
     // Twitch (mocked)
     if (u.hostname === 'id.twitch.tv' && u.pathname === '/oauth2/token') {
       const b = new URLSearchParams(await req.text());
@@ -97,6 +108,19 @@ r = await go('/owned', { method: 'PUT', headers: { ...C, 'Content-Type': 'applic
 check('write with no Origin and no header blocked', r.status === 403);
 r = await go('/owned', { method: 'PUT', headers: { ...C, Origin: 'https://evil.example', 'Content-Type': 'application/json', 'X-WF-Client': 'desktop' }, body: JSON.stringify({ mods: [] }) });
 check('desktop header with foreign Origin blocked', r.status === 403);
+// warframe.market prices
+r = await go('/market/price?names=' + encodeURIComponent('Serration,Not A Mod') + '&refs=' + encodeURIComponent('/Lotus/Weapons/Tenno/LongGuns/PrimeSoma/PrimeSomaRifle'), { headers: { Origin: SITE } });
+j = await r.json();
+const ser = j.prices.Serration;
+check('market: rank 10 typical = median of 5 cheapest online sells (ignores offline, atragraph)', r.status === 200 && ser.sell['10'].min === 1 && ser.sell['10'].typical === 10 && ser.sell['10'].n === 6, JSON.stringify(ser));
+check('market: rank 0 and buy orders kept separately', ser.sell['0'].typical === 3 && ser.buy['10'].max === 8);
+check('market: unknown name marked missing, weapon set found by game ref', j.prices['Not A Mod'].missing === true && j.prices['/Lotus/Weapons/Tenno/LongGuns/PrimeSoma/PrimeSomaRifle'].sell.any.typical === 55, JSON.stringify(j.prices).slice(0,600));
+check('market: descriptive User-Agent sent', /warframe-calc/.test(wfmUA) && /warframe\.hardn\.net/.test(wfmUA));
+const callsBefore = wfmCalls;
+r = await go('/market/price?names=Serration'); await r.json();
+check('market: prices and item list served from cache on repeat', wfmCalls === callsBefore);
+r = await go('/market/price'); check('market: needs names or refs', r.status === 400);
+
 // Twitch link
 r = await go('/auth/twitch/link?return=' + encodeURIComponent(SITE + '/'));
 check('twitch link needs sign-in', r.status === 302 && r.headers.get('location').includes('twitch-error=signin'));

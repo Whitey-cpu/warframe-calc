@@ -664,3 +664,10 @@ dialog#changelogDialog[open] { display: grid; grid-template-rows: auto auto 1fr;
 .mod.riven .mod-img { background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--r-riven) 45%, transparent), transparent 70%); }
 .mod.riven-pick { outline: 1px dashed var(--r-riven); outline-offset: -3px; }
 
+
+/* ---------------- warframe.market prices ---------------- */
+.slot { position: relative; }
+.slot-price { position: absolute; left: 6px; bottom: 4px; font-size: .7rem; font-weight: 700; color: var(--accent-2); text-decoration: none; background: color-mix(in srgb, var(--panel) 85%, transparent); padding: 0 4px; border-radius: 4px; z-index: 2; }
+.slot-price:hover { text-decoration: underline; }
+.market-line { margin: 4px 0 0; }
+.market-line:empty { display: none; }

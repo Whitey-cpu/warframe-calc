@@ -292,8 +292,10 @@
       <span class="muted small" id="drainInfo"></span>
       <span class="spacer"></span>
       <label class="check small"><input type="checkbox" id="showDelta" checked> Show mod value</label>
+      <label class="check small" title="Plat prices from warframe.market (PC) for the mods in your slots"><input type="checkbox" id="showPrices" checked> Plat prices</label>
       <button type="button" class="btn sm only-mobile" id="openBrowser">+ Add mods</button>
     </div>
+    <p class="market-line small" id="marketLine"></p>
     <p class="hint only-desktop">Drag mods into slots or click to add. Drag slots to reorder (element order matters: first slot combines first). Right-click a slot to remove.</p>
     <div id="incarnonPanel" class="panel inc-panel" hidden></div>
   </section>
@@ -392,6 +394,7 @@
 <script src="ui/background.js"></script>
 <script src="ui/layout.js"></script>
 <script src="ui/riven.js"></script>
+<script src="ui/market.js"></script>
 <script src="ui/features.js"></script>
 <script src="ui/app.js"></script>
 </body>
