@@ -4,9 +4,17 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.9.1**: Plat prices are switched off for now: warframe.market's bot protection blocks requests from our server, and the site will not try to get around it.
 - **v0.9.0**: Plat prices from warframe.market: each mod in your slots shows its going price at that rank, plus the Prime weapon set price and what the build would cost to buy.
 - **v0.8.0**: New Riven tab: build a riven with its real stat ranges, grade your own riven, find the best stats for your build, and save your rivens. The riven now takes a real mod slot.
-- **v0.7.0**: Link your Twitch channel to your account: your public builds show your channel with a Live badge while you stream.
+
+## v0.9.1 (2026-10-17)
+
+**TL;DR:** Plat prices are switched off for now: warframe.market's bot protection blocks requests from our server, and the site will not try to get around it.
+
+### Plat prices
+
+- The price badges and the Plat prices toggle are hidden. The code stays in place so prices can come back if warframe.market allows our server or offers another approved way.
 
 ## v0.9.0 (2026-10-17)
 

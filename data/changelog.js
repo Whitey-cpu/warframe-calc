@@ -5,6 +5,15 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.9.1', date: '2026-10-17',
+    tldr: 'Plat prices are switched off for now: warframe.market\'s bot protection blocks requests from our server, and the site will not try to get around it.',
+    sections: [
+      { title: 'Plat prices', items: [
+        'The price badges and the Plat prices toggle are hidden. The code stays in place so prices can come back if warframe.market allows our server or offers another approved way.'
+      ] }
+    ]
+  },
+  {
     version: '0.9.0', date: '2026-10-17',
     tldr: 'Plat prices from warframe.market: each mod in your slots shows its going price at that rank, plus the Prime weapon set price and what the build would cost to buy.',
     sections: [

@@ -5,7 +5,7 @@ const W = new URL('..', import.meta.url).pathname;
 const mf = new Miniflare({
   modules: true, script: fs.readFileSync(`${W}/src/worker.js`, 'utf8'), scriptPath: 'worker.js', compatibilityDate: '2026-08-01',
   d1Databases: { DB: 'test-db' },
-  bindings: { ADMIN_IDS: '1234567890', ALLOWED_ORIGINS: 'https://warframe.hardn.net', DISCORD_CLIENT_ID: 'cid', DISCORD_CLIENT_SECRET: 'secret', DISCORD_REDIRECT_URI: 'https://warframe-api.hardn.net/auth/discord/callback', TWITCH_CLIENT_ID: 'tcid', TWITCH_CLIENT_SECRET: 'tsecret' },
+  bindings: { ADMIN_IDS: '1234567890', ALLOWED_ORIGINS: 'https://warframe.hardn.net', DISCORD_CLIENT_ID: 'cid', DISCORD_CLIENT_SECRET: 'secret', DISCORD_REDIRECT_URI: 'https://warframe-api.hardn.net/auth/discord/callback', TWITCH_CLIENT_ID: 'tcid', TWITCH_CLIENT_SECRET: 'tsecret', MARKET_ENABLED: '1' },
   outboundService: async (req) => {
     const u = new URL(req.url);
     if (u.pathname === '/api/oauth2/token') { const b = new URLSearchParams(await req.text()); if (b.get('code') !== 'good' || b.get('client_secret') !== 'secret') return new Response('bad', { status: 400 }); return Response.json({ access_token: 'at' }); }

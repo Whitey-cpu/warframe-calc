@@ -78,7 +78,12 @@ async function route(request, env, url, origin, allowed) {
   if (p === '/' || p === '/health') return json({ ok: true, service: 'warframe-calc-api' });
 
   if (p === '/auth/discord/login' && m === 'GET') return discordLogin(env, url);
-  if (p === '/market/price' && m === 'GET') return marketPrices(env, url);
+  // Plat prices are off until warframe.market allows requests from this server (their bot protection blocks it).
+  // Set MARKET_ENABLED = "1" in wrangler.toml [vars] to turn the endpoint back on.
+  if (p === '/market/price' && m === 'GET') {
+    if (env.MARKET_ENABLED !== '1') return json({ error: 'Plat prices are turned off for now' }, 503);
+    return marketPrices(env, url);
+  }
   if (p === '/auth/discord/callback' && m === 'GET') return discordCallback(request, env, url);
 
   // public share read
