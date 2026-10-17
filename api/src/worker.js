@@ -459,7 +459,11 @@ async function wfmItems() {
   let cat = await cacheGet('items');
   if (!cat) {
     const r = await wfmFetch('/v2/items');
-    if (!r.ok) throw httpError(502, 'warframe.market items list unavailable (' + r.status + ')');
+    if (!r.ok) {
+      // say why (a Cloudflare challenge from their side looks different from an API error)
+      const why = r.headers.get('cf-mitigated') ? 'challenge' : ((await r.text().catch(() => '')).match(/<title>([^<]{0,60})/) || [])[1] || '';
+      throw httpError(502, `warframe.market items list unavailable (${r.status}${why ? ', ' + why : ''})`);
+    }
     const list = ((await r.json()) || {}).data || [];
     cat = { at: Date.now(), names: {}, refs: {}, info: {} };
     for (const it of list) {
