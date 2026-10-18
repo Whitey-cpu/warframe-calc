@@ -250,21 +250,87 @@
     rec(0, []);
     return out;
   }
-  function averageRiven(keys, negKey, weapon) {
+  // roll: where in the 0.9 to 1.1 random range every stat lands (1 = average); a negative rolls the same way
+  function averageRiven(keys, negKey, weapon, roll) {
+    const q = roll || 1;
     const nPos = keys.length, nNeg = negKey ? 1 : 0;
-    const stats = keys.map(k => ({ key: k, value: range(k, weapon, nPos, nNeg, false).avg, neg: false }));
-    if (negKey) stats.push({ key: negKey, value: range(negKey, weapon, nPos, nNeg, true).avg, neg: true });
+    const stats = keys.map(k => ({ key: k, value: range(k, weapon, nPos, nNeg, false).avg * q, neg: false }));
+    if (negKey) stats.push({ key: negKey, value: range(negKey, weapon, nPos, nNeg, true).avg * q, neg: true });
     return { stats };
   }
+  // Roll scanner jobs. opts.forced: stats every combination must have; opts.excluded: stats to skip;
+  // opts.negative: undefined = none or the first harmless one, null = never, or a stat key to always use.
   function* bestStatsJobs(weapon, opts = {}) {
     const { positives, harmless } = candidateKeys(weapon, opts);
-    const neg = opts.allowNegative === false || !harmless.length ? [null] : [null, harmless[0]];
-    for (const k of [3, 2]) for (const c of combos(positives, k)) {
-      if (opts.spliced && c.filter(x => statDef(x).spliced).length > 1) continue;
-      for (const n of neg) yield { keys: c, neg: n };
+    const forced = (opts.forced || []).filter(k => positives.includes(k));
+    const pool = positives.filter(k => !(opts.excluded || []).includes(k) && !forced.includes(k));
+    let neg;
+    if (opts.allowNegative === false || opts.negative === null) neg = [null];
+    else if (opts.negative) neg = [opts.negative];
+    else neg = harmless.length ? [null, harmless[0]] : [null];
+    for (const k of [3, 2]) {
+      if (forced.length > k) continue;
+      for (const c0 of combos(pool, k - forced.length)) {
+        const c = forced.concat(c0);
+        if (opts.spliced && c.filter(x => statDef(x).spliced).length > 1) continue;
+        for (const n of neg) { if (n && c.includes(n)) continue; yield { keys: c, neg: n }; }
+      }
     }
   }
 
+  // ---------- reading a riven card (text from a screenshot) ----------
+  // Lines look like "+123.4% Critical Chance", "-45.2% Zoom", "x1.24 Damage to Grineer" or "+2.1m Punch Through".
+  // Returns the stats it recognised, the weapon named on the card (longest weapon name found) and lines it could not use.
+  const ALIASES = { 'damage to grineer': 'vsGrineer', 'damage to corpus': 'vsCorpus', 'damage to infested': 'vsInfested', 'damage to orokin': 'vsOrokin',
+    'damage to scaldra': 'vsScaldra', 'damage to techrot': 'vsTechrot', 'attack speed': 'fireRate', 'melee damage': 'damage', 'heat': 'heat', 'cold': 'cold',
+    'toxin': 'toxin', 'electricity': 'electricity', 'recoil': 'recoil', 'magazine': 'magazine', 'status chance': 'statusChance' };
+  const norm = t => String(t).toLowerCase().replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  function matchStat(words, type) {
+    const w = norm(words).replace(/^(to|vs) /, '');
+    if (!w) return null;
+    const defs = STATS.concat(SPLICED).filter(d => available(d, type));
+    let best = null, bestScore = 0;
+    for (const d of defs) {
+      for (const lab of [d.label, d.meleeLabel].filter(Boolean)) {
+        const L = norm(lab).replace(/ vs /, ' to ');
+        if (w === L) return d.key;
+        const a = new Set(w.split(' ')), b = L.split(' ');
+        const hit = b.filter(x => a.has(x)).length;
+        const sc = hit / Math.max(b.length, a.size);
+        if (sc > bestScore) { bestScore = sc; best = d.key; }
+      }
+    }
+    for (const [k, v] of Object.entries(ALIASES)) if (w === k || w.endsWith(' ' + k)) return available(statDef(v), type) ? v : null;
+    return bestScore >= 0.6 ? best : null;
+  }
+  function parseCardText(text, weapons, currentWeapon) {
+    const clean = String(text || '').replace(/[\u2212\u2013\u2014]/g, '-').replace(/,(?=\d)/g, '.');
+    const all = (weapons || []).map(w => w.name).sort((a, b) => b.length - a.length);
+    const flat = norm(clean);
+    const named = all.find(n => (' ' + flat + ' ').includes(' ' + norm(n) + ' ')) || null;
+    const weapon = (weapons || []).find(w => w.name === named) || currentWeapon || null;
+    const type = typeFor(weapon);
+    const stats = [], unmatched = [];
+    for (const raw of clean.split(/\n+/)) {
+      const line = raw.trim();
+      const m = line.match(/([+\-]?)\s*(x)?\s*(\d+(?:\.\d+)?)\s*(%|m|s)?\s+([A-Za-z][A-Za-z .'-]{2,})/);
+      if (!m) { if (/\d/.test(line)) unmatched.push(line); continue; }
+      const key = matchStat(m[5], type);
+      if (!key) { unmatched.push(line); continue; }
+      const def = statDef(key);
+      let v = parseFloat(m[3]), neg = m[1] === '-';
+      if (m[2] || def.unit === 'x') {             // x1.24 -> +24, x0.86 -> 14 negative
+        if (m[2]) { neg = v < 1; v = Math.abs(v - 1) * 100; }
+      }
+      if (stats.some(x => x.key === key)) continue;
+      stats.push({ key, value: Math.round(v * 100) / 100, neg });
+    }
+    // a riven has at most one negative; with four stats and no minus sign, Weapon Recoil is the usual malus
+    if (stats.length === 4 && !stats.some(x => x.neg)) { const rc = stats.find(x => x.key === 'recoil'); if (rc) rc.neg = true; }
+    return { weaponName: named, stats: stats.slice(0, 4), unmatched };
+  }
+
   WF.riven = { TYPES, TYPE_LABEL, STATS, SPLICED, RECIPES, MULT, NAME, MAX_RANK, DEFAULT_DRAIN, typeFor, statDef, labelFor, baseFor, available, range, valueAt,
-    counts, multipliers, validate, grade, letter, toEffects, notModeled, fmtValue, lines, synthMod, empty, fromLegacy, candidateKeys, combos, averageRiven, bestStatsJobs, rankScale };
+    counts, multipliers, validate, grade, letter, toEffects, notModeled, fmtValue, lines, synthMod, empty, fromLegacy, candidateKeys, combos, averageRiven, bestStatsJobs, rankScale,
+    parseCardText, matchStat };
 })();

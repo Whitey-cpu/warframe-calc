@@ -136,6 +136,17 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
           <summary>How this number is made</summary>
           <div id="mathSteps"></div>
         </details>
+        <section id="rotationBox" class="rotation-box" hidden></section>
+        <details id="simBox" class="sim-box" data-adv>
+          <summary data-tip="shotSim">Shot by shot</summary>
+          <p class="muted small">Rolls every pellet's crit, headshot and status like the game does and repeats the fight many times, so you can see how much luck moves the result.</p>
+          <div class="row sim-controls">
+            <label>Fight <select id="simSeconds"><option value="10">10s</option><option value="20" selected>20s</option><option value="60">60s</option></select></label>
+            <label>Runs <select id="simRuns"><option value="100">100</option><option value="300" selected>300</option><option value="1000">1,000</option></select></label>
+            <button type="button" class="btn sm" id="simRun">Run</button>
+          </div>
+          <div id="simOut"></div>
+        </details>
         <details id="detailBox" open data-adv>
           <summary>Full breakdown</summary>
           <div id="breakdown"></div>
@@ -228,6 +239,7 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
         <label data-tip="statusTypes">Status types on target (min) <input type="number" id="statusTypes" value="0" min="0"></label>
         <label class="check" data-tip="aoeSpread"><input type="checkbox" id="aoeSpread"> Spread targets over the blast</label>
         <label class="check" data-tip="energyOver500"><input type="checkbox" id="energyOver500"> Max energy over 500</label>
+        <label class="check" data-tip="autoCombo"><input type="checkbox" id="autoCombo" checked> Work out heavy attack combo</label>
       </div>
       <h3>What gets modeled</h3>
       <div class="grid2 sim-toggles">
@@ -262,12 +274,15 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
           <option value="ttk">Time to kill (needs enemy unit)</option>
           <option value="groupSustained">Group DPS (enemies in area)</option>
         </select></label>
-        <label data-adv>Exclude mods <input id="excluded" placeholder="comma separated"></label>
+        <label data-adv data-tip="excluded">Never use <input id="excluded" placeholder="mod names, comma separated"></label>
+        <label data-adv data-tip="allowed">Only use <input id="allowed" placeholder="blank = any mod"></label>
+        <label data-tip="formaBudget">Forma budget <input type="number" id="formaBudget" min="0" max="10" step="1" placeholder="no limit"></label>
+        <label class="check" data-tip="optPolarity"><input type="checkbox" id="optPolarity" checked> Set slot polarities</label>
         <label class="check"><input type="checkbox" id="optArcane" checked> Pick weapon arcane</label>
         <label class="check"><input type="checkbox" id="optExilus" checked> Use exilus slot</label>
         <label class="check" title="Star the mods you own in the mod browser"><input type="checkbox" id="optOwned"> Only mods I own</label>
       </div>
-      <p class="muted small">Locked slots are kept. Check the capacity bar afterwards; forma is not chosen for you.</p>
+      <p class="muted small">Locked slots are kept. With a Forma budget, only builds that fit your capacity with that many Forma count, and the slot polarities are set for you.</p>
       <button type="button" id="runOpt" class="btn">Find best build</button>
       <div id="optOut" class="small"></div>
       <details class="lb" id="leaderboard" data-adv>
@@ -436,6 +451,7 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
 <script src="src/incarnon.js"></script>
 <script src="src/riven.js"></script>
 <script src="src/teshin.js"></script>
+<script src="src/sim.js"></script>
 <script src="data/changelog.js"></script>
 <script src="ui/news.js"></script>
 <script src="ui/changelog.js"></script>

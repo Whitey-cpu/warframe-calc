@@ -748,3 +748,21 @@ html[data-mode="beginner"] [data-adv] { display: none !important; }
 #weaponNotes details summary { cursor: pointer; }
 @media (max-width: 1520px) { .topbar #downloadApp { display: none; } }
 .tip-lbl { display: inline-flex; align-items: center; gap: 0; }
+
+/* ---------- shot by shot / rotation ---------- */
+.sim-box, .rotation-box { margin: 10px 0; }
+.rotation-box h3 { margin: 6px 0; }
+.sim-controls { gap: 8px; align-items: end; flex-wrap: wrap; }
+.sim-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 6px; margin: 8px 0; }
+.sim-stats .tile { padding: 6px 8px; min-width: 0; }
+.sim-stats .tile .k { font-size: 10.5px; white-space: nowrap; }
+.sim-stats .tile .v { font-size: 0.98rem; overflow-wrap: anywhere; }
+.hist { width: 100%; height: auto; display: block; }
+.hist-bar { fill: var(--accent); }
+.hist-bar:hover { opacity: .75; }
+.log-wrap { max-height: 320px; overflow: auto; }
+.log-table td, .log-table th { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.rv-import { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.rv-import #rvImportMsg { flex-basis: 100%; }
+.rv-scan select[multiple] { min-height: 84px; }

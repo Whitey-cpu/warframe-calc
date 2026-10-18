@@ -6,7 +6,9 @@
  *    swap exilus and weapon arcane, until nothing improves.
  * Metrics: sustainedTotal, burstTotal, burstDirect, perShotVsEnemy, groupSustained (area damage on several
  * enemies), ttk (time to kill, lower is better; needs enemy health).
- * Mod capacity / forma is NOT enforced: it assumes you can fit the mods (the UI shows capacity separately).
+ * Forma budget (opts.formaBudget): when set, a build only counts if its mods fit the capacity with at most that many
+ * Forma (WF.capacity.formaPlan). Without it, capacity is not enforced and the result reports the Forma it needs.
+ * Allow / block lists: opts.allowed (only these mods), opts.excluded (never these).
  */
 (function () {
   const WF = (typeof window !== 'undefined') ? (window.WF = window.WF || {}) : (global.WF = global.WF || {});
@@ -53,12 +55,13 @@
     const slots = opts.slots || 8;
     const useExilus = opts.exilus !== false;
     const excluded = new Set((opts.excluded || []).map(s => s.toLowerCase()));
+    const allowed = new Set((opts.allowed || []).map(s => s.toLowerCase()).filter(Boolean));
     const locked = (opts.locked || []).filter(Boolean);
     const useArcane = opts.arcane !== false;
     const beamWidth = opts.beamWidth || 8;
 
     let pool = E.modsFor(data, weapon).filter(m =>
-      !excluded.has(m.name.toLowerCase()) &&
+      !excluded.has(m.name.toLowerCase()) && (!allowed.size || allowed.has(m.name.toLowerCase())) &&
       !/Riven/.test(m.type) &&
       m.effects.some(e => RELEVANT.has(e.stat) && !(e.onlyFor && e.onlyFor !== weapon.category)));
     if (opts.ownedOnly && opts.owned) {
@@ -66,6 +69,22 @@
       pool = pool.filter(m => own.has(m.name.toLowerCase()));
     }
     const exilusPool = pool.filter(m => m.exilus);
+    // ---- capacity / Forma ----
+    const C = WF.capacity;
+    const cap = opts.capacity != null ? opts.capacity : 60;
+    const budget = opts.formaBudget != null && opts.formaBudget !== '' ? Math.max(0, +opts.formaBudget) : null;
+    const modInfo = n => { const m = E.findMod(data, weapon, n); return m ? { name: m.name, drain: m.drain || 0, rank: m.maxRank || 0, polarity: m.polarity } : null; };
+    const fixed = (opts.fixedSlots || []).filter(Boolean); // e.g. the riven: { name, drain, rank, polarity }
+    const planCache = new Map();
+    function planFor(mods, exilus) {
+      const key = mods.filter(Boolean).slice().sort().join('|') + '#' + (exilus || '');
+      if (planCache.has(key)) return planCache.get(key);
+      const p = C.formaPlan({ mods: fixed.concat(mods.filter(Boolean).map(modInfo).filter(Boolean)), exilus: exilus ? modInfo(exilus) : null,
+        innate: weapon.polarities, exilusInnate: weapon.exilusPolarity, cap, slots: slots + fixed.length });
+      planCache.set(key, p);
+      return p;
+    }
+    const fitsBudget = (mods, exilus) => budget == null || (() => { const p = planFor(mods, exilus); return p.fits && p.forma <= budget; })();
     const arcanePool = useArcane ? data.arcanes.filter(a => arcaneTypesFor(weapon).includes(a.type) && !excluded.has(a.name.toLowerCase())
       && a.effects.some(e => RELEVANT.has(e.stat))) : [];
 
@@ -97,7 +116,7 @@
       const key = names.join('|') + '#' + (arcane || '') + (exact ? '!' : '');
       if (cache.has(key)) return cache.get(key);
       let s = -1;
-      if (!conflicts(names)) {
+      if (!conflicts(names) && fitsBudget(mods, exilus)) {
         evals++;
         const res = E.calculate(Object.assign({}, scen, {
           conditions: exact ? baseCond : fastCond,
@@ -217,10 +236,12 @@
     const result = E.calculate(finalBuild, data);
     const drain = finalBuild.mods.reduce((t, n) => { const m = E.findMod(data, weapon, n); return t + (m ? m.drain + m.maxRank : 0); }, 0);
     const shown = metric === 'ttk' ? (result.ttk ? result.ttk.seconds : null) : scoreOf(result, metric);
+    const plan = planFor(bestState.mods, bestState.exilus);
     return {
       metric, score: shown, mods: bestState.mods.filter(Boolean), exilus: bestState.exilus, arcane: bestState.arcane,
-      maxRankDrain: drain, evaluations: evals, candidates: pool.length, build: finalBuild, result,
-      notes: ['Mod capacity, polarities and forma are not enforced; check the capacity bar.',
+      maxRankDrain: drain, evaluations: evals, candidates: pool.length, build: finalBuild, result, plan, formaBudget: budget,
+      notes: [budget == null ? `Forma is not limited. This build needs ${plan.fits ? plan.forma + ' Forma' : 'more capacity than the weapon has'} at max rank.` : `Limited to ${budget} Forma; this build needs ${plan.forma}.`,
+        'ASSUMPTION: innate polarities can line up with any mod (the data does not say which slot they are on).',
         'Incompatibility rules: same-mod variants plus the list in src/static.js. Check that the result can be equipped in game.']
     };
   }

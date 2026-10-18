@@ -581,6 +581,7 @@
       conditions: { assumeMax: $('assumeMax').checked, aiming: $('aiming').checked, combo: ev('combo') || 1, statusTypes: ev('statusTypes'), stacks,
         killRate: $('killRate').value === 'custom' ? undefined : $('killRate').value, killsPerMin: $('killRate').value === 'custom' ? Math.max(0, ev('killsPerMin')) : undefined,
         distance: $('distance').value === '' ? undefined : Math.max(0, ev('distance')), aoeSpread: $('aoeSpread').checked, energyOver500: $('energyOver500').checked,
+        autoCombo: $('autoCombo').checked,
         model: { falloff: $('mFalloff').checked, battery: $('mBattery').checked, range: $('mRange').checked, shards: $('mShards').checked },
         selfStatus: $('selfStatus').checked, fightSeconds: $('fightSeconds').value === '' ? undefined : ev('fightSeconds') },
       overrides,
@@ -658,7 +659,7 @@
     if (c.killsPerMin != null) $('killsPerMin').value = c.killsPerMin;
     $('killsPerMinWrap').hidden = $('killRate').value !== 'custom';
     $('distance').value = c.distance != null ? c.distance : 10;
-    $('aoeSpread').checked = !!c.aoeSpread; $('energyOver500').checked = !!c.energyOver500;
+    $('aoeSpread').checked = !!c.aoeSpread; $('energyOver500').checked = !!c.energyOver500; $('autoCombo').checked = c.autoCombo !== false;
     const md = c.model || {};
     $('mFalloff').checked = md.falloff !== false; $('mBattery').checked = md.battery !== false; $('mRange').checked = md.range !== false; $('mShards').checked = md.shards !== false;
     if (b.shards) writeShards(b.shards);
@@ -742,6 +743,13 @@
       const b = collect();
       if (!b) { $('tiles').innerHTML = '<p class="muted">Choose a weapon to start.</p>'; $('typeBars').innerHTML = ''; $('breakdown').innerHTML = ''; return; }
       try {
+        // melee: best "normal combos then a heavy" loop; a heavy attack uses that loop's combo when auto combo is on
+        window.WFLastRotation = null;
+        if (state.weapon.category === 'Melee') {
+          try { window.WFLastRotation = E.meleeRotation(b, D); } catch (e) { window.WFLastRotation = null; }
+          const atk = state.weapon.attacks[b.attack];
+          if (window.WFLastRotation && atk && atk.heavy && b.conditions.autoCombo) b.conditions.combo = window.WFLastRotation.best.combo;
+        }
         const result = E.calculate(b, D);
         render(result);
         showAutoStacks(result);
@@ -769,7 +777,11 @@
         metric: $('metric').value, locked, exilus: $('optExilus').checked, arcane: $('optArcane').checked,
         fixedArcanes: $('optArcane').checked ? [state.arcanes[1]].filter(Boolean) : b.arcanes,
         ownedOnly: $('optOwned').checked, owned: [...owned],
-        excluded: $('excluded').value.split(',').map(s => s.trim()).filter(Boolean)
+        excluded: $('excluded').value.split(',').map(s => s.trim()).filter(Boolean),
+        allowed: $('allowed').value.split(',').map(s => s.trim()).filter(Boolean),
+        formaBudget: $('formaBudget').value === '' ? null : Math.max(0, parseInt($('formaBudget').value, 10) || 0),
+        capacity: $('catalyst').checked ? 60 : 30,
+        fixedSlots: rIdx >= 0 ? (() => { const rm = findModByName(RIVEN); return rm ? [{ name: 'Riven', drain: rm.drain || 0, rank: state.ranks[rIdx] != null ? state.ranks[rIdx] : (rm.maxRank || 0), polarity: rm.polarity }] : []; })() : []
       }), D);
       const ms = Math.round(performance.now() - t0);
       if ($('optOwned').checked && !owned.size) { $('optOut').textContent = 'Mark the mods you own first (star on each mod card), or untick "Only mods I own".'; return; }
@@ -780,8 +792,16 @@
       state.ranks = new Array(SLOT_COUNT + 1).fill(null); if (rIdx >= 0) state.ranks[rIdx] = rankKeep;
       state.locks = state.mods.slice(0, SLOT_COUNT).map((n, i) => n !== RIVEN && picked.slice(0, i).filter(x => x !== RIVEN).length < locked.length);
       if ($('optArcane').checked) state.arcanes[0] = o.arcane || null;
+      // put the planned polarities on the slots (riven first in the plan, then the mods in slot order, unused innate on empty slots)
+      if ($('optPolarity').checked && o.plan && o.plan.fits) {
+        const pl = o.plan.polarities.slice();
+        const rivenPol = rIdx >= 0 ? pl.shift() : null;
+        const freePols = (o.plan.free || []).slice();
+        state.pols = state.mods.slice(0, SLOT_COUNT).map(n => n === RIVEN ? rivenPol : n ? (pl.shift() || null) : (freePols.shift() || null)).concat([o.plan.exilusPolarity || null]);
+      }
       renderSlots(); renderArcanes(); update();
-      $('optOut').innerHTML = `<p>Best: <b>${fmt(o.score)}</b> (${o.evaluations} builds in ${ms} ms). Drain at max rank ${o.maxRankDrain}.</p><ul class="notes">${o.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`;
+      const planTxt = o.plan && o.plan.fits ? `Needs <b>${o.plan.forma}</b> Forma (drain ${o.plan.drain}/${o.plan.cap}).` : o.plan ? '<span class="warn-t">Does not fit the capacity even with Forma on every slot.</span>' : '';
+      $('optOut').innerHTML = `<p>Best: <b>${fmt(o.score)}</b> (${o.evaluations} builds in ${ms} ms). ${planTxt}</p><ul class="notes">${o.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`;
     }, 20);
   };
 

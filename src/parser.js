@@ -29,7 +29,7 @@
     'weak point damage': 'weakPoint', 'weak point critical chance': 'weakPointCrit',
     // "Direct Damage" (Galvanized mods) adds to the base damage pool for the hit itself.
     'direct damage': 'directDamage',
-    'heavy attack wind up speed': 'windUp', 'heavy attack efficiency': 'heavyEfficiency'
+    'heavy attack wind up speed': 'windUp', 'heavy attack efficiency': 'heavyEfficiency', 'combo duration': 'comboDurationPct'
   };
 
   const TAG_WORDS = {
@@ -82,6 +82,11 @@
     m = t.match(/^x(\d+(?:\.\d+)?)\s+Damage to (.+)$/i);
     if (m) return { stat: 'faction', faction: m[2].trim(), value: parseFloat(m[1]) - 1 };
 
+    // flat melee combo stats: "+30 Initial Combo", "+12s Combo Duration"
+    m = t.match(/^([+-]?\d+(?:\.\d+)?)\s+Initial Combo$/i);
+    if (m) return { stat: 'initialCombo', value: parseFloat(m[1]) };
+    m = t.match(/^([+-]?\d+(?:\.\d+)?)s\s+Combo Duration$/i);
+    if (m) return { stat: 'comboDurationFlat', value: parseFloat(m[1]) };
     m = t.match(/^([+-]?\d+(?:\.\d+)?)%\s+(?:to\s+)?(.+)$/i);
     if (!m) return null;
     const value = parseFloat(m[1]) / 100;

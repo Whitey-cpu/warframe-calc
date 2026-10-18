@@ -121,8 +121,68 @@ window.WFSim = function (UI) {
   }
   $('statTabs').addEventListener('click', e => { const t = e.target.closest('[data-tab="sim"]'); if (t) setTimeout(() => scheduleTimeline(UI.collect()), 0); });
 
+  // ---------- melee: heavy attack rotation ----------
+  function renderRotation(b) {
+    const box = $('rotationBox');
+    const rot = window.WFLastRotation;
+    if (!rot || !UI.state.weapon || UI.state.weapon.category !== 'Melee') { box.hidden = true; box.innerHTML = ''; return; }
+    const B = rot.best, sp = rot.heavySpam;
+    const what = B.normals === 0 ? 'heavy attacks back to back' : `${B.normals} normal combo${B.normals > 1 ? 's' : ''}, then a heavy attack`;
+    box.hidden = false;
+    box.innerHTML = `<h3 data-tip="rotation">Best melee loop</h3>
+      <p class="small">${esc(what)} at <b>${B.combo}x</b> combo: <b>${fmt(B.dps)}</b> DPS over a ${Math.round(B.cycle * 100) / 100}s loop.</p>
+      <div class="statline small"><span>Heavy spam <b>${fmt(sp.dps)}</b> (${sp.combo}x)</span><span>Normal swings only <b>${fmt(rot.normalsOnly)}</b></span>
+        <span>Combo per ${rot.stance ? 'stance combo' : 'hit'} <b>${Math.round(rot.pointsPerCombo * 10) / 10}</b></span><span>Heavy Attack Efficiency <b>${Math.round(rot.efficiency * 100)}%</b></span>
+        ${rot.initialCombo ? `<span>Initial Combo <b>${Math.round(rot.initialCombo)}</b></span>` : ''}<span>Combo timer <b>${Math.round(rot.comboDuration * 10) / 10}s</b></span></div>
+      <p class="muted small">${rot.stance ? '' : 'Pick a stance for exact combo timing; without one each swing counts as one hit. '}A heavy attack spends the combo except what Heavy Attack Efficiency keeps; Initial Combo refills at 40 points per second. ${link('Melee_Combo', 'Melee Combo')}</p>`;
+    if (window.WFTipsDecorate) window.WFTipsDecorate(box);
+  }
+
+  // ---------- shot by shot ----------
+  let lastResult = null;
+  function runSim() {
+    const out = $('simOut');
+    if (!lastResult || !WF.sim) { out.innerHTML = '<p class="muted small">Choose a weapon first.</p>'; return; }
+    const seconds = +$('simSeconds').value, runs = +$('simRuns').value;
+    out.innerHTML = '<p class="muted small">Rolling...</p>';
+    setTimeout(() => {
+      const r = lastResult;
+      const res = WF.sim.simulate(r, { seconds, runs, seed: (Date.now() & 0xffffff), melee: UI.state.weapon && UI.state.weapon.category === 'Melee' });
+      // histogram (one series, accent colour, hover per bar)
+      const bins = 24, lo = res.min, hi = res.max === res.min ? res.min + 1 : res.max;
+      const counts = new Array(bins).fill(0);
+      res.all.forEach(v => { counts[Math.min(bins - 1, Math.floor((v - lo) / (hi - lo) * bins))]++; });
+      const Wd = 480, H = 120, pad = 4, bw = (Wd - pad * 2) / bins, maxC = Math.max(...counts) || 1;
+      const bars = counts.map((c, i) => { const h = c / maxC * (H - 24); const x0 = lo + (hi - lo) * i / bins, x1 = lo + (hi - lo) * (i + 1) / bins;
+        return `<rect class="hist-bar" x="${(pad + i * bw + 1).toFixed(1)}" y="${(H - 18 - h).toFixed(1)}" width="${Math.max(1, bw - 2).toFixed(1)}" height="${Math.max(0, h).toFixed(1)}" rx="2"><title>${fmt(x0)} to ${fmt(x1)}: ${c} run${c === 1 ? '' : 's'}</title></rect>`; }).join('');
+      const formula = r.dps.sustainedTotal;
+      const fx = formula >= lo && formula <= hi ? pad + (formula - lo) / (hi - lo) * (Wd - pad * 2) : null;
+      const rows = res.log.map(e => e.kind === 'reload'
+        ? `<tr class="muted"><td>${e.t.toFixed(2)}s</td><td colspan="4">Reload (${Math.round(e.dur * 100) / 100}s)</td></tr>`
+        : `<tr><td>${e.t.toFixed(2)}s</td><td>${e.pellets}</td><td>${[e.crits[0] ? e.crits[0] + ' no crit' : '', e.crits[1] ? e.crits[1] + ' yellow' : '', e.crits[2] ? e.crits[2] + ' orange' : '', e.crits[3] ? e.crits[3] + ' red' : ''].filter(Boolean).join(', ')}${e.heads ? `, ${e.heads} head` : ''}</td>
+            <td>${esc(Object.entries(e.procs).map(([k, v]) => v > 1 ? `${k} x${v}` : k).join(', ') || '-')}</td><td>${fmt(e.dmg)}</td></tr>`).join('');
+      out.innerHTML = `
+        <div class="sim-stats">
+          ${[['Worst', res.min], ['Unlucky (10%)', res.p10], ['Median', res.median], ['Lucky (90%)', res.p90], ['Best', res.max]].map(([k, v]) => `<div class="tile"><div class="k">${k}</div><div class="v">${fmt(v)}</div></div>`).join('')}
+        </div>
+        <svg class="hist" viewBox="0 0 ${Wd} ${H}" role="img" aria-label="DPS spread over ${runs} simulated fights">
+          ${bars}${fx != null ? `<line x1="${fx}" x2="${fx}" y1="4" y2="${H - 18}" class="tl-ref"/>` : ''}
+          <text x="${pad}" y="${H - 4}" class="tl-ax">${fmt(lo)}</text><text x="${Wd - pad}" y="${H - 4}" class="tl-ax" text-anchor="end">${fmt(hi)}</text>
+        </svg>
+        <p class="muted small">${runs} fights of ${seconds}s. Dashed line: the calculator's long-run number (${fmt(formula)}). Short fights start with a full magazine and cut off status ticks that land after the window, so they can read a little above or below it.</p>
+        <details class="small"><summary>Combat log (first fight, first ${res.log.length} events)</summary>
+          <div class="log-wrap"><table class="tl-table log-table"><thead><tr><th>Time</th><th>Pellets</th><th>Crits</th><th>Status</th><th>Hit damage</th></tr></thead><tbody>${rows}</tbody></table></div>
+          <p class="muted small">Hit damage is direct damage only; status ticks land over the next seconds and are counted in the totals.</p></details>
+        <p class="muted small">ASSUMPTION: enemy statuses and buff stacks stay at their long-run average, so this shows luck, not ramp-up (see the Simulacrum's first minute).</p>`;
+    }, 20);
+  }
+  $('simRun').addEventListener('click', runSim);
+
   UI.hooks.push((b, r) => {
+    lastResult = r;
     try { mathSteps(b, r); } catch (e) { $('mathSteps').innerHTML = ''; }
+    try { renderRotation(b); } catch (e) { $('rotationBox').hidden = true; }
+    if ($('simOut').innerHTML && $('simBox').open) $('simOut').innerHTML = '<p class="muted small">Build changed. Press Run for a new roll.</p>';
     scheduleTimeline(b);
   });
 };

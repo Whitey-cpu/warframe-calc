@@ -39,6 +39,79 @@ window.WFRiven = function (UI) {
     if (full) render(); else refreshGrades();
   }
 
+  // roll scanner option lists (stats this weapon can roll)
+  function scanOptions() {
+    const w = weapon(); if (!w) return '';
+    const type = R.typeFor(w);
+    return R.STATS.concat(R.SPLICED).filter(d => R.available(d, type) && d.fx && !d.negOnly).map(d => `<option value="${d.key}">${esc(R.labelFor(d, type))}</option>`).join('');
+  }
+  function negOptions() {
+    const w = weapon(); if (!w) return '';
+    const type = R.typeFor(w);
+    return R.STATS.filter(d => R.available(d, type) && !d.posOnly).map(d => `<option value="${d.key}">-${esc(R.labelFor(d, type))}</option>`).join('');
+  }
+  const selected = id => { const el = $(id); return el ? [...el.selectedOptions].map(o => o.value) : []; };
+
+  // ---------------- import from a screenshot (Tesseract.js, bundled in vendor/tesseract, runs on this device) ----------------
+  let ocrWorker = null;
+  let importNote = ''; // last import result, kept across re-renders
+  function loadScript(src) { return new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error('Could not load ' + src)); document.head.appendChild(sc); }); }
+  async function getWorker(msg) {
+    if (ocrWorker) return ocrWorker;
+    const base = new URL('vendor/tesseract/', location.href).href;
+    if (!window.Tesseract) await loadScript(base + 'tesseract.min.js');
+    msg('Loading the text reader (about 7 MB, once)...');
+    ocrWorker = await window.Tesseract.createWorker('eng', 1, {
+      workerPath: base + 'worker.min.js', corePath: base + 'core', langPath: base + 'lang', gzip: true, cacheMethod: 'write'
+    });
+    return ocrWorker;
+  }
+  // bigger, grey and dark-on-light reads best; riven cards are light text on dark purple
+  function prepare(img) {
+    const scale = Math.min(3, Math.max(1, 1600 / Math.max(img.width, img.height)));
+    const c = document.createElement('canvas'); c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+    const g = c.getContext('2d'); g.drawImage(img, 0, 0, c.width, c.height);
+    const d = g.getImageData(0, 0, c.width, c.height), px = d.data;
+    let sum = 0;
+    for (let i = 0; i < px.length; i += 4) { const y = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]; px[i] = px[i + 1] = px[i + 2] = y; sum += y; }
+    const invert = sum / (px.length / 4) < 128;
+    for (let i = 0; i < px.length; i += 4) { let y = px[i]; if (invert) y = 255 - y; y = y < 150 ? Math.max(0, y - 60) : Math.min(255, y + 60); px[i] = px[i + 1] = px[i + 2] = y; }
+    g.putImageData(d, 0, 0);
+    return c;
+  }
+  async function importImage(file) {
+    const out = $('rvImportMsg');
+    const msg = t => { if (out) out.textContent = t; };
+    try {
+      msg('Reading the screenshot...');
+      const url = URL.createObjectURL(file);
+      const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('That file is not an image.')); im.src = url; });
+      const worker = await getWorker(msg);
+      msg('Reading the card...');
+      const { data } = await worker.recognize(prepare(img));
+      URL.revokeObjectURL(url);
+      const got = R.parseCardText(data.text, D.weapons, weapon());
+      if (!got.stats.length) { msg('No riven stats found. Crop the screenshot to the riven card and try again.'); return; }
+      if (got.weaponName && weapon() && got.weaponName !== weapon().name) {
+        out.innerHTML = `This riven is for <b>${esc(got.weaponName)}</b>. <button type="button" class="btn ghost sm" id="rvSwitchW">Switch to ${esc(got.weaponName)}</button>`;
+        $('rvSwitchW').onclick = () => { UI.apply(Object.assign({}, UI.collect(), { weapon: got.weaponName, mods: [], slotLayout: null, riven: [], rivenMod: { stats: got.stats } })); state.riven.stats = got.stats; render(); };
+        return;
+      }
+      importNote = `Imported ${got.stats.length} stat${got.stats.length > 1 ? 's' : ''}. Check them against your card${got.unmatched.length ? `; could not read: ${esc(got.unmatched.slice(0, 3).join(' | '))}` : ''}.`;
+      state.riven.stats = got.stats;
+      changed(true);
+    } catch (e) { msg('Import failed: ' + e.message); }
+  }
+  panel.addEventListener('paste', e => {
+    const it = [...(e.clipboardData || {}).items || []].find(x => x.type && x.type.startsWith('image/'));
+    if (it) { e.preventDefault(); importImage(it.getAsFile()); }
+  });
+  document.addEventListener('paste', e => {
+    if (!panel.offsetParent || e.target.closest('input, textarea')) return;
+    const it = [...(e.clipboardData || {}).items || []].find(x => x.type && x.type.startsWith('image/'));
+    if (it && !panel.contains(e.target)) { e.preventDefault(); importImage(it.getAsFile()); }
+  });
+
   // ---------------- render ----------------
   function render() {
     const w = weapon();
@@ -83,16 +156,29 @@ window.WFRiven = function (UI) {
         <label>Polarity <select id="rvPol">${POLS.map(p => `<option value="${p}"${state.riven.polarity === p ? ' selected' : ''}>${p[0].toUpperCase() + p.slice(1)}</option>`).join('')}</select></label>
         <label title="Capacity cost shown on your riven at rank 8. Riven cards differ; 18 is only a starting guess.">Drain at rank 8 <input type="number" id="rvDrain" min="0" max="30" value="${state.riven.drain != null ? state.riven.drain : R.DEFAULT_DRAIN}"></label>
       </div>
+      <div class="rv-import">
+        <button type="button" class="btn ghost sm" id="rvImportBtn">Import from screenshot</button>
+        <input type="file" id="rvImportFile" accept="image/*" hidden>
+        <span class="muted small">or paste a screenshot here (Ctrl+V). It is read on your device; nothing is uploaded.</span>
+        <div id="rvImportMsg" class="small">${importNote}</div>
+      </div>
       <p class="muted small">Type the numbers from your riven card (rank 8 values), or pick a stat and drag its slider through the possible range.</p>
       <div class="rv-rows">${rs.map(row).join('')}</div>
       <div id="rvMsgs"></div>
       <div class="rv-grade-all" id="rvGradeAll"></div>
       ${splices.length ? `<p class="small rv-splice"><span class="muted">Riven Splicer can combine:</span> ${splices.join(' &middot; ')}</p>` : ''}
       <details class="rv-sec" id="rvBestBox" open>
-        <summary>Best stats for this build</summary>
-        <p class="muted small">Every 2- and 3-stat combination at an average roll, for your build and enemy (${esc(($('metric').selectedOptions[0] || {}).textContent || 'DPS')}).</p>
+        <summary>Roll scanner: best stats for this build</summary>
+        <p class="muted small">Every 2- and 3-stat combination for your build and enemy (${esc(($('metric').selectedOptions[0] || {}).textContent || 'DPS')}).</p>
+        <div class="grid2 rv-scan">
+          <label>Must have <select id="rvForce" multiple size="4">${scanOptions()}</select></label>
+          <label>Never use <select id="rvExclude" multiple size="4">${scanOptions()}</select></label>
+          <label>Negative <select id="rvNeg"><option value="">None or a harmless one</option><option value="none">No negative</option>${negOptions()}</select></label>
+          <label>Roll quality <span class="muted small" id="rvRollTxt">average</span><input type="range" id="rvRoll" min="90" max="110" step="1" value="100"></label>
+        </div>
         <label class="check small"><input type="checkbox" id="rvSpliced"> Include spliced traits</label>
         <label class="check small"><input type="checkbox" id="rvNoAmmo"> Ignore magazine and reload stats</label>
+        <label class="check small" title="Runs the optimizer again around each of the top 3 rivens, so the mods can change with the riven (slower)"><input type="checkbox" id="rvReopt"> Re-optimize mods for the top 3</label>
         <button type="button" class="btn sm" id="rvBest">Find best stats</button>
         <div id="rvBestOut"></div>
       </details>
@@ -136,6 +222,7 @@ window.WFRiven = function (UI) {
 
   // ---------------- editing ----------------
   panel.addEventListener('change', e => {
+    if (e.target.id === 'rvImportFile') { const f = e.target.files && e.target.files[0]; if (f) importImage(f); e.target.value = ''; return; }
     const t = e.target;
     const rs = rows();
     if (t.matches('[data-k]')) {
@@ -162,6 +249,7 @@ window.WFRiven = function (UI) {
     else if (t.id === 'rvDrain') { state.riven.drain = Math.max(0, Math.min(30, parseInt(t.value, 10) || 0)); changed(false); }
   });
   panel.addEventListener('input', e => {
+    if (e.target.id === 'rvRoll') { const v = +e.target.value; $('rvRollTxt').textContent = v === 100 ? 'average' : v === 110 ? 'perfect' : v === 90 ? 'worst' : v + '%'; return; }
     const t = e.target;
     const rs = rows();
     if (t.matches('[data-v]')) {
@@ -190,6 +278,7 @@ window.WFRiven = function (UI) {
     } else if (e.target.id === 'rvUnequip') {
       const i = slotIdx(); if (i >= 0) { state.mods[i] = null; state.ranks[i] = null; UI.renderSlots(); UI.update(); render(); }
     } else if (e.target.id === 'rvBest') bestStats();
+    else if (e.target.id === 'rvImportBtn') $('rvImportFile').click();
     else if (e.target.id === 'rvSave') saveRiven();
     else if (e.target.closest('[data-use]')) useBest(+e.target.closest('[data-use]').dataset.use);
     else if (e.target.closest('[data-load]')) loadRiven(e.target.closest('[data-load]').dataset.load);
@@ -213,7 +302,10 @@ window.WFRiven = function (UI) {
     if (metric === 'ttk' && !(b.enemy && b.enemy.health > 0)) metric = 'sustainedTotal';
     const fi = S.FACTIONS[b.enemy && b.enemy.faction] || {};
     const factionKey = RIVEN_FACTION[fi.baneKey] || RIVEN_FACTION[fi.rivenKey] || null;
-    const opts = { factionKey, spliced: $('rvSpliced').checked, noAmmo: $('rvNoAmmo').checked, attack: b.attack };
+    const negSel = $('rvNeg').value;
+    const roll = (+$('rvRoll').value || 100) / 100;
+    const opts = { factionKey, spliced: $('rvSpliced').checked, noAmmo: $('rvNoAmmo').checked, attack: b.attack,
+      forced: selected('rvForce'), excluded: selected('rvExclude'), negative: negSel === 'none' ? null : (negSel || undefined) };
     const base = Object.assign({}, b, { riven: [], rivenSlot: undefined });
     const baseRes = E.calculate(base, D);
     const baseScore = metricScore(baseRes, metric);
@@ -230,7 +322,7 @@ window.WFRiven = function (UI) {
       const end = Math.min(jobs.length, k + 80);
       for (; k < end; k++) {
         const j = jobs[k];
-        const riv = R.averageRiven(j.keys, j.neg, w);
+        const riv = R.averageRiven(j.keys, j.neg, w, roll);
         try {
           const res = E.calculate(Object.assign({}, b, { riven: R.toEffects(riv), rivenSlot: slot, conditions: cond }), D);
           results.push({ keys: j.keys, neg: j.neg, score: metricScore(res, metric) });
@@ -241,15 +333,29 @@ window.WFRiven = function (UI) {
       // keep the best version of each positive set (with or without the negative)
       const seen = new Set();
       lastBest = results.filter(r => { const id = r.keys.slice().sort().join('+'); if (seen.has(id)) return false; seen.add(id); return true; }).slice(0, 10);
+      // optional: let the mods change around each of the top 3 rivens
+      if ($('rvReopt').checked && WF.optimizer) {
+        const rIdx = slotIdx();
+        for (const r of lastBest.slice(0, 3)) {
+          try {
+            const riv = R.averageRiven(r.keys, r.neg, w, roll);
+            const o = WF.optimizer.optimize(Object.assign({}, b, { riven: R.toEffects(riv), rivenSlot: rIdx >= 0 ? b.rivenSlot : 7.5, slots: UI.SLOT_COUNT - 1,
+              metric, locked: [], exilus: true, arcane: false, fixedArcanes: b.arcanes, beamWidth: 5, refine: 1 }), D);
+            r.reopt = { score: metric === 'ttk' ? (o.score ? 1 / o.score : 0) : o.score, mods: o.mods };
+          } catch (err) { /* keep the plain result */ }
+        }
+      }
       const type = R.typeFor(w);
       const lbl = key => esc(R.labelFor(R.statDef(key), type));
       const unit = metric === 'ttk' ? '' : metric === 'perShotVsEnemy' ? ' per shot' : ' DPS';
-      out.innerHTML = `<table class="rv-best"><tr><th>Positives (average roll)</th><th>Negative</th><th>${metric === 'ttk' ? 'Time to kill' : 'Result'}</th><th>vs no riven</th><th></th></tr>${lastBest.map((r, i) => {
+      out.innerHTML = `<table class="rv-best"><tr><th>Positives</th><th>Negative</th><th>${metric === 'ttk' ? 'Time to kill' : 'Result'}</th><th>vs no riven</th><th></th></tr>${lastBest.map((r, i) => {
         const val = metric === 'ttk' ? (1 / r.score).toFixed(2) + 's' : fmt(r.score) + unit;
         const gain = baseScore > 0 ? ((r.score / baseScore - 1) * 100) : 0;
-        return `<tr><td>${r.keys.map(lbl).join(', ')}</td><td>${r.neg ? 'any harmless one' : 'none'}</td><td>${val}</td><td class="pos">+${gain.toFixed(gain >= 10 ? 0 : 1)}%</td><td><button type="button" class="btn ghost sm" data-use="${i}">Use</button></td></tr>`;
+        const re = r.reopt ? `<br><span class="muted small">with re-optimized mods: ${metric === 'ttk' ? (1 / r.reopt.score).toFixed(2) + 's' : fmt(r.reopt.score) + unit}</span>` : '';
+        const negTxt = !r.neg ? 'none' : opts.negative ? '-' + lbl(r.neg) : 'any harmless one';
+        return `<tr><td>${r.keys.map(lbl).join(', ')}</td><td>${negTxt}</td><td>${val}${re}</td><td class="pos">${gain >= 0 ? '+' : ''}${gain.toFixed(Math.abs(gain) >= 10 ? 0 : 1)}%</td><td><button type="button" class="btn ghost sm" data-use="${i}">Use</button></td></tr>`;
       }).join('')}</table>
-      <p class="muted small">"Harmless" negatives here do not change damage in this model: ${harmless.map(lbl).join(', ') || 'none'}. Disposition ${w.omega || 1}, rank 8.
+      <p class="muted small">"Harmless" negatives here do not change damage in this model: ${harmless.map(lbl).join(', ') || 'none'}. Disposition ${w.omega || 1}, rank 8, every stat at ${Math.round(roll * 100)}% of its average roll.
         ${opts.factionKey ? '' : 'Faction stats are skipped because the current enemy faction has no matching riven stat.'}</p>`;
     };
     setTimeout(step, 10);
@@ -257,8 +363,10 @@ window.WFRiven = function (UI) {
   function useBest(i) {
     const r = lastBest[i]; const w = weapon(); if (!r || !w) return;
     const { harmless } = R.candidateKeys(w, {});
-    const pick = r.neg ? (harmless.includes('zoom') ? 'zoom' : r.neg) : null;
-    state.riven.stats = R.averageRiven(r.keys, pick, w).stats.map(s => Object.assign(s, { value: +s.value.toFixed(2) }));
+    const negSel = $('rvNeg') ? $('rvNeg').value : '';
+    const pick = !r.neg ? null : (negSel && negSel !== 'none') ? r.neg : (harmless.includes('zoom') ? 'zoom' : r.neg);
+    const roll = $('rvRoll') ? (+$('rvRoll').value || 100) / 100 : 1;
+    state.riven.stats = R.averageRiven(r.keys, pick, w, roll).stats.map(s => Object.assign(s, { value: +s.value.toFixed(2) }));
     if (slotIdx() < 0) { const free = state.mods.slice(0, UI.SLOT_COUNT).indexOf(null); if (free >= 0) UI.addMod(UI.RIVEN, free); }
     changed(true);
   }

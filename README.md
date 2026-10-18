@@ -94,6 +94,14 @@ Public sources only. Nothing is read from the game client or a player account.
 - Damage falloff from the wiki falloff data per attack, battery weapons (refill rate and delay from each weapon's wiki page,
   `data/overrides.json`), Archon Shards, melee heavy attacks (listed heavy damage x combo multiplier, wind-up) and stances
   (per-hit multipliers from the wiki's Module:Stances/data, scraped weekly by `scripts/scrape-web.js` with `scripts/lua-table.js`)
+- Shot by shot (`src/sim.js`): rolls each pellet's crit tier, headshot and status per pellet from the engine's per-hit numbers,
+  repeats the fight (default 300 x 20s) and reports worst / 10% / median / 90% / best DPS with a combat log
+- Forma-aware optimizer: `WF.capacity.formaPlan` finds the fewest Forma that fit a mod set and where the polarities go
+  (innate polarities treated as movable, since the data does not say which slot they are on); `formaBudget`, `allowed`, `excluded`
+- Best melee loop (`WF.engine.meleeRotation`): combo points from stance hit % x enemies hit, Heavy Attack Efficiency (max 90%),
+  Initial Combo (refills 40/s), combo timer; tries 0-60 normal combos between heavies (wiki Melee Combo page)
+- Riven import from screenshots with Tesseract.js bundled in `vendor/tesseract` (runs in the browser, loaded only when used),
+  card text parsed by `WF.riven.parseCardText`; roll scanner with forced / excluded stats, chosen negative and roll quality
 - What's new: Game updates (DE patch notes with a TL;DR from DE's own headings, full notes, search, calculator items highlighted),
   live Events (events, Baro Ki'Teer, Prime Resurgence, Nightwave, resets, open world cycles, DE news) and the changelog
 - Installable web app with offline support (`sw.js`), light/dark toggle, feedback button, patch-change banner

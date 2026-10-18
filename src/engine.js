@@ -339,7 +339,7 @@
       slashOnCrit: 0, separate: [], voidExtra: 0,
       // flat changes to the weapon's BASE stats (Incarnon evolutions, e.g. "+12 base damage per pellet")
       baseDmgFlat: 0, baseCCFlat: 0, baseCDFlat: 0, baseSCFlat: 0, baseMSFlat: 0, baseMagFlat: 0,
-      locks: {}, wpCrit: 0, lingerFirstDouble: 0, lastShotMS: 0, msDmg: 0, statusDamageType: {}, corrosiveMax: 0, windUp: 0, heavyEff: 0
+      locks: {}, wpCrit: 0, lingerFirstDouble: 0, lastShotMS: 0, msDmg: 0, statusDamageType: {}, corrosiveMax: 0, windUp: 0, heavyEff: 0, initialCombo: 0, comboDurFlat: 0, comboDurPct: 0
     };
     const elementOrder = []; // [{el, bonus, slot}]
     const used = [];
@@ -416,6 +416,9 @@
         case 'corrosiveMax': P.corrosiveMax += v; break;
         case 'windUp': P.windUp += v; break;
         case 'heavyEfficiency': P.heavyEff += v; break;
+        case 'initialCombo': P.initialCombo += v; break;
+        case 'comboDurationFlat': P.comboDurFlat += v; break;
+        case 'comboDurationPct': P.comboDurPct += v; break;
         case 'headshot': P.headshot += v; break;
         case 'weakPoint': P.weakPoint += v; break;
         case 'slashOnCrit': P.slashOnCrit += v; break;
@@ -719,6 +722,7 @@
       const tick = baseTotal * dotDmgMult * d.pct * factionMult * factionMult * (1 + P.statusDamage + (P.statusDamageType[t] || 0)) * elemFactor * critBodyHeadAvg;
       const dur = d.duration * (1 + P.statusDuration);
       let ticks = d.fixedTicks || (Math.floor(dur - d.delay) + 1 - (d.lastTickNoDamage ? 1 : 0));
+      const fullTicks = ticks;
       // Heat: every proc refreshes all active Heat stacks (wiki: Damage/Heat_Damage), so while procs keep coming
       // (ASSUMPTION: when procs/s x duration >= 3) each stack keeps ticking until the target dies.
       const pps = procs * effFR * sustainFactor;
@@ -730,7 +734,7 @@
       }
       const tickVs = tick * typeMod(t) * (d.bypassArmor ? 1 : armorDM) * viral;
       const perProc = tickVs * ticks;
-      dots[t] = { procsPerShot: procs, tick: tickVs, ticks: Math.round(ticks * 100) / 100, perProc, perShot: perProc * procs };
+      dots[t] = { procsPerShot: procs, tick: tickVs, ticks: Math.round(ticks * 100) / 100, perProc, perShot: perProc * procs, fullTicks, delay: d.delay, refresh };
       dotPerShot += perProc * procs;
       dotGroupPerShot += perProc * procs * (d.aoe ? targets : 1);
       if (t === 'blast' && targets > 1) {
@@ -766,7 +770,9 @@
         critChance: cc, critMultiplier: cd, statusChance: sc, multishot: ms,
         fireRate: fr, effectiveFireRate: effFR, magazine: mag, reload,
         factionMultiplier: factionMult, separateMultiplier: sepMult,
-        headshotMultiplier: headMult, avgCritBody: critBody, avgCritHead: critHead,
+        headshotMultiplier: headMult, avgCritBody: critBody, avgCritHead: critHead, critChanceHead: ccHead, headshotRate: hsRate, slashOnCrit: P.slashOnCrit,
+        heavyEfficiency: Math.min(0.9, P.heavyEff), initialCombo: P.initialCombo,
+        comboDuration: isMelee ? Math.max(0.1, ((weapon.comboDuration || 5) + P.comboDurFlat) * (1 + P.comboDurPct)) : null,
         armorAfterStrip: netArmor, armorDamageMultiplier: armorDM, viralMultiplier: viral
       },
       damageTypes: Object.fromEntries(Object.entries(hitTyped).map(([k, v]) => [k, round(v)])),
@@ -778,6 +784,7 @@
       ttk,
       dots: Object.fromEntries(Object.entries(dots).map(([k, v]) => [k, mapRound(v)])),
       procsPerShot: round(procsPerShot + extraSlashPerShot),
+      procWeights,
       procPerShotByType: Object.fromEntries(Object.entries(procWeights).map(([k, w]) => [k, w * procsPerShot + (k === 'slash' ? extraSlashPerShot : 0)])),
       dotPerShot,
       perShotGroup: round(perShot * (isAoE ? targets : 1)),
@@ -804,6 +811,7 @@
       stackModel: trigCtx.stackLog.map(x => Object.assign({}, x, { rate: round(x.rate), stacks: round(x.stacks) })),
       needsRates: trigCtx.needsRates,
       corrosiveMaxBonus: P.corrosiveMax,
+      stance: stance ? { name: stance.stance, combo: stance.combo, comboName: stance.comboName, hits: stance.hits, avgMult: round(stance.avgMult), duration: stance.duration } : null,
       falloffMult: round(fall)
     };
     if (trigCtx.stackLog.some(x => x.kind === 'kill')) {
@@ -1000,6 +1008,63 @@
     return r;
   }
 
+  // ---------- melee: normal combos then a heavy attack ----------
+  // Melee Combo (https://wiki.warframe.com/w/Melee_Combo): 2x at 20 hits, +1x per 20 up to 12x at 220; a 300% stance hit
+  // adds 3 points; points come per enemy hit; a heavy attack spends the combo but keeps Heavy Attack Efficiency (max 90%)
+  // of it; Initial Combo is a floor that refills at 40 points/s; the combo resets when no hit lands for the combo
+  // duration (5s by default). Heavy attacks get the full multiplier, normal swings do not (Blood Rush and Weeping
+  // Wounds still read it). Tries 0 to 60 normal combos between heavy attacks and keeps the best.
+  // ASSUMPTION: no rounding of combo points; normal swings use the average multiplier while the combo builds.
+  const comboMult = p => p < 20 ? 1 : Math.min(12, Math.floor(p / 20) + 1);
+  function meleeRotation(build, data, opts) {
+    const weapon = typeof build.weapon === 'object' ? build.weapon : findWeapon(data, build.weapon);
+    if (!weapon || weapon.category !== 'Melee') return null;
+    const hIdx = weapon.attacks.findIndex(a => a.heavy);
+    if (hIdx < 0) return null;
+    let nIdx = typeof build.attack === 'number' ? build.attack : 0;
+    if (!weapon.attacks[nIdx] || weapon.attacks[nIdx].heavy) nIdx = 0;
+    const cond = build.conditions || {};
+    const cache = new Map();
+    const at = (idx, m) => {
+      const k = idx + ':' + m;
+      if (!cache.has(k)) cache.set(k, calculate(Object.assign({}, build, { attack: idx, conditions: Object.assign({}, cond, { combo: m, iterations: 2 }) }), data));
+      return cache.get(k);
+    };
+    const n1 = at(nIdx, 1), h1 = at(hIdx, 1);
+    const st = n1.stats;
+    const targets = Math.max(1, (build.enemy && build.enemy.targets) || 1);
+    const hitsPerCombo = n1.stance ? n1.stance.hits : 1;
+    const pointsPerCombo = (n1.stance ? n1.stance.avgMult * n1.stance.hits : 1) * targets;
+    const comboTime = hitsPerCombo / st.effectiveFireRate;
+    const heavyTime = 1 / h1.stats.effectiveFireRate;
+    const eff = Math.min(0.9, h1.stats.heavyEfficiency || 0);
+    const ic = h1.stats.initialCombo || 0;
+    const dur = h1.stats.comboDuration || 5;
+    const heavyDmg = m => { const r = at(hIdx, m); return r.perShotVsEnemy + (r.dotPerShot || 0); };
+    const normalDps = m => at(nIdx, m).dps.sustainedTotal;
+    const rows = [];
+    for (let N = 0; N <= 60; N++) {
+      const cycle = N * comboTime + heavyTime;
+      const floor = Math.min(ic, 40 * cycle);
+      let P = floor;
+      for (let i = 0; i < 60; i++) {
+        let after = Math.max(eff * P, floor);
+        if (heavyTime > dur && N === 0) after = floor; // nothing lands during a wind-up longer than the combo timer
+        P = Math.min(220, after + N * pointsPerCombo);
+      }
+      const after = Math.max(eff * P, floor);
+      const m = comboMult(P);
+      const mAvg = comboMult((after + P) / 2);
+      const dmg = N * comboTime * normalDps(mAvg) + heavyDmg(m);
+      rows.push({ normals: N, combo: m, points: Math.round(P), cycle, dps: dmg / cycle });
+    }
+    const best = rows.reduce((a, b) => b.dps > a.dps ? b : a);
+    return {
+      best, heavySpam: rows[0], normalsOnly: normalDps(12), rows,
+      pointsPerCombo, comboTime, heavyTime, efficiency: eff, initialCombo: ic, comboDuration: dur, stance: n1.stance
+    };
+  }
+
   // ---------- the first minute (Simulacrum timeline) ----------
   // Instant DPS at time t after the fight starts with no stacks and no statuses on the target. ASSUMPTION: rate-based stacks
   // (kills, procs, weak point hits) build up linearly at their rate until they reach their long-run average; your own
@@ -1042,5 +1107,5 @@
   function round(v) { return Math.round(v * 1000) / 1000; }
   function mapRound(o) { const r = {}; for (const [k, v] of Object.entries(o)) r[k] = typeof v === 'number' ? round(v) : v; return r; }
 
-  WF.engine = { calculate, calcCore, timeline, expectedStacks, KILL_RATES, selfStatusState, findWeapon, findMod, findArcane, modsFor, compatibleCompats, quantize, expectedCrit, variantRoot };
+  WF.engine = { calculate, calcCore, timeline, meleeRotation, comboMult, expectedStacks, KILL_RATES, selfStatusState, findWeapon, findMod, findArcane, modsFor, compatibleCompats, quantize, expectedCrit, variantRoot };
 })();

@@ -48,7 +48,14 @@ window.WFTips = function (UI) {
     stance: ['Stance combos change how hard and how often each swing hits. Damage = weapon damage x the hit\'s %, and attack speed shortens the whole combo.', 'Stance'],
     stanceCombo: ['Which combo you repeat. Neutral is standing still, Forward is moving, Block holds block.', 'Stance'],
     weakPointMult: ['Headshot multiplier for this enemy. Blank uses 2x for most enemies (3x if your mods say so).', 'Weak_Point'],
-    targets: ['How many enemies area damage hits: explosions, clouds, Gas, Electricity chains, Blast bursts.', 'Area_of_Effect']
+    targets: ['How many enemies area damage hits: explosions, clouds, Gas, Electricity chains, Blast bursts.', 'Area_of_Effect'],
+    shotSim: ['Simulates every shot with real dice rolls: pellet count, crit tier, headshots and status per pellet. Repeating the fight shows the range between unlucky and lucky.', 'Critical_Hit'],
+    rotation: ['The best loop of normal combos and heavy attacks, with the combo worked out from your stance, Heavy Attack Efficiency, Initial Combo and the combo timer.', 'Melee_Combo'],
+    autoCombo: ['Heavy attacks use the combo from the best melee loop instead of the combo number you type in.', 'Melee_Combo'],
+    formaBudget: ['Most Forma you are willing to use. The optimizer only keeps builds that fit the capacity with that many, and shows where the polarities go. Blank: no limit.', 'Forma'],
+    optPolarity: ['After a search, set each slot\'s polarity to the plan so the capacity bar matches.', 'Polarity'],
+    allowed: ['Only these mods are tried (comma separated). Blank tries every mod that fits the weapon.', null],
+    excluded: ['These mods are never tried (comma separated).', null]
   };
   // one box for all tips
   const box = document.createElement('div');

@@ -4,9 +4,25 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.13.0**: Shot-by-shot fights with a combat log, a Forma-aware optimizer, an automatic melee combo loop, and riven import from screenshots with a roll scanner.
 - **v0.12.0**: Beginner and Advanced modes, the new Simulacrum tab, step-by-step math with help tips, and modeling for falloff, regenerating ammo, Archon Shards, stances and heavy attacks.
 - **v0.11.0**: On Kill buffs now follow a kill rate setting, proc-based arcanes work, and Coda Bubonico uses shotgun mods like in game.
-- **v0.10.0**: Ask Teshin: find out whether a weapon wants a crit, status or hybrid build, try mods from the latest patches, and check this week's sleeper picks.
+
+## v0.13.0 (2026-10-18)
+
+**TL;DR:** Shot-by-shot fights with a combat log, a Forma-aware optimizer, an automatic melee combo loop, and riven import from screenshots with a roll scanner.
+
+### Added
+
+- Shot by shot (DPS tab, Advanced): rolls every pellet's crit, headshot and status like the game, repeats the fight hundreds of times and shows worst, unlucky, median, lucky and best DPS with a spread chart and a combat log.
+- Forma budget for the optimizer: only builds that fit your capacity with that many Forma count, and the slot polarities are set for you. Also "Only use" and "Never use" mod lists.
+- Best melee loop: works out the combo from your stance, Heavy Attack Efficiency, Initial Combo and the combo timer, and finds the best mix of normal combos and heavy attacks. Heavy attacks use that combo automatically.
+- Riven import from a screenshot: paste or pick an image of your riven and the stats fill in. It is read on your device.
+- Roll scanner: pick stats a riven must have or never use, a specific negative, and roll quality from worst to perfect, with an option to re-optimize your mods around the top results.
+
+### Changed
+
+- Initial Combo, Combo Duration and Heavy Attack Efficiency mods now count.
 
 ## v0.12.0 (2026-10-18)
 

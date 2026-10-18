@@ -343,5 +343,41 @@ if (data.incarnon) {
   eq('Timeline starts below and ends at the long-run DPS', tl.points[0].dps < tl.steady && Math.abs(tl.points[tl.points.length - 1].dps - tl.steady) / tl.steady < 0.01, true);
 }
 
+
+// 29. Shot-by-shot sim, Forma planner and budget, melee loop, riven card reader and roll scanner
+{
+  if (global.window) { Object.assign(global.WF, global.window.WF || {}); global.window.WF = global.WF; }
+  require('../src/capacity.js'); require('../src/sim.js'); require('../src/optimizer.js');
+  const W = global.WF;
+  const r = E.calculate({ weapon: 'Soma Prime', mods: ['Serration', 'Split Chamber', 'Point Strike', 'Vital Sense'], enemy: { faction: 'Grineer', armor: 500, headshotRate: 0.3 }, conditions: { selfStatus: false } }, data);
+  const sm = W.sim.simulate(r, { seconds: 120, runs: 150, seed: 7 });
+  eq('Sim: long-run average matches the formula within 3%', Math.abs(sm.mean / r.dps.sustainedTotal - 1) < 0.03, true);
+  eq('Sim: min <= median <= max', sm.min <= sm.median && sm.median <= sm.max, true);
+  eq('Sim: same seed gives the same result', W.sim.simulate(r, { seconds: 20, runs: 20, seed: 3 }).median, W.sim.simulate(r, { seconds: 20, runs: 20, seed: 3 }).median, 1e-9);
+  const soma = E.findWeapon(data, 'Soma Prime');
+  const info = n => { const m = E.findMod(data, soma, n); return { name: m.name, drain: m.drain, rank: m.maxRank, polarity: m.polarity }; };
+  const eight = ['Serration', 'Split Chamber', 'Point Strike', 'Vital Sense', 'Hammer Shot', 'Primed Cryo Rounds', 'Infected Clip', 'High Voltage'].map(info);
+  const plan = W.capacity.formaPlan({ mods: eight, innate: soma.polarities, exilusInnate: soma.exilusPolarity, cap: 60 });
+  eq('Forma plan: fits 60 capacity', plan.fits && plan.drain <= 60, true);
+  eq('Forma plan: one fewer Forma does not fit', (() => { const p2 = W.capacity.formaPlan({ mods: eight, innate: soma.polarities, cap: 60 }); return p2.forma; })() >= 1, true);
+  eq('Forma plan: capacity 30 cannot fit eight big mods', W.capacity.formaPlan({ mods: eight, innate: soma.polarities, cap: 30 }).fits, false);
+  const o0 = W.optimizer.optimize({ weapon: 'Soma Prime', formaBudget: 0, conditions: { selfStatus: false }, enemy: { faction: 'Grineer', armor: 500 } }, data);
+  eq('Optimizer: 0 Forma budget gives a build that fits without Forma', o0.plan.fits && o0.plan.forma === 0, true);
+  const oA = W.optimizer.optimize({ weapon: 'Soma Prime', allowed: ['Serration', 'Split Chamber', 'Point Strike'], conditions: { selfStatus: false } }, data);
+  eq('Optimizer: allow list limits the mods', oA.mods.every(m => ['Serration', 'Split Chamber', 'Point Strike'].includes(m)), true);
+  const rot = E.meleeRotation({ weapon: 'Fragor', mods: ['Killing Blow', 'Corrupt Charge', 'Reflex Coil'], stance: { name: 'Crushing Ruin', combo: 'Neutral' }, enemy: { targets: 3 }, conditions: { selfStatus: false } }, data);
+  eq('Melee loop: 5 hits at 300% = 15 combo per stance combo per enemy', rot.pointsPerCombo, 45, 1e-9);
+  eq('Melee loop: best loop beats spamming heavies here', rot.best.dps >= rot.heavySpam.dps, true);
+  eq('Melee combo tiers: 19 -> 1x, 20 -> 2x, 220+ -> 12x', [E.comboMult(19), E.comboMult(20), E.comboMult(300)].join() === '1,2,12', true);
+  const R2 = W.riven;
+  const card = R2.parseCardText('SOMA PRIME CRITATIS\n+142.3% Critical Chance\n+98.7% Critical Damage\n+110.2% Multishot\n-40.1% Zoom', data.weapons);
+  eq('Riven card: weapon and four stats read', card.weaponName === 'Soma Prime' && card.stats.map(x => x.key).join() === 'critChance,critDamage,multishot,zoom' && card.stats[3].neg, true);
+  eq('Riven card: x1.24 faction = +24', R2.parseCardText('x1.24 Damage to Grineer', data.weapons, soma).stats[0].value, 24, 1e-9);
+  const jobs = [...R2.bestStatsJobs(soma, { forced: ['critChance'], excluded: ['multishot'], negative: null })];
+  eq('Roll scanner: forced and excluded stats respected', jobs.length > 0 && jobs.every(j => j.keys.includes('critChance') && !j.keys.includes('multishot') && !j.neg), true);
+  const avg = R2.averageRiven(['critChance'], null, soma).stats[0].value, top = R2.averageRiven(['critChance'], null, soma, 1.1).stats[0].value;
+  eq('Roll scanner: perfect roll = 1.1 x average', top / avg, 1.1, 1e-9);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

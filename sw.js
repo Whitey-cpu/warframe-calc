@@ -3,10 +3,10 @@
  * App files: served from cache, refreshed in the background (stale-while-revalidate).
  * Item images (cdn.warframestat.us): cache-first, capped. The accounts API is never cached.
  */
-const VERSION = 'wfcalc-v20';
+const VERSION = 'wfcalc-v21';
 const SHELL = [
   './', 'index.html', 'privacy.html', 'manifest.webmanifest', 'favicon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png',
-  'ui/style.css', 'ui/app.js', 'ui/features.js', 'ui/layout.js', 'ui/background.js', 'ui/news.js', 'ui/changelog.js', 'ui/riven.js', 'ui/teshin.js', 'ui/sim.js', 'ui/tips.js', 'learn.html', 'data/changelog.js',
+  'ui/style.css', 'ui/app.js', 'ui/features.js', 'ui/layout.js', 'ui/background.js', 'ui/news.js', 'ui/changelog.js', 'ui/riven.js', 'ui/teshin.js', 'ui/sim.js', 'ui/tips.js', 'src/sim.js', 'learn.html', 'data/changelog.js',
   'src/static.js', 'src/parser.js', 'src/engine.js', 'src/optimizer.js', 'src/enemy.js', 'src/capacity.js', 'src/incarnon.js', 'src/riven.js', 'src/teshin.js',
   'data/game-data.js'
 ];
@@ -40,6 +40,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.includes('/vendor/')) return; // the 11 MB text reader: browser HTTP cache only, loaded on demand
   e.respondWith(caches.open(VERSION).then(async c => {
     const hit = await c.match(req, { ignoreSearch: true });
     // revalidate past the HTTP cache, and store under the plain path so cache-busting query strings do not pile up
