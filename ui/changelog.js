@@ -1,5 +1,5 @@
 /*
- * "What's new" dialog with three tabs: Game updates and Events (ui/news.js) and This site, the change log
+ * "What's new" dialog with three tabs: Game updates and Events (ui/news.js) and Changelog
  * (data/changelog.js) with a one-line summary (TL;DR) per update, plus a banner the first time someone visits
  * after a new version. Nothing here needs the calculator state.
  */
@@ -28,7 +28,7 @@
         ${e.sections.map(s => `<h4>${esc(s.title)}</h4><ul>${s.items.map(it => `<li>${esc(it)}</li>`).join('')}</ul>`).join('')}
       </details>`).join('');
   }
-  // tabs: Game updates (DE patch notes), Events (live world state), This site (this change log)
+  // tabs: Game updates (DE patch notes), Events (live world state), Changelog
   const EXT = {
     game: ['Official patch notes', 'https://www.warframe.com/en/patch-notes'],
     events: ['DE news', 'https://www.warframe.com/news'],
@@ -62,7 +62,7 @@
   $('whatsNew').addEventListener('click', () => {
     let last = null;
     try { last = localStorage.getItem('wfcalc.clTab'); } catch (e) { /* ignore */ }
-    // an unseen site update opens "This site"; otherwise the tab used last time, starting with Game updates
+    // an unseen site update opens "Changelog"; otherwise the tab used last time, starting with Game updates
     open($('whatsNew').classList.contains('has-new') ? 'site' : PANES[last] ? last : 'game');
   });
   $('changelogDialog').addEventListener('click', e => { if (e.target === $('changelogDialog')) $('changelogDialog').close(); });

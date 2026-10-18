@@ -1,176 +1,162 @@
 /*
- * Site / app change log, newest first. Shown in the "What's new" dialog and used for the update banner.
- * Add an entry at the top for every release: version (matches package.json), date (YYYY-MM-DD), a one-line tldr,
- * and sections of plain-language items. Game data refreshes are listed separately by the data banner.
+ * Release notes, newest first. Shown in What's new > Changelog and used for the update banner.
+ * Add an entry at the top for every release: version (matches package.json), date (YYYY-MM-DD),
+ * a one-line tldr, and short sections. Keep it in plain patch-note style.
  */
 window.WF_CHANGELOG = [
   {
-    version: '0.9.1', date: '2026-10-17',
-    tldr: 'Plat prices are switched off for now: warframe.market\'s bot protection blocks requests from our server, and the site will not try to get around it.',
+    version: '0.10.0', date: '2026-10-17',
+    tldr: 'Ask Teshin: find out whether a weapon wants a crit, status or hybrid build, try mods from the latest patches, and check this week\'s sleeper picks.',
     sections: [
-      { title: 'Plat prices', items: [
-        'The price badges and the Plat prices toggle are hidden. The code stays in place so prices can come back if warframe.market allows our server or offers another approved way.'
+      { title: 'Added', items: [
+        'Ask Teshin button next to Remove all.',
+        'Build lean: compares the best build, a crit-only build and a status-only build for your current enemy and buffs, and calls it Crit, Status or Hybrid (one style needs a 15% lead). Any of the three builds can be applied in one click.',
+        'Patch picks: mods and arcanes from recent patch notes that fit the weapon, tested in your build with the DPS change.',
+        'Sleepers: a weekly scan of every weapon against a level 150 Steel Path Heavy Gunner, highlighting high-disposition weapons that still perform near the top.',
+        'Quick links to the wiki, r/Warframe and Overframe for community builds.'
+      ] }
+    ]
+  },
+  {
+    version: '0.9.1', date: '2026-10-17',
+    tldr: 'Plat prices are paused while I work out access with warframe.market.',
+    sections: [
+      { title: 'Changed', items: [
+        'Hid the plat price badges and toggle. warframe.market currently blocks requests from the calculator\'s server, so prices could not load.'
       ] }
     ]
   },
   {
     version: '0.9.0', date: '2026-10-17',
-    tldr: 'Plat prices from warframe.market: each mod in your slots shows its going price at that rank, plus the Prime weapon set price and what the build would cost to buy.',
+    tldr: 'Plat prices from warframe.market for equipped mods and Prime weapon sets.',
     sections: [
-      { title: 'Prices', items: [
-        'Each equipped mod shows "~Np": the median of the 5 cheapest sell orders from players online or in game on warframe.market (PC), at the mod\'s rank. If nobody sells that rank it shows the unranked price, marked R0. Click it to open the item on warframe.market.',
-        'Prime weapons show their set price, and a line under the mods adds up what the mods and weapon arcane would cost to buy, leaving out mods you marked as owned.',
-        'Turn it off with "Plat prices" under the mod slots.'
-      ] },
-      { title: 'How it gets them', items: [
-        'Our server reads warframe.market\'s public API and caches each item for 10 minutes (the items list for a day), with a named User-Agent and under their 3 requests per second limit, as their API rules ask. Only items on screen are looked up, and nothing about you is sent.'
+      { title: 'Added', items: [
+        'Price badge on each equipped mod at its current rank, with a link to the listing.',
+        'Prime weapon set price and a total cost for the build, skipping mods you own.',
+        'Plat prices toggle under the mod slots.'
       ] }
     ]
   },
   {
     version: '0.8.0', date: '2026-10-17',
-    tldr: 'New Riven tab: build a riven with its real stat ranges, grade your own riven, find the best stats for your build, and save your rivens. The riven now takes a real mod slot.',
+    tldr: 'New Riven tab: build, grade and save rivens, and find the best stats for your build.',
     sections: [
-      { title: 'Riven builder', items: [
-        'Pick up to 3 positive stats and 1 negative; each shows the range it can roll for this weapon (wiki base value x disposition x stat-count multiplier x 0.9 to 1.1), with a slider and a box for the exact number.',
-        'Includes the Update 44.1 spliced traits (Weak Point Damage, Viral, Damage vs. Techrot and the rest) and shows which of your stats a Riven Splicer can combine.',
-        'The riven is a Riven Mod card that sits in a mod slot: it uses capacity (drain and polarity editable), counts its slot position for element order, and the optimizer works around it.'
+      { title: 'Added', items: [
+        'Riven builder with the real roll range for every stat on the selected weapon, including Update 44.1 spliced traits.',
+        'Riven grader: enter your riven\'s numbers to see where each roll landed and an overall grade.',
+        'Best stats: ranks 2- and 3-stat combinations for your current build and enemy.',
+        'Saved rivens per weapon, stored in your browser or on your account.'
       ] },
-      { title: 'Grader', items: [
-        'Type the numbers from your riven card: each stat shows where it landed in its range, an overall grade (this site\'s own S to D scale), and a warning if a value cannot roll for that weapon.'
-      ] },
-      { title: 'Best stats and saved rivens', items: [
-        'Find best stats tries every 2 and 3 positive-stat combination at an average roll for your current build and enemy, and one click puts the winner on your riven.',
-        'Save rivens per weapon, in this browser or on your account when signed in, and load them back with one click.',
-        'Builds saved with the old riven stat rows are converted automatically.'
-      ] },
-      { title: 'Assumptions', items: [
-        'Riven values below rank 8 scale like other mods, (rank + 1) / 9, and the default drain is 18 at rank 8. The wiki does not state either, so both are marked in the app and the drain can be changed.'
+      { title: 'Changed', items: [
+        'Rivens now sit in a real mod slot: they use capacity, follow slot order for elements, and the optimizer builds around them.',
+        'Builds saved with the old riven fields are converted automatically.'
       ] }
     ]
   },
   {
     version: '0.7.0', date: '2026-10-16',
-    tldr: 'Link your Twitch channel to your account: your public builds show your channel with a Live badge while you stream.',
+    tldr: 'Link your Twitch channel and show a LIVE badge on your public builds.',
     sections: [
-      { title: 'Accounts', items: [
-        'Link Twitch from the account menu (after signing in with Discord). Twitch is asked for no permissions beyond your public profile, and its sign-in token is revoked right after reading it.',
-        'Your Twitch name and channel link show on your public community builds, with a LIVE badge and the game while you are streaming (checked at most every 2 minutes). Untick "Show on my public builds" to hide it, or unlink any time.',
-        'Works in the desktop app too.'
+      { title: 'Added', items: [
+        'Link Twitch from the account menu (website and desktop app).',
+        'Your channel appears on your public builds, with a LIVE badge and the game while you stream.',
+        'Option to hide your channel, or unlink at any time.'
       ] },
-      { title: 'Not included', items: [
-        'Warframe loadouts are not imported from Twitch. DE\'s Warframe Arsenal Twitch extension shows opted-in loadouts on Twitch, but DE does not offer that data to other sites.'
+      { title: 'Notes', items: [
+        'Warframe loadouts are not imported from Twitch. DE does not offer that data to other sites.'
       ] }
     ]
   },
   {
     version: '0.6.0', date: '2026-10-16',
-    tldr: 'What\'s new now has Game updates (DE\'s official patch notes with a TL;DR and search) and live Events (Baro, events, resets, open world cycles, DE news).',
+    tldr: 'Game updates and live events, right inside What\'s new.',
     sections: [
-      { title: 'Game updates', items: [
-        'The last 15 Warframe updates and hotfixes from DE\'s official patch notes, refreshed every 3 hours.',
-        'Each one has a TL;DR built from DE\'s own section headings and a count of fixes and other changes, the full notes, and links to the official page and forum thread.',
-        'Weapons, Warframes, mods and arcanes from the calculator are highlighted where the notes mention them.',
-        'Search box to find every line about a weapon or mod across those releases.',
-        'A patch posted in the last few hours shows as "Just released" with a link, until its summary is added.'
-      ] },
-      { title: 'Events', items: [
-        'Live world state: current and upcoming events, Baro Ki\'Teer, Prime Resurgence, Nightwave, daily and weekly resets, open world cycles and DE\'s latest news and devstreams, with countdowns.',
-        'Read from the public warframestat.us API when you open the tab. Nothing is read from anyone\'s game account.'
+      { title: 'Added', items: [
+        'Game updates tab: the latest Warframe patch notes with a summary, the full notes, search, and highlights for items you can build here.',
+        'Events tab: current and upcoming events, Baro Ki\'Teer, Prime Resurgence, Nightwave, resets, open world cycles and DE news, with live countdowns.'
       ] }
     ]
   },
   {
     version: '0.5.1', date: '2026-10-15',
-    tldr: 'Kuva, Tenet and Coda weapons now get their Valence bonus, Coda Bassocyst gets its Mercy Kill buff, Deadhead-style buffs count properly, and this change log was added.',
+    tldr: 'Valence bonus for Kuva, Tenet and Coda weapons, the Coda Bassocyst Mercy Kill buff, and this change log.',
     sections: [
-      { title: 'Math', items: [
-        'Valence bonus for Kuva, Tenet and Coda weapons: pick the element and 25-60% next to Attack. It is added as base damage, so elemental mods scale from it, as in game.',
-        'Coda Bassocyst Mercy Kill buff (+100% damage and multishot for 20s) is modeled, and can be turned off in Buffs > Conditional stacks.',
-        'On Weak Point Kill buffs (Primary Deadhead, Galvanized Scope stacks) now count when "Conditional buffs at max" is on. Weak point hit buffs still need a headshot rate.',
-        'Checked against an Overframe Coda Bassocyst build: damage per shot now matches exactly (13,302.9).'
+      { title: 'Added', items: [
+        'Valence bonus (element and 25-60%) for Kuva, Tenet and Coda weapons, applied as base damage like in game.',
+        'Coda Bassocyst Mercy Kill buff, toggleable under Buffs > Conditional stacks.',
+        'What\'s new: release notes with a short summary for every update.'
       ] },
-      { title: 'Site', items: [
-        'What\'s new: this change log, with a short summary for each update and a banner the first time you visit after one.'
+      { title: 'Fixed', items: [
+        'On Weak Point Kill buffs such as Primary Deadhead now count when conditional buffs are at max.'
       ] }
     ]
   },
   {
     version: '0.5.0', date: '2026-10-15',
-    tldr: 'New in-game arsenal layout with a proper phone layout, Config A-D per weapon, and backgrounds from the official Warframe Fansite Kit.',
+    tldr: 'Arsenal-style redesign with a proper phone layout, Config A-D and official backgrounds.',
     sections: [
-      { title: 'Layout', items: [
-        'Arsenal-style screen: capacity bar, Config A-D tabs, 2x4 mod slots with weapon arcane and exilus, game-style stat list with radial attacks and Incarnon form.',
-        'Stat panel tabs: Arsenal, DPS & TTK, Enemy, Buffs, Optimize, Builds. An "In combat" box keeps DPS and time to kill in view.',
-        'Phone layout: bottom tab bar (Mods, Stats, Enemy, More) and a full-screen mod browser.',
-        'Classic view toggle shows every panel at once.'
+      { title: 'Added', items: [
+        'Arsenal-style screen: capacity bar, Config A-D, 2x4 mod slots with weapon arcane and exilus, in-game style stat list.',
+        'Stat panel tabs: Arsenal, DPS & TTK, Enemy, Buffs, Optimize and Builds.',
+        'Phone layout with a bottom tab bar and a full-screen mod browser.',
+        'Classic view toggle.',
+        'Backgrounds from DE\'s official Warframe Fansite Kit.'
       ] },
-      { title: 'Configs', items: [
-        'Four configs per weapon, like the game. Saved in your browser and synced to your account when signed in. Double-click a tab to rename it.'
-      ] },
-      { title: 'Backgrounds', items: [
-        '44 backgrounds from DE\'s official Warframe Fansite Kit (Captura wallpapers, key art, skyboxes, scenes) with darken and blur sliders and an optional random pick per visit.'
-      ] },
-      { title: 'Fixes', items: [
-        'Exilus mods are recognized again (the data source renamed the flag).',
-        'After a site update, returning visitors now get the new version straight away instead of one visit later.'
+      { title: 'Fixed', items: [
+        'Exilus mods are recognized again.',
+        'Returning visitors get new versions right away.'
       ] }
     ]
   },
   {
     version: '0.4.0', date: '2026-10-15',
-    tldr: 'Big math overhaul (status build-up, fight length, lingering clouds, group DPS, faster optimizer) and game data pulled from several public sources, current to Hotfix 44.1.1.',
+    tldr: 'Major damage math overhaul and game data updated to Hotfix 44.1.1.',
     sections: [
-      { title: 'Math', items: [
-        'Statuses you apply yourself (Viral, Corrosive, Heat, Magnetic, Puncture, Cold) build up over the fight and feed back into damage.',
-        'Time to kill and fight length are solved together, so DoT ticks and cloud hits stop when the target dies.',
-        'Lingering damage fields (Torid Poison Cloud: one hit per second for 10s), extra attacks per shot, and multi-target group DPS.',
-        'Mod rules: "Fire Rate / Multishot cannot be modified" and the Incarnon rule for Semi-Auto Cannonade mods.',
-        'Optimizer rewritten (beam search plus pair swaps), about 3x faster.',
-        'Torid numbers checked against in-game arsenal screenshots.'
+      { title: 'Changed', items: [
+        'Your own status effects now build up over the fight and feed back into damage.',
+        'Time to kill and fight length are solved together, so DoTs and clouds stop when the target dies.',
+        'Lingering damage fields, extra attacks per shot and group DPS.',
+        'Faster optimizer.'
       ] },
-      { title: 'Game data', items: [
-        'Enemy health, shields and armor from DE\'s Public Export (139 old values corrected).',
-        'Incarnon evolutions for 53 weapons generated from the wiki, with per-variant values.',
-        'Current game build shown at the top, a "Data sources and freshness" list, and data notes where sources disagree.',
-        'Weekly automatic data refresh from public sources only.'
-      ] },
-      { title: 'Desktop app', items: [
-        'Pulls the full dataset from the site, and uses whichever copy (bundled or downloaded) is newest.'
+      { title: 'Data', items: [
+        'Enemy stats from DE\'s Public Export.',
+        'Incarnon evolutions for 53 weapons.',
+        'Weekly automatic data refresh.'
       ] }
     ]
   },
   {
     version: '0.3.0', date: '2026-10-15',
-    tldr: 'Quality-of-life update: mod value preview, ranks and polarities, undo/redo, enemy scaling with time to kill, build compare, leaderboard and community builds.',
+    tldr: 'Mod value preview, ranks and polarities, undo/redo, enemy scaling, compare and community builds.',
     sections: [
-      { title: 'Building', items: [
-        'Mod value preview, mod ranks, slot polarities and a capacity/forma checker.',
-        'Undo and redo (Ctrl+Z / Ctrl+Y), Incarnon presets.'
-      ] },
-      { title: 'Results', items: [
-        'Enemy level scaling and Steel Path, shields, Overguard and time to kill.',
-        'Pin-and-compare, weapon leaderboard.'
-      ] },
-      { title: 'Sharing and app', items: [
-        'Community builds with likes, Discord link previews, installable web app, light/dark toggle, data update banner.',
-        'Desktop app: Discord sign-in and update check.'
+      { title: 'Added', items: [
+        'Mod value preview, mod ranks, slot polarities and a capacity checker.',
+        'Undo and redo, Incarnon presets.',
+        'Enemy level scaling with Steel Path, shields, Overguard and time to kill.',
+        'Build compare, weapon leaderboard and community builds.',
+        'Installable web app and light/dark theme.'
       ] }
     ]
   },
   {
     version: '0.2.0', date: '2026-10-14',
-    tldr: 'Arsenal-style look with game art, plus Discord sign-in to save builds, owned mods and share links.',
+    tldr: 'Game art throughout, plus Discord sign-in for saved builds and share links.',
     sections: [
-      { title: 'Look', items: ['Weapon, Warframe and arcane browsers with game images, drag-and-drop mod cards, favicon and app icons.'] },
-      { title: 'Accounts', items: ['Discord sign-in, cloud builds, owned mods, share links and a privacy page. Account features hide if the service is unreachable.'] }
+      { title: 'Added', items: [
+        'Weapon, Warframe and arcane browsers with in-game images and drag-and-drop mods.',
+        'Discord sign-in, cloud builds, owned mods and share links.'
+      ] }
     ]
   },
   {
     version: '0.1.0', date: '2026-10-14',
-    tldr: 'First release: damage calculator, build optimizer, Windows desktop app and the web version at warframe.hardn.net.',
+    tldr: 'First release: damage calculator, build optimizer, web version and Windows app.',
     sections: [
-      { title: 'Launch', items: ['Weapon damage calculator with mods, arcanes, Warframe buffs and enemy armor and factions.', 'Build optimizer.', 'Windows installer and web version.'] }
+      { title: 'Added', items: [
+        'Weapon damage calculator with mods, arcanes, Warframe buffs, armor and factions.',
+        'Build optimizer.',
+        'warframe.hardn.net and a Windows installer.'
+      ] }
     ]
   }
 ];

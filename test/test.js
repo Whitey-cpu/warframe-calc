@@ -246,5 +246,23 @@ if (data.incarnon) {
   eq('Riven best stats: 2 and 3 positive combos, with and without a negative', jobs.length, 2 * (R.combos(R.candidateKeys(soma, { factionKey: 'vsGrineer' }).positives, 3).length + R.combos(R.candidateKeys(soma, { factionKey: 'vsGrineer' }).positives, 2).length));
 }
 
+// 25. Teshin build lean: crit-only build never uses status chance mods, status-only never uses crit mods
+{
+  // earlier tests created a fake window; point it at the same WF object so the browser-style modules find the engine
+  if (global.window) { Object.assign(global.WF, global.window.WF || {}); global.window.WF = global.WF; }
+  require('../src/optimizer.js');
+  require('../src/teshin.js');
+  const W = global.WF;
+  const T = W.teshin;
+  const r = T.lean({ weapon: 'Soma Prime', enemy: { faction: 'Grineer', armor: 300 } }, data, { beamWidth: 3 });
+  const soma = E.findWeapon(data, 'Soma Prime');
+  const items = o => o.mods.concat(o.exilus ? [o.exilus] : [], o.arcane ? [o.arcane] : []).map(n => E.findMod(data, soma, n) || E.findArcane(data, n)).filter(Boolean);
+  const has = (o, stats) => items(o).some(it => it.effects.some(e => stats.includes(e.stat)));
+  eq('Teshin: crit-only build has no status chance mods', has(r.crit, ['statusChance']), false);
+  eq('Teshin: status-only build has no crit mods', has(r.status, ['critChance', 'critChanceFlat', 'critDamage', 'slashOnCrit']), false);
+  eq('Teshin: best build is at least as strong as both', r.best.score >= Math.max(r.crit.score, r.status.score) - 1e-6, true);
+  eq('Teshin: verdict is crit, status or hybrid', ['crit', 'status', 'hybrid'].includes(r.verdict), true);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

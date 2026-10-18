@@ -671,3 +671,23 @@ dialog#changelogDialog[open] { display: grid; grid-template-rows: auto auto 1fr;
 .slot-price:hover { text-decoration: underline; }
 .market-line { margin: 4px 0 0; }
 .market-line:empty { display: none; }
+
+/* ---------------- Teshin ---------------- */
+.teshin-btn { background: color-mix(in srgb, var(--accent) 85%, #000); }
+dialog#teshinDialog { width: min(760px, calc(100vw - 32px)); max-height: min(880px, calc(100dvh - 40px)); padding: 0; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); color: var(--text); }
+dialog#teshinDialog[open] { display: grid; grid-template-rows: auto 1fr; }
+dialog#teshinDialog::backdrop { background: rgb(0 0 0 / .55); }
+.ts-sec { border-top: 1px solid var(--border); padding: 6px 0 10px; }
+.ts-sec:first-child { border-top: 0; }
+.ts-sec h3 { margin: 6px 0 4px; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-2); }
+.ts-think { font-style: italic; color: var(--muted); }
+.ts-verdict { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); margin: 6px 0; font-size: .9rem; }
+.ts-chip { font-weight: 800; padding: 2px 10px; border-radius: 999px; color: #fff; background: var(--accent); white-space: nowrap; }
+.v-crit .ts-chip { background: #c0392b; } .v-status .ts-chip { background: #2e8b57; } .v-hybrid .ts-chip { background: #7d5fb5; }
+.ts-bar { display: grid; grid-template-columns: 80px 1fr auto auto; gap: 8px; align-items: center; font-size: .84rem; margin: 4px 0; }
+.ts-bar .track { height: 10px; background: color-mix(in srgb, var(--border) 60%, transparent); border-radius: 6px; overflow: hidden; }
+.ts-bar .fill { display: block; height: 100%; background: var(--accent); }
+.ts-bar .fill.crit { background: #c0392b; } .ts-bar .fill.status { background: #2e8b57; }
+.ts-notes, .ts-ideas, .ts-list { margin: 6px 0; padding-left: 18px; display: grid; gap: 3px; font-size: .86rem; }
+.ts-ideas .pos { color: var(--good); font-weight: 700; }
+@media (max-width: 760px) { dialog#teshinDialog { width: 100%; max-width: none; max-height: none; height: 100dvh; border-radius: 0; } }

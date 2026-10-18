@@ -90,7 +90,7 @@ window.WFRiven = function (UI) {
       ${splices.length ? `<p class="small rv-splice"><span class="muted">Riven Splicer can combine:</span> ${splices.join(' &middot; ')}</p>` : ''}
       <details class="rv-sec" id="rvBestBox" open>
         <summary>Best stats for this build</summary>
-        <p class="muted small">Tries every 2 and 3 positive-stat combination at an average roll, with and without a harmless negative, in this build and against the current enemy. Uses the optimizer's goal (${esc(($('metric').selectedOptions[0] || {}).textContent || 'DPS')}).</p>
+        <p class="muted small">Every 2- and 3-stat combination at an average roll, for your build and enemy (${esc(($('metric').selectedOptions[0] || {}).textContent || 'DPS')}).</p>
         <label class="check small"><input type="checkbox" id="rvSpliced"> Include spliced traits</label>
         <label class="check small"><input type="checkbox" id="rvNoAmmo"> Ignore magazine and reload stats</label>
         <button type="button" class="btn sm" id="rvBest">Find best stats</button>
@@ -103,7 +103,7 @@ window.WFRiven = function (UI) {
         <div id="rvLib"></div>
       </details>
       <p class="muted small">Math: <a href="https://wiki.warframe.com/w/Riven_Mods" target="_blank" rel="noopener">WARFRAME Wiki, Riven Mods</a> (base values, disposition, stat-count multipliers, splicing).
-        Assumptions: values below rank 8 scale like other mods, (rank + 1) / 9; the grade letters are this site's own scale.</p>`;
+        Values below rank 8 are scaled like other mods, (rank + 1) / 9.</p>`;
     refreshGrades();
     renderLibrary();
   }
@@ -131,7 +131,7 @@ window.WFRiven = function (UI) {
     $('rvMsgs').innerHTML = (msgs.length ? `<ul class="notes">${msgs.map(m => `<li class="warn">${esc(m)}</li>`).join('')}</ul>` : '') +
       (nm.length ? `<p class="muted small">Shown but not used in the damage math: ${esc(nm.join(', '))}.</p>` : '') +
       (slotIdx() < 0 && R.counts(state.riven).list.length ? '<p class="small warn-t">Not in a mod slot, so it is not counted in the results yet.</p>' : '');
-    $('rvGradeAll').innerHTML = g.overall == null ? '' : `Overall roll quality <b class="rv-letter l-${g.letter}">${g.letter}</b> <span class="muted small">${Math.round(g.overall * 100)}% (average of the stats; this site's scale: S 90%+, A 75%+, B 50%+, C 25%+)</span>`;
+    $('rvGradeAll').innerHTML = g.overall == null ? '' : `Overall roll quality <b class="rv-letter l-${g.letter}">${g.letter}</b> <span class="muted small">${Math.round(g.overall * 100)}% (S 90%+, A 75%+, B 50%+, C 25%+)</span>`;
   }
 
   // ---------------- editing ----------------

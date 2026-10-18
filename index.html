@@ -61,6 +61,7 @@
         <button type="button" class="btn ghost sm" id="undoBtn" title="Undo (Ctrl+Z)" disabled>&#8630;<span class="lbl"> Undo</span></button>
         <button type="button" class="btn ghost sm" id="redoBtn" title="Redo (Ctrl+Y)" disabled>&#8631;<span class="lbl"> Redo</span></button>
         <button type="button" class="btn ghost sm" id="clearMods" title="Remove all mods">Remove all</button>
+        <button type="button" class="btn sm teshin-btn" id="askTeshin" title="Does this weapon lean crit, status or hybrid? Plus patch ideas and sleepers">Ask Teshin</button>
       </div>
     </div>
   </section>
@@ -343,11 +344,20 @@
   <div class="stat-tabs cl-tabs" role="tablist" aria-label="What's new" id="clTabs">
     <button type="button" role="tab" id="cltab-game" aria-controls="clpane-game" data-cl="game">Game updates</button>
     <button type="button" role="tab" id="cltab-events" aria-controls="clpane-events" data-cl="events">Events</button>
-    <button type="button" role="tab" id="cltab-site" aria-controls="changelogBody" data-cl="site">This site</button>
+    <button type="button" role="tab" id="cltab-site" aria-controls="changelogBody" data-cl="site">Changelog</button>
   </div>
   <div id="clpane-game" class="cl-body" role="tabpanel" aria-labelledby="cltab-game" tabindex="0"></div>
   <div id="clpane-events" class="cl-body" role="tabpanel" aria-labelledby="cltab-events" tabindex="0" hidden></div>
   <div id="changelogBody" class="cl-body" role="tabpanel" aria-labelledby="cltab-site" tabindex="0" hidden></div>
+</dialog>
+
+<dialog id="teshinDialog" closedby="any" aria-labelledby="tsTitle">
+  <form method="dialog" class="picker-head">
+    <h2 id="tsTitle">Teshin <span class="muted small">build advisor</span></h2>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" value="close">Close</button>
+  </form>
+  <div id="teshinBody" class="cl-body"></div>
 </dialog>
 
 <dialog id="bgDialog" closedby="any" aria-labelledby="bgTitle">
@@ -386,12 +396,14 @@
 <script src="src/capacity.js"></script>
 <script src="src/incarnon.js"></script>
 <script src="src/riven.js"></script>
+<script src="src/teshin.js"></script>
 <script src="data/changelog.js"></script>
 <script src="ui/news.js"></script>
 <script src="ui/changelog.js"></script>
 <script src="ui/background.js"></script>
 <script src="ui/layout.js"></script>
 <script src="ui/riven.js"></script>
+<script src="ui/teshin.js"></script>
 <script src="ui/features.js"></script>
 <script src="ui/app.js"></script>
 </body>

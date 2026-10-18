@@ -26,6 +26,9 @@ jobs:
         run: node scripts/sync-data.js
       - name: Run tests
         run: node test/test.js
+      - name: Weekly meta scan (this site's own math)
+        continue-on-error: true
+        run: node scripts/meta-scan.js
       - name: Commit if changed
         run: |
           if git diff --quiet -- data/ && [ -z "$(git ls-files --others --exclude-standard data/)" ]; then echo "No data changes"; exit 0; fi

@@ -938,6 +938,7 @@
   if (window.WFLayout) window.WFLayout(window.WFUI);
   if (window.WFRiven) window.WFRiven(window.WFUI);
   if (window.WFMarket) window.WFMarket(window.WFUI);
+  if (window.WFTeshin) window.WFTeshin(window.WFUI);
 
   // ---------- start ----------
   renderFrame(); renderArcanes(); renderSlots(); renderModBrowser();

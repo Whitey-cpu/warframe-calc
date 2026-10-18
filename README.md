@@ -85,8 +85,10 @@ Public sources only. Nothing is read from the game client or a player account.
   your own riven, best stats for the current build, saved rivens (browser or account). The riven is a Riven Mod card in a real slot (`src/riven.js`, `ui/riven.js`)
 - Plat prices (switched off: warframe.market's bot protection blocks requests from the Worker; turn on with `MARKET_ENABLED = "1"` and the toggle in index.html if that changes): equipped mods, weapon arcane and Prime weapon sets priced from the warframe.market public API (median of the 5 cheapest
   online sellers at that rank, PC) through the accounts API `/market/price`, cached 10 minutes, following warframe.market's API rules
+- Ask Teshin: crit / status / hybrid lean for the current weapon (three optimizer runs, `src/teshin.js`), mods and arcanes from recent
+  patch notes tried in your build, and weekly sleepers from `scripts/meta-scan.js` (own math, Steel Path L150 Heavy Gunner, `data/meta.json`)
 - What's new: Game updates (DE patch notes with a TL;DR from DE's own headings, full notes, search, calculator items highlighted),
-  live Events (events, Baro Ki'Teer, Prime Resurgence, Nightwave, resets, open world cycles, DE news) and this site's change log
+  live Events (events, Baro Ki'Teer, Prime Resurgence, Nightwave, resets, open world cycles, DE news) and the changelog
 - Installable web app with offline support (`sw.js`), light/dark toggle, feedback button, patch-change banner
 - Desktop app: Discord sign-in, cloud sync, update notifications
 
