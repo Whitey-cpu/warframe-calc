@@ -1,0 +1,45 @@
+name: Release desktop app
+
+# Builds the Windows installer on a GitHub-hosted Windows runner and publishes it as a GitHub release
+# tagged v<package.json version>. The desktop app checks the latest release and offers the update.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install build tools
+        run: npm install --no-audit --no-fund
+      - name: Run tests
+        run: node test/test.js
+      - name: Build installer
+        run: npx electron-builder --win nsis --x64 --publish never
+      - name: Release notes from data/changelog.js
+        shell: bash
+        run: |
+          node -e "
+            global.window = {}; require('./data/changelog.js');
+            const e = window.WF_CHANGELOG[0];
+            const out = [e.tldr, ''].concat(...e.sections.map(s => ['### ' + s.title].concat(s.items.map(i => '- ' + i), ['']))).join('\n');
+            require('fs').writeFileSync('release-notes.md', out + '\nThe installer is unsigned, so Windows SmartScreen may warn: choose More info, then Run anyway.\n');
+          "
+          echo "VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
+      - name: Publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="v${VERSION}: $(node -e "global.window={}; require('./data/changelog.js'); process.stdout.write(window.WF_CHANGELOG[0].tldr.slice(0, 90))")"
+          if gh release view "v${VERSION}" >/dev/null 2>&1; then
+            gh release upload "v${VERSION}" "dist/WarframeDamageCalc-Setup-${VERSION}.exe" --clobber
+          else
+            gh release create "v${VERSION}" "dist/WarframeDamageCalc-Setup-${VERSION}.exe" --title "$TITLE" --notes-file release-notes.md --target "${GITHUB_SHA}"
+          fi
