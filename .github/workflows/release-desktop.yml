@@ -37,7 +37,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TITLE="v${VERSION}: $(node -e "global.window={}; require('./data/changelog.js'); process.stdout.write(window.WF_CHANGELOG[0].tldr.slice(0, 90))")"
+          TITLE="Warframe Damage Calc ${VERSION}"
           if gh release view "v${VERSION}" >/dev/null 2>&1; then
             gh release upload "v${VERSION}" "dist/WarframeDamageCalc-Setup-${VERSION}.exe" --clobber
           else
