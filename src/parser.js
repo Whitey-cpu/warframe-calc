@@ -59,7 +59,9 @@
     const bow = t.match(/\(x(\d+(?:\.\d+)?) for Bows\)/i);
     if (bow) bowMult = parseFloat(bow[1]);
     t = t.replace(/\s*\([^)]*\)/g, '').trim();
-    t = t.replace(/\s+for\s+\d+(?:\.\d+)?s$/i, '');
+    let duration = null;
+    const dur = t.match(/\s+for\s+(\d+(?:\.\d+)?)s$/i);
+    if (dur) { duration = parseFloat(dur[1]); t = t.slice(0, dur.index); }
     let aiming = false;
     if (/\s+when Aiming$/i.test(t)) { aiming = true; t = t.replace(/\s+when Aiming$/i, ''); }
     let onlyFor = null;
@@ -92,6 +94,7 @@
     if (bowMult !== 1) eff.bowMult = bowMult;
     if (onlyFor) eff.onlyFor = onlyFor;
     if (aiming) eff.cond = { trigger: 'When Aiming' };
+    if (duration != null) eff.duration = duration;
     if (per) {
       if (/combo multiplier/i.test(per)) eff.perCombo = true;
       else eff.per = per; // e.g. "Status Type affecting the target" -> user supplies a count
@@ -125,6 +128,10 @@
         if (/Arcane Revive/i.test(line)) continue;
         const sentences = line.split(/\.\s+/).map(s => s.trim()).filter(Boolean);
         for (let s of sentences) {
+          // inline trigger: "On Weak Point Hit: Gain +30% Status Chance and +6% Ammo Efficiency for 10s"
+          const inline = s.match(/^((?:On|While|When|After|Upon)\b[^:]*):\s*(.+)$/i);
+          if (inline) { cond = { trigger: inline[1] }; flush(); s = inline[2]; }
+          s = s.replace(/^Gain\s+(?=[+-]?\d)/i, '');
           const lock = s.match(/^(Multishot|Fire Rate) cannot be modified\.?$/i);
           if (lock) { const e = { stat: 'lock', lock: /multishot/i.test(lock[1]) ? 'multishot' : 'fireRate', value: 1, raw: s }; effects.push(e); continue; }
           const stacks = s.match(/^Stacks up to (\d+)(?:x| times)\.?$/i);
@@ -132,9 +139,27 @@
           let chance = null;
           const ch = s.match(/^(\d+(?:\.\d+)?)% chance for (?:an? )?(.+)$/i);
           if (ch) { chance = parseFloat(ch[1]) / 100; s = ch[2]; }
+          // "+3% Critical Damage and +2.25% Multishot for 12s": two effects sharing the trailing duration
+          const parts = /^[+-]?\d+(?:\.\d+)?%/.test(s) ? s.split(/\s+and\s+(?=[+-]?\d+(?:\.\d+)?%)/i) : [s];
+          if (parts.length > 1) {
+            const tail = (parts[parts.length - 1].match(/\s+for\s+\d+(?:\.\d+)?s\.?$/i) || [''])[0];
+            for (let i = 0; i < parts.length; i++) {
+              const ps = i < parts.length - 1 ? parts[i] + tail : parts[i];
+              const pe = parseStatPhrase(ps, ctx);
+              if (!pe) { unparsed.push(ps.replace(/\.$/, '')); continue; }
+              if (cond || chance != null) pe.cond = Object.assign({}, pe.cond || {}, cond || { trigger: 'Chance' }, chance != null ? { chance } : {});
+              if (pe.duration != null && pe.cond) { pe.cond.duration = pe.duration; }
+              delete pe.duration;
+              pe.raw = ps.replace(/\.$/, '');
+              effects.push(pe); block.push(pe);
+            }
+            continue;
+          }
           const eff = parseStatPhrase(s, ctx);
           if (eff) {
             if (cond || chance != null) eff.cond = Object.assign({}, eff.cond || {}, cond || { trigger: 'Chance' }, chance != null ? { chance } : {});
+            if (eff.duration != null && eff.cond) eff.cond.duration = eff.duration;
+            delete eff.duration;
             eff.raw = s;
             effects.push(eff);
             block.push(eff);

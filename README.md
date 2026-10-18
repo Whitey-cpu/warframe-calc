@@ -31,7 +31,7 @@ In the UI, **Copy build JSON** gives you a build you can paste to Claude or feed
 - Enemy level scaling, Steel Path, shields, Overguard, faction vulnerabilities, armor DR `0.9 * sqrt(armor/2700)`
 - Incarnon evolutions for 53 weapons, generated from the wiki (perk text turned into effects; unmodeled lines are listed)
 - Mod rules: "Fire Rate / Multishot cannot be modified", trigger-only mods (Cannonades, incl. the Incarnon both-modes rule), weak point triggers
-- Conditional buffs (On Kill stacks, per status type, combo) with per-buff stack overrides
+- Conditional buffs (On Kill stacks, per status type, combo) with per-buff stack overrides. On Kill stacks follow a kill rate (Horde 60/min, Steady 12/min, Boss, or custom), each buff's duration and how it loses stacks (one at a time for Galvanized and Merciless, each stack separately for Galvanized Scope, all at once for Frostbite-style arcanes, per the wiki); proc and weak point hit arcanes use the build's own proc and hit rate
 - Riven stats (including spliced weak point traits) and custom buffs for anything not built in
 - Optimizer: beam search plus local search (single and pair swaps, slot order, exilus, weapon arcane), locked and excluded mods
 
@@ -53,7 +53,7 @@ Public sources only. Nothing is read from the game client or a player account.
 | Current game build label | [warframe.com patch notes](https://www.warframe.com/en/patch-notes) | weekly |
 | Game updates tab (patch notes, TL;DR, search) | [warframe.com patch notes](https://www.warframe.com/en/patch-notes), release dates from the WARFRAME Wiki when a page shows none (`scripts/scrape-patches.js`) | every 3 hours |
 | Events tab (events, Baro, resets, cycles, DE news) | [warframestat.us](https://docs.warframestat.us/) community API (reads DE's public world state) | live, when the tab opens |
-| Corrections where datasets lag | `data/overrides.json` (each entry names its official source) | by hand |
+| Corrections where datasets lag | `data/overrides.json` (each entry names its official source; `set` for weapon fields, `attackSet` for one fire mode) | by hand |
 
 - The app shows the game build, each source's version and fetch date ("Data sources and freshness" at the bottom),
   and a "Data note" on any weapon, enemy or frame where sources disagree or a value was corrected.

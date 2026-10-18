@@ -5,6 +5,24 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.11.0', date: '2026-10-18',
+    tldr: 'On Kill buffs now follow a kill rate setting, proc-based arcanes work, and Coda Bubonico uses shotgun mods like in game.',
+    sections: [
+      { title: 'Added', items: [
+        'Kill rate setting under Conditions: Horde, Steady, Boss or a custom kills per minute. On Kill buffs use the stacks you would actually hold, based on each buff\'s duration and how it loses stacks, so Primary Merciless falls off at lower kill rates while Galvanized mods stay close to full.',
+        'Primary Frostbite, Primary Blight, Conjunction Voltage and Primary Crux now count, with stacks based on your own Cold, Toxin or Electricity procs and weak point hits.',
+        'Empty conditional stack boxes show the stacks being used.'
+      ] },
+      { title: 'Changed', items: [
+        'Galvanized Scope\'s headshot kill stacks follow your headshot rate instead of assuming full stacks.'
+      ] },
+      { title: 'Fixed', items: [
+        'Coda Bubonico now uses shotgun mods (Galvanized Hell, Galvanized Savvy, Primed Point Blank and the rest). It was listed as a rifle.',
+        'Coda Bubonico\'s Burst and Radial Attack no longer use the main fire\'s 7 pellets.'
+      ] }
+    ]
+  },
+  {
     version: '0.10.0', date: '2026-10-17',
     tldr: 'Ask Teshin: find out whether a weapon wants a crit, status or hybrid build, try mods from the latest patches, and check this week\'s sleeper picks.',
     sections: [

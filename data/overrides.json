@@ -3,11 +3,37 @@
  "gameBuild": {
   "latestHotfix": "44.1.1",
   "latestHotfixDate": "2026-10-08",
-  "latestUpdate": { "number": "44.1.0", "name": "Iceblade of Narin: The Icebind", "date": "Oct 7, 2026" },
+  "latestUpdate": {
+   "number": "44.1.0",
+   "name": "Iceblade of Narin: The Icebind",
+   "date": "Oct 7, 2026"
+  },
   "source": "https://www.warframe.com/en/patch-notes",
   "checkedAt": "2026-10-14"
  },
  "weapons": [
-  { "name": "Cyath", "set": { "omega": 1.05 }, "source": "September 2026 Riven Dispositions, [DE]Connor, 2026-09-15: Cyath 1->1.05 (https://forums.warframe.com/topic/1523355-september-2026-riven-dispositions/)" }
+  {
+   "name": "Cyath",
+   "set": {
+    "omega": 1.05
+   },
+   "source": "September 2026 Riven Dispositions, [DE]Connor, 2026-09-15: Cyath 1->1.05 (https://forums.warframe.com/topic/1523355-september-2026-riven-dispositions/)"
+  },
+  {
+   "name": "Coda Bubonico",
+   "set": {
+    "type": "Shotgun"
+   },
+   "source": "WARFRAME Wiki: \"The Coda Bubonico uses Shotgun Mods.\" (https://wiki.warframe.com/w/Coda_Bubonico), confirmed in-game 2026-10-17 with Primed Point Blank and Galvanized Hell equipped",
+   "attackSet": {
+    "Burst": {
+     "multishot": 1
+    },
+    "Radial Attack": {
+     "multishot": 1
+    }
+   },
+   "attackSource": "WARFRAME Wiki attack table lists Multishot 1 for Burst and Radial Attack (https://wiki.warframe.com/w/Coda_Bubonico); in-game arsenal 2026-10-17 shows the Burst total at 2.1x its per-pellet sum with Galvanized Hell (+110%)"
+  }
  ]
 }

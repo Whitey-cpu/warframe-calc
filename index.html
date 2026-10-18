@@ -189,7 +189,10 @@
       <div id="abilities"></div>
       <h3>Conditions</h3>
       <div class="grid2">
-        <label class="check"><input type="checkbox" id="assumeMax" checked> Conditional buffs at max</label>
+        <label class="check" title="On Kill, on-proc and other conditional buffs. Off counts none of them."><input type="checkbox" id="assumeMax" checked> Conditional buffs</label>
+        <label title="How often you get kills with this weapon. Stacks come from each buff's duration and how it loses stacks: Galvanized stacks drop one every 20s without a kill, so even Steady keeps them close to full. Boss counts no kills.">Kill rate <select id="killRate">
+          <option value="horde">Horde (60/min)</option><option value="steady">Steady (12/min)</option><option value="boss">Boss, no kills</option><option value="custom">Custom</option></select></label>
+        <label id="killsPerMinWrap" hidden>Kills per minute <input type="number" id="killsPerMin" min="0" step="1" value="30"></label>
         <label class="check"><input type="checkbox" id="aiming" checked> Aiming</label>
         <label>Melee combo <input type="number" id="combo" value="1" min="1" step="0.5"></label>
         <label title="Extra status types from teammates or abilities. Your own procs are counted automatically when the box below is ticked.">Status types on target (min) <input type="number" id="statusTypes" value="0" min="0"></label>

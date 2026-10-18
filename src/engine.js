@@ -151,13 +151,88 @@
     if (/critical hit/.test(t)) return ctx.baseCC > 0;
     return true;
   }
+  // ---------- stack model: kill rate and proc rate ----------
+  // How stacks are lost (WARFRAME Wiki):
+  //  - 'one': when the buff times out, one stack is lost and the timer restarts. Galvanized mods, Merciless, Deadhead
+  //    (https://wiki.warframe.com/w/Galvanized_Hell, https://wiki.warframe.com/w/Primary_Merciless).
+  //  - 'each': every stack has its own timer. Galvanized Scope and Galvanized Crosshairs (https://wiki.warframe.com/w/Galvanized_Mods).
+  //  - 'all': one timer that each new proc or hit refreshes; all stacks drop when it runs out. Primary Frostbite, Primary Blight,
+  //    Conjunction Voltage, Primary Crux (their wiki pages).
+  // ASSUMPTION: kills, procs and hits arrive at a steady random (Poisson) rate. ASSUMPTION: for 'one', each kill also restarts
+  // the timer (the wiki does not say). ASSUMPTION: other kill buffs lose one stack at a time, other proc/hit buffs lose all.
+  const EACH_TIMER = /^Galvanized (Scope|Crosshairs)$/;
+  const KILL_RATES = { horde: 60, steady: 12, boss: 0 }; // kills per minute: Claude's suggested presets, not game data
+  function decayKind(src, trigger) {
+    if (EACH_TIMER.test(src.key)) return 'each';
+    return /kill/i.test(trigger) ? 'one' : 'all';
+  }
+  // Long-run average stacks for events at `rate` per second, buff `dur` seconds, cap `max`.
+  function expectedStacks(rate, dur, max, decay) {
+    if (!(rate > 0)) return 0;
+    if (!(dur > 0)) return max;
+    const a = rate * dur;
+    if (decay === 'each') {
+      // stacks with their own timers behave like an Erlang loss system: truncated Poisson with mean a
+      let t = 1, sum = 1, mean = 0;
+      for (let n = 1; n <= max; n++) { t *= a / n; sum += t; mean += n * t; if (sum > 1e200) { t /= 1e200; sum /= 1e200; mean /= 1e200; } }
+      return mean / sum;
+    }
+    // embedded jump chain: from n >= 1 the next event is a new stack (chance p, before the timer runs out) or the timeout (q)
+    const q = Math.exp(-a), p = 1 - q;
+    if (max <= 0) return 0;
+    if (q < 1e-12) return max;
+    const logW = new Array(max + 1); // log of (visit frequency x mean time per visit)
+    let lp = 0;                      // log visit frequency, state 0 = 1
+    logW[0] = -Math.log(rate);
+    for (let n = 1; n <= max; n++) {
+      if (decay === 'all') lp = n === 1 ? 0 : (n < max ? lp + Math.log(p) : lp + Math.log(p) - Math.log(q));
+      else lp = n === 1 ? -Math.log(q) : lp + Math.log(p) - Math.log(q);
+      logW[n] = lp + Math.log(p) - Math.log(rate);
+    }
+    const top = Math.max.apply(null, logW);
+    let sw = 0, sn = 0;
+    logW.forEach((lw, n) => { const w = Math.exp(lw - top); sw += w; sn += n * w; });
+    return sn / sw;
+  }
+  const STATUS_WORDS = 'impact|puncture|slash|heat|cold|electricity|toxin|blast|radiation|gas|magnetic|viral|corrosive|void';
+  // Events per second that build this buff, or null when the trigger is not rate-based (counted at max as before).
+  function triggerRate(trigger, ctx, conditions) {
+    const t = String(trigger || '');
+    if (/kill/i.test(t)) {
+      const kpm = conditions.killsPerMin != null ? conditions.killsPerMin : (KILL_RATES[conditions.killRate] != null ? KILL_RATES[conditions.killRate] : KILL_RATES.horde);
+      const kps = Math.max(0, kpm) / 60;
+      // Galvanized Scope / Crosshairs: weak point kill stacks follow the headshot rate setting (each stack lasts only 12s).
+      // Other weak point kill buffs (Primary Deadhead: 24s, loses one stack at a time) are kept up by occasional headshot
+      // kills, so they use the full kill rate (ASSUMPTION, as before).
+      return { rate: /weak point kill|headshot kill/i.test(t) && ctx.eachTimer ? kps * ctx.hsRate : kps, kind: 'kill' };
+    }
+    const rates = conditions.rates;
+    if (/weak point hit|headshot/i.test(t)) {
+      if (!rates) return { missing: true };
+      return { rate: rates.pelletsPerSec * ctx.hsRate, kind: 'hit' }; // every pellet can build stacks (wiki: Primary Crux)
+    }
+    const m = t.match(new RegExp(`^On (?:Weapon )?(${STATUS_WORDS}) Status(?: Effect)?$`, 'i'));
+    if (m || /^On Status Effect$/i.test(t)) {
+      if (!rates) return { missing: true };
+      const procs = rates.procs || {};
+      return { rate: m ? (procs[m[1].toLowerCase()] || 0) : Object.values(procs).reduce((x, y) => x + y, 0), kind: 'proc' };
+    }
+    return null;
+  }
   function stackCount(src, eff, idx, cond, conditions, ctx) {
     const k = `${src.key}#${idx}`;
     if (conditions.stacks && conditions.stacks[k] != null) return conditions.stacks[k];
     if (conditions.stacks && conditions.stacks[src.key] != null) return conditions.stacks[src.key];
     if (cond.trigger === 'When Aiming') return conditions.aiming === false ? 0 : 1;
     if (ctx && !triggerPossible(cond.trigger, ctx)) return 0;
-    return conditions.assumeMax === false ? 0 : (cond.maxStacks || 1);
+    if (conditions.assumeMax === false) return 0;
+    const max = cond.maxStacks || 1;
+    const tr = ctx ? triggerRate(cond.trigger, Object.assign({}, ctx, { eachTimer: EACH_TIMER.test(src.key) }), conditions) : null;
+    if (!tr) return max;
+    if (tr.missing) { ctx.needsRates = true; return max; }
+    const n = cond.duration ? expectedStacks(tr.rate, cond.duration, max, decayKind(src, cond.trigger)) : (tr.rate > 0 ? max : 0);
+    if (ctx.stackLog && !ctx.stackLog.some(x => x.key === k)) ctx.stackLog.push({ key: k, source: src.key, trigger: cond.trigger, kind: tr.kind, rate: tr.rate, duration: cond.duration || null, max, stacks: n });
+    return n;
   }
 
   // ---------- main ----------
@@ -175,7 +250,7 @@
     const cond = Object.assign({ assumeMax: true, combo: 1, statusTypes: 0, aiming: true }, build.conditions || {});
     const enemy = Object.assign({ faction: 'None (neutral)', armor: 0, headshotRate: 0, viralStacks: 0, corrosiveStacks: 0, heatStrip: false, armorStripPct: 0 }, build.enemy || {});
     const isMelee = weapon.category === 'Melee';
-    const trigCtx = { isAoE: atk.shotType === 'AoE', hsRate: Math.max(0, enemy.headshotRate || 0), isMelee, baseCC: (ov.critChance != null ? ov.critChance : atk.critChance) };
+    const trigCtx = { isAoE: atk.shotType === 'AoE', hsRate: Math.max(0, enemy.headshotRate || 0), isMelee, baseCC: (ov.critChance != null ? ov.critChance : atk.critChance), stackLog: [], needsRates: false };
 
     const P = {
       dmg: 0, direct: 0, phys: { impact: 0, puncture: 0, slash: 0 },
@@ -374,7 +449,7 @@
     // "Multishot consumes ammo ... increases Damage by +N%": normal mode = extra projectiles deal +N% (multiplicative);
     // Incarnon Form = all multishot bonuses are increased by N% (wiki notes, e.g. https://wiki.warframe.com/w/Torid_Incarnon_Genesis)
     const msBonus = P.ms * (P.msDmg && isIncForm ? 1 + P.msDmg : 1);
-    const msModded = ((ov.multishot != null ? ov.multishot : (formMs != null ? formMs : (isMelee ? 1 : weapon.multishot))) + P.baseMSFlat) * (isMelee || P.locks.multishot ? 1 : (1 + msBonus));
+    const msModded = ((ov.multishot != null ? ov.multishot : (formMs != null ? formMs : (isMelee ? 1 : (atk.multishot != null ? atk.multishot : weapon.multishot)))) + P.baseMSFlat) * (isMelee || P.locks.multishot ? 1 : (1 + msBonus));
     let ms = msModded;
     if (P.lastShotMS) {
       // "+N Multishot on last shot in magazine": averaged over the magazine, added after multishot mods (ASSUMPTION)
@@ -591,8 +666,16 @@
         groupSustained: round((perShot * (isAoE ? targets : 1) + dotGroupPerShot) * effFR * sustainFactor),
         sustainFactor: round(sustainFactor)
       },
-      used, unparsed, notes: [...new Set(notes)]
+      used, unparsed, notes: [...new Set(notes)],
+      // expected stacks of rate-based buffs (kills, procs, weak point hits) and whether proc/hit rates were still missing
+      stackModel: trigCtx.stackLog.map(x => Object.assign({}, x, { rate: round(x.rate), stacks: round(x.stacks) })),
+      needsRates: trigCtx.needsRates
     };
+    if (trigCtx.stackLog.some(x => x.kind === 'kill')) {
+      const kpm = cond.killsPerMin != null ? cond.killsPerMin : (KILL_RATES[cond.killRate] != null ? KILL_RATES[cond.killRate] : KILL_RATES.horde);
+      result.notes.push(`On Kill stacks use ${round(kpm)} kills per minute (expected stacks from each buff's duration and how it loses stacks). ASSUMPTION: kills come at a steady random rate and each kill restarts the buff timer.`);
+    }
+    if (trigCtx.stackLog.some(x => x.kind === 'proc' || x.kind === 'hit')) result.notes.push('Stacks from status procs and weak point hits use this build\'s own proc and hit rate (ASSUMPTION: steady random rate).');
     return result;
   }
 
@@ -691,6 +774,12 @@
     return out;
   }
 
+  // Pellets and status procs per second (sustained, including reloads) for proc- and hit-driven stacks.
+  function ratesOf(r) {
+    const f = r.stats.effectiveFireRate * r.dps.sustainFactor;
+    return { pelletsPerSec: (r.stats.multishot || 1) * f, procs: Object.fromEntries(Object.entries(r.procPerShotByType || {}).map(([k, v]) => [k, v * f])) };
+  }
+
   // Result for an assumed fight length T (null = open-ended): one pass to read proc rates, then passes that feed
   // the self-applied statuses back in (status-type counts can change proc-dependent bonuses, so passes repeat).
   function evalAtFight(build, data, T, selfOn, passes) {
@@ -700,7 +789,11 @@
     if (T) c0.fightSeconds = T;
     let r = calcWithExtras(Object.assign({}, build, { conditions: c0 }), data);
     let st = null;
-    if (!selfOn) return { r, st };
+    if (!selfOn) {
+      // proc- and hit-driven stacks need this build's rates, which are only known after one pass
+      if (r.needsRates) r = calcWithExtras(Object.assign({}, build, { conditions: Object.assign({}, c0, { rates: ratesOf(r) }) }), data);
+      return { r, st };
+    }
     for (let i = 0; i < passes; i++) {
       st = selfStatusState(r, T);
       const e = Object.assign({}, manualEnemy, {
@@ -711,7 +804,7 @@
         coldStacks: Math.max(manualEnemy.coldStacks || 0, st.stacks.cold || 0),
         heatStrip: manualEnemy.heatStrip === true ? true : Math.max(+manualEnemy.heatStrip || 0, st.uptime.heat || 0)
       });
-      const c = Object.assign({}, c0, { statusTypes: Math.max(manualTypes, st.types) });
+      const c = Object.assign({}, c0, { statusTypes: Math.max(manualTypes, st.types), rates: ratesOf(r) });
       r = calcWithExtras(Object.assign({}, build, { enemy: e, conditions: c }), data);
     }
     return { r, st };
@@ -774,5 +867,5 @@
   function round(v) { return Math.round(v * 1000) / 1000; }
   function mapRound(o) { const r = {}; for (const [k, v] of Object.entries(o)) r[k] = typeof v === 'number' ? round(v) : v; return r; }
 
-  WF.engine = { calculate, calcCore, selfStatusState, findWeapon, findMod, findArcane, modsFor, compatibleCompats, quantize, expectedCrit, variantRoot };
+  WF.engine = { calculate, calcCore, expectedStacks, KILL_RATES, selfStatusState, findWeapon, findMod, findArcane, modsFor, compatibleCompats, quantize, expectedCrit, variantRoot };
 })();

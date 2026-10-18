@@ -217,6 +217,12 @@ function applyExtras(data, x) {
     for (const o of ov.weapons || []) {
       for (const w of data.weapons.filter(x => x.name === o.name || (o.variants && o.variants.includes(x.name)))) {
         for (const [k, v] of Object.entries(o.set || {})) { const old = w[k]; w[k] = v; addNote(w, `${k} ${old} -> ${v} (${o.source})`); }
+        // per-attack values, e.g. { "Burst": { "multishot": 1 } } for alt-fires that do not share the weapon's multishot
+        for (const [an, vals] of Object.entries(o.attackSet || {})) {
+          const a = (w.attacks || []).find(x => x.name === an);
+          if (!a) { addNote(w, `Override for attack "${an}" not applied: attack not found (${o.attackSource || o.source})`); continue; }
+          for (const [k, v] of Object.entries(vals)) { const old = a[k]; a[k] = v; addNote(w, `${an} ${k} ${old == null ? '(weapon value)' : old} -> ${v} (${o.attackSource || o.source})`); }
+        }
       }
     }
   }

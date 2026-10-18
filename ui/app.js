@@ -477,10 +477,20 @@
         items.push({ key: `${it.name}#${idx}`, label: `${it.name}: ${eff.raw || eff.stat} (${eff.cond.trigger}${eff.cond.maxStacks ? ', max ' + eff.cond.maxStacks : ''}${eff.cond.chance ? ', ' + Math.round(eff.cond.chance * 100) + '% chance' : ''})`, max: eff.cond.maxStacks || 1 });
       });
     });
-    $('stacks').innerHTML = items.length ? `<h3>Conditional stacks</h3><p class="muted small">Blank uses the checkbox above. 0 turns a buff off.</p>` +
+    $('stacks').innerHTML = items.length ? `<h3>Conditional stacks</h3><p class="muted small">Blank uses the kill rate and your proc rate. Type a number to force it; 0 turns a buff off.</p>` +
       items.map(it => `<label class="small">${esc(it.label)} <input type="number" min="0" max="${it.max}" data-stack="${esc(it.key)}" value="${keep[it.key] != null ? esc(keep[it.key]) : (pendingStacks[it.key] != null ? esc(pendingStacks[it.key]) : '')}" placeholder="auto"></label>`).join('') : '';
   }
   let pendingStacks = {};
+  // blank stack inputs show the expected stacks the calculator used (kill rate, proc rate or weak point hits)
+  function showAutoStacks(r) {
+    const by = {};
+    (r.stackModel || []).forEach(x => { by[x.key] = x; });
+    document.querySelectorAll('[data-stack]').forEach(i => {
+      const x = by[i.dataset.stack];
+      i.placeholder = x ? `auto: ${Math.round(x.stacks * 10) / 10}` : 'auto';
+      i.title = x ? `${Math.round(x.stacks * 100) / 100} of ${x.max} expected from ${Math.round(x.rate * 100) / 100} ${x.kind === 'kill' ? 'kills' : x.kind === 'proc' ? 'procs' : 'weak point hits'}/s${x.duration ? ` and a ${x.duration}s duration` : ''}` : '';
+    });
+  }
 
   // ---------- build <-> state ----------
   function collect() {
@@ -513,6 +523,7 @@
       customBuffs: readRows($('custom')).map(r => Object.assign(toEffect(r), { kind: r.kind.startsWith('element:') ? 'element' : r.kind, label: r.label || undefined })),
       extraAttacks: (state.extraAttacks || []).filter(i => i !== (parseInt($('attack').value, 10) || 0)),
       conditions: { assumeMax: $('assumeMax').checked, aiming: $('aiming').checked, combo: ev('combo') || 1, statusTypes: ev('statusTypes'), stacks,
+        killRate: $('killRate').value === 'custom' ? undefined : $('killRate').value, killsPerMin: $('killRate').value === 'custom' ? Math.max(0, ev('killsPerMin')) : undefined,
         selfStatus: $('selfStatus').checked, fightSeconds: $('fightSeconds').value === '' ? undefined : ev('fightSeconds') },
       overrides,
       enemy: Object.assign({
@@ -585,6 +596,9 @@
     (b.customBuffs || []).forEach(c => addRow($('custom'), CUSTOM_KINDS, { kind: c.kind === 'element' ? 'element:' + c.element : c.kind, value: c.value, label: c.label }));
     const c = b.conditions || {};
     $('assumeMax').checked = c.assumeMax !== false; $('aiming').checked = c.aiming !== false;
+    $('killRate').value = c.killsPerMin != null ? 'custom' : (['horde', 'steady', 'boss'].includes(c.killRate) ? c.killRate : 'horde');
+    if (c.killsPerMin != null) $('killsPerMin').value = c.killsPerMin;
+    $('killsPerMinWrap').hidden = $('killRate').value !== 'custom';
     $('combo').value = c.combo || 1; $('statusTypes').value = c.statusTypes || 0;
     $('selfStatus').checked = c.selfStatus !== false; $('fightSeconds').value = c.fightSeconds || '';
     $('targets').value = (b.enemy && b.enemy.targets) || 1;
@@ -666,6 +680,7 @@
       try {
         const result = E.calculate(b, D);
         render(result);
+        showAutoStacks(result);
         try { localStorage.setItem(LAST_KEY, JSON.stringify(b)); } catch (e) { /* storage unavailable */ }
         if (window.WFUI) WFUI.hooks.forEach(fn => { try { fn(b, result); } catch (err) { console.error(err); } });
       } catch (e) { $('tiles').innerHTML = `<p class="muted">Error: ${esc(e.message)}</p>`; }
@@ -673,6 +688,7 @@
   }
 
   // ---------- generic inputs ----------
+  $('killRate').addEventListener('input', () => { $('killsPerMinWrap').hidden = $('killRate').value !== 'custom'; });
   document.querySelector('.side').addEventListener('input', e => { if (!e.target.closest('#optPanel') && e.target.id !== 'buildName' && e.target.id !== 'jsonBox' && e.target.id !== 'excluded') update(); });
   document.querySelector('.attack-row').addEventListener('input', e => { if (e.target.id === 'attack') renderExtraAttacks(); renderWeapon(); update(); });
 

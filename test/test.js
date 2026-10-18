@@ -87,7 +87,7 @@ r = E.calculate({ weapon: testWeapon({ impact: 100 }), buffs: [{ id: 'roar', str
 eq('Roar 130% strength', r.perShotVsEnemy, 165);
 
 // 8. Primary Merciless is additive with Serration (https://wiki.warframe.com/w/Primary_Merciless)
-r = E.calculate({ weapon: testWeapon({ impact: 100 }), mods: ['Serration'], arcanes: ['Primary Merciless'] }, data);
+r = E.calculate({ weapon: testWeapon({ impact: 100 }), mods: ['Serration'], arcanes: ['Primary Merciless'], conditions: { stacks: { 'Primary Merciless': 12 } } }, data);
 eq('Serration + 12x Merciless', r.perHitNonCrit, 100 * (1 + 1.65 + 3.6));
 
 // 9. Galvanized Chamber full stacks: +80% + 5 x 30% = +230% (https://wiki.warframe.com/w/Galvanized_Chamber)
@@ -262,6 +262,53 @@ if (data.incarnon) {
   eq('Teshin: status-only build has no crit mods', has(r.status, ['critChance', 'critChanceFlat', 'critDamage', 'slashOnCrit']), false);
   eq('Teshin: best build is at least as strong as both', r.best.score >= Math.max(r.crit.score, r.status.score) - 1e-6, true);
   eq('Teshin: verdict is crit, status or hybrid', ['crit', 'status', 'hybrid'].includes(r.verdict), true);
+}
+
+
+// 26. Coda Bubonico uses shotgun mods (wiki), and matches the in-game arsenal (2026-10-17 screenshots, Primed Point Blank rank 9,
+//     28.2% Radiation valence, conditionals off): crit 81%, crit dmg 4.8x, status 18.3%, fire rate 6.4, multishot 14.7, magazine 50;
+//     Burst: status 109.8%, total 187.7; Radial Attack: status 102.6%, Viral 357.5.
+{
+  const bub = E.findWeapon(data, 'Coda Bubonico');
+  eq('Coda Bubonico is a shotgun (uses Shotgun Mods)', bub.type === 'Shotgun' && E.modsFor(data, bub).some(m => m.name === 'Galvanized Hell'), true);
+  const mods = ['Galvanized Hell', 'Galvanized Savvy', 'Critical Deceleration', 'Primed Ravage', 'Atomic Fallout', 'Magnetic Strafe', { name: 'Primed Point Blank', rank: 9 }, 'Charged Shell', 'Galvanized Acceleration'];
+  const b = atk => E.calculate({ weapon: 'Coda Bubonico', attack: atk, mods, arcanes: ['Primary Crux'], valence: { element: 'radiation', pct: 0.282 }, conditions: { assumeMax: false, selfStatus: false } }, data);
+  const a0 = b(0), a1 = b(1), a2 = b(2);
+  eq('Coda Bubonico arsenal crit chance 81%', a0.stats.critChance, 0.81, 0.005);
+  eq('Coda Bubonico arsenal crit damage 4.8x', a0.stats.critMultiplier, 4.8, 0.05);
+  eq('Coda Bubonico arsenal status 18.3%', a0.stats.statusChance, 0.183, 0.0005);
+  eq('Coda Bubonico arsenal fire rate 6.4', a0.stats.fireRate, 6.4, 0.005);
+  eq('Coda Bubonico arsenal multishot 14.7', a0.stats.multishot, 14.7, 0.01);
+  eq('Coda Bubonico arsenal magazine 50', a0.stats.magazine, 50);
+  eq('Coda Bubonico Burst status 109.8%', a1.stats.statusChance, 1.098, 0.0005);
+  eq('Coda Bubonico Burst total 187.7 (multishot 1 base, x2.1 modded)', a1.arsenal.total, 187.7, 0.15);
+  eq('Coda Bubonico Radial status 102.6%', a2.stats.statusChance, 1.026, 0.0005);
+  eq('Coda Bubonico Radial Viral 357.5', a2.arsenal.types.viral, 357.5, 0.1);
+}
+
+// 27. Stack model: kill rate and proc rate (wiki: Galvanized and Merciless lose one stack per timeout; Galvanized Scope tracks
+//     each stack; Primary Frostbite loses all stacks when its refreshed 12s timer runs out)
+{
+  const S2 = E.expectedStacks;
+  eq('No kills: no stacks', S2(0, 20, 4, 'one'), 0);
+  eq('Galvanized Hell at 60 kills/min: full 4 stacks', S2(1, 20, 4, 'one'), 4, 1e-3);
+  eq('Galvanized Hell at 12 kills/min: still about 4 stacks', S2(0.2, 20, 4, 'one') > 3.9, true);
+  eq('Primary Merciless (4s) at 12 kills/min drops well below 12', S2(0.2, 4, 12, 'one') < 10, true);
+  eq('Single buff uptime = 1 - e^(-rate x duration)', S2(0.3, 10, 1, 'one'), 1 - Math.exp(-3), 1e-9);
+  eq('Separate timers: truncated Poisson mean', S2(1, 12, 5, 'each') > 4 && S2(1, 12, 5, 'each') < 5, true);
+  const hell = c => E.calculate({ weapon: 'Kuva Hek', mods: ['Galvanized Hell'], conditions: Object.assign({ selfStatus: false }, c) }, data).stats.multishot;
+  const base = E.calculate({ weapon: 'Kuva Hek', mods: ['Galvanized Hell'], conditions: { assumeMax: false, selfStatus: false } }, data).stats.multishot;
+  eq('Boss kill rate: Galvanized Hell gives only its base multishot', hell({ killRate: 'boss' }), base, 1e-9);
+  eq('Horde kill rate: Galvanized Hell adds 4 x 30% multishot', hell({ killRate: 'horde' }) / base, (1 + 1.1 + 1.2) / 2.1, 1e-6);
+  const scope = hs => E.calculate({ weapon: 'Soma Prime', mods: ['Galvanized Scope'], enemy: { headshotRate: hs }, conditions: { selfStatus: false } }, data).stats.critChance;
+  eq('Galvanized Scope gives nothing with 0% headshots', scope(0), E.calculate({ weapon: 'Soma Prime', mods: [], conditions: { selfStatus: false } }, data).stats.critChance, 1e-9);
+  eq('Galvanized Scope builds with 30% headshots', scope(0.3) > scope(0), true);
+  const fb = E.findArcane(data, 'Primary Frostbite');
+  eq('Primary Frostbite parses into crit damage and multishot, 12s, 40 stacks', fb.effects.length === 2 && fb.effects.every(e => e.cond.duration === 12 && e.cond.maxStacks === 40), true);
+  const cold = E.calculate({ weapon: 'Soma Prime', mods: ['Cryo Rounds'], arcanes: ['Primary Frostbite'], conditions: { selfStatus: false } }, data);
+  const noCold = E.calculate({ weapon: 'Soma Prime', mods: ['Serration'], arcanes: ['Primary Frostbite'], conditions: { selfStatus: false } }, data);
+  eq('Primary Frostbite stacks with Cold procs', cold.stackModel.find(x => x.source === 'Primary Frostbite').stacks > 39, true);
+  eq('Primary Frostbite gives nothing without Cold procs', noCold.stackModel.find(x => x.source === 'Primary Frostbite').stacks, 0);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

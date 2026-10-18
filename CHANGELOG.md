@@ -4,9 +4,28 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.11.0**: On Kill buffs now follow a kill rate setting, proc-based arcanes work, and Coda Bubonico uses shotgun mods like in game.
 - **v0.10.0**: Ask Teshin: find out whether a weapon wants a crit, status or hybrid build, try mods from the latest patches, and check this week's sleeper picks.
 - **v0.9.1**: Plat prices are paused while I work out access with warframe.market.
-- **v0.9.0**: Plat prices from warframe.market for equipped mods and Prime weapon sets.
+
+## v0.11.0 (2026-10-18)
+
+**TL;DR:** On Kill buffs now follow a kill rate setting, proc-based arcanes work, and Coda Bubonico uses shotgun mods like in game.
+
+### Added
+
+- Kill rate setting under Conditions: Horde, Steady, Boss or a custom kills per minute. On Kill buffs use the stacks you would actually hold, based on each buff's duration and how it loses stacks, so Primary Merciless falls off at lower kill rates while Galvanized mods stay close to full.
+- Primary Frostbite, Primary Blight, Conjunction Voltage and Primary Crux now count, with stacks based on your own Cold, Toxin or Electricity procs and weak point hits.
+- Empty conditional stack boxes show the stacks being used.
+
+### Changed
+
+- Galvanized Scope's headshot kill stacks follow your headshot rate instead of assuming full stacks.
+
+### Fixed
+
+- Coda Bubonico now uses shotgun mods (Galvanized Hell, Galvanized Savvy, Primed Point Blank and the rest). It was listed as a rifle.
+- Coda Bubonico's Burst and Radial Attack no longer use the main fire's 7 pellets.
 
 ## v0.10.0 (2026-10-17)
 
