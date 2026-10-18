@@ -1,14 +1,14 @@
 {
- "scrapedAt": "2026-10-15T03:44:42.404Z",
+ "scrapedAt": "2026-10-18T16:25:57.667Z",
  "build": {
-  "latestHotfix": "44.1.1",
+  "latestHotfix": "44.1.2",
   "latestUpdate": {
    "number": "44.1.0",
    "name": "Iceblade of Narin: The Icebind",
    "date": "Oct 7, 2026"
   },
   "source": "https://www.warframe.com/en/patch-notes",
-  "checkedAt": "2026-10-15T03:44:42.404Z"
+  "checkedAt": "2026-10-18T16:25:57.421Z"
  },
  "incarnon": {
   "weapons": [
@@ -1759,7 +1759,7 @@
      "Destreza Prime"
     ],
     "source": "https://wiki.warframe.com/w/Destreza_Incarnon_Genesis",
-    "lastEdited": "2026-10-14T21:19:46Z",
+    "lastEdited": "2026-10-17T22:29:41Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -2942,7 +2942,7 @@
      "Innodem"
     ],
     "source": "https://wiki.warframe.com/w/Innodem",
-    "lastEdited": "2026-10-08T10:10:02Z",
+    "lastEdited": "2026-10-17T02:29:03Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -3936,7 +3936,7 @@
      "Nami Solo"
     ],
     "source": "https://wiki.warframe.com/w/Nami_Solo_Incarnon_Genesis",
-    "lastEdited": "2026-05-01T23:13:44Z",
+    "lastEdited": "2026-10-17T06:30:35Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -3974,7 +3974,7 @@
          "On Finisher Kill: +40 Health per second for 10s."
         ],
         "values": {},
-        "notes": ""
+        "notes": "Will trigger on Mercy kills even while using an Exalted Melee such as Exalted Blade."
        }
       ],
       "challengeAfter": "Activate this weapon's Incarnon form 6 times in a mission"
@@ -6183,7 +6183,7 @@
      "Vectis Prime"
     ],
     "source": "https://wiki.warframe.com/w/Vectis_Incarnon_Genesis",
-    "lastEdited": "2026-09-29T21:48:57Z",
+    "lastEdited": "2026-10-15T14:04:53Z",
     "tiers": {
      "EVO1": {
       "perks": [

@@ -1,15 +1,15 @@
 {
- "builtAt": "2026-10-18T04:22:15.873Z",
- "dataVersion": "1.1276.19",
+ "builtAt": "2026-10-18T16:33:58.917Z",
+ "dataVersion": "1.1276.26",
  "gameBuild": {
-  "latestHotfix": "44.1.1",
+  "latestHotfix": "44.1.2",
   "latestUpdate": {
    "number": "44.1.0",
    "name": "Iceblade of Narin: The Icebind",
    "date": "Oct 7, 2026"
   },
   "source": "https://www.warframe.com/en/patch-notes",
-  "checkedAt": "2026-10-15T03:44:42.404Z"
+  "checkedAt": "2026-10-18T16:25:57.421Z"
  },
  "scenario": {
   "unit": "Heavy Gunner",
@@ -28,32 +28,10 @@
    "count": 195,
    "top": [
     {
-     "name": "Coda Bubonico",
-     "category": "Primary",
-     "type": "Rifle",
-     "dps": 540726,
-     "dispo": 0.6,
-     "mods": [
-      "Malignant Force",
-      "Galvanized Chamber",
-      "Primed Cryo Rounds",
-      "Galvanized Scope",
-      "Galvanized Aptitude",
-      "Wildfire",
-      "Vile Acceleration",
-      "Vital Sense"
-     ],
-     "exilus": null,
-     "arcane": "Primary Merciless",
-     "ttk": 0.79,
-     "incarnon": false,
-     "rank": 1
-    },
-    {
      "name": "Phage",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 523043,
+     "dps": 522484,
      "dispo": 1.46,
      "mods": [
       "Primed Charged Shell",
@@ -69,57 +47,57 @@
      "arcane": "Primary Merciless",
      "ttk": 0.82,
      "incarnon": false,
+     "rank": 1
+    },
+    {
+     "name": "Coda Bubonico",
+     "category": "Primary",
+     "type": "Shotgun",
+     "dps": 423065,
+     "dispo": 0.6,
+     "mods": [
+      "Primed Charged Shell",
+      "Galvanized Hell",
+      "Primed Ravage",
+      "Galvanized Savvy",
+      "Repeater Clip",
+      "Critical Deceleration",
+      "Primed Cleanse Grineer",
+      "Shrapnel Shot"
+     ],
+     "exilus": null,
+     "arcane": "Primary Merciless",
+     "ttk": 1.01,
+     "incarnon": false,
      "rank": 2
     },
     {
      "name": "Coda Synapse",
      "category": "Primary",
      "type": "Rifle",
-     "dps": 429464,
+     "dps": 395035,
      "dispo": 0.9,
      "mods": [
       "Galvanized Chamber",
       "Primed Cryo Rounds",
       "Malignant Force",
-      "Galvanized Scope",
-      "Bladed Rounds",
       "Vile Acceleration",
+      "Vital Sense",
+      "Critical Delay",
       "Thermite Rounds",
       "Galvanized Aptitude"
      ],
      "exilus": null,
      "arcane": "Primary Merciless",
-     "ttk": 1,
+     "ttk": 1.08,
      "incarnon": false,
      "rank": 3
-    },
-    {
-     "name": "Synapse",
-     "category": "Primary",
-     "type": "Rifle",
-     "dps": 334015,
-     "dispo": 1.31,
-     "mods": [
-      "Galvanized Chamber",
-      "Primed Cryo Rounds",
-      "Malignant Force",
-      "Galvanized Scope",
-      "Bladed Rounds",
-      "Vile Acceleration",
-      "Thermite Rounds",
-      "Galvanized Aptitude"
-     ],
-     "exilus": null,
-     "arcane": "Primary Merciless",
-     "ttk": 1.28,
-     "incarnon": false,
-     "rank": 4
     },
     {
      "name": "Bubonico",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 329229,
+     "dps": 332312,
      "dispo": 0.75,
      "mods": [
       "Primed Charged Shell",
@@ -127,13 +105,35 @@
       "Primed Ravage",
       "Galvanized Savvy",
       "Repeater Clip",
-      "Primed Blunderbuss",
+      "Critical Deceleration",
       "Primed Cleanse Grineer",
-      "Primed Ammo Stock"
+      "Shrapnel Shot"
      ],
      "exilus": null,
      "arcane": "Primary Merciless",
-     "ttk": 1.3,
+     "ttk": 1.29,
+     "incarnon": false,
+     "rank": 4
+    },
+    {
+     "name": "Synapse",
+     "category": "Primary",
+     "type": "Rifle",
+     "dps": 307561,
+     "dispo": 1.31,
+     "mods": [
+      "Galvanized Chamber",
+      "Primed Cryo Rounds",
+      "Malignant Force",
+      "Vile Acceleration",
+      "Vital Sense",
+      "Critical Delay",
+      "Thermite Rounds",
+      "Galvanized Aptitude"
+     ],
+     "exilus": null,
+     "arcane": "Primary Merciless",
+     "ttk": 1.39,
      "incarnon": false,
      "rank": 5
     },
@@ -141,7 +141,7 @@
      "name": "Kuva Sobek",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 219776,
+     "dps": 219634,
      "dispo": 0.8,
      "mods": [
       "Incendiary Coat",
@@ -160,32 +160,10 @@
      "rank": 6
     },
     {
-     "name": "Tenet Quanta",
-     "category": "Primary",
-     "type": "Rifle",
-     "dps": 219044,
-     "dispo": 0.85,
-     "mods": [
-      "Infected Clip",
-      "Galvanized Chamber",
-      "Bladed Rounds",
-      "Galvanized Scope",
-      "Vile Acceleration",
-      "Primed Bane Of Grineer",
-      "Vital Sense",
-      "Stormbringer"
-     ],
-     "exilus": null,
-     "arcane": "Primary Merciless",
-     "ttk": 1.96,
-     "incarnon": false,
-     "rank": 7
-    },
-    {
      "name": "Coda Bassocyst",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 215718,
+     "dps": 215655,
      "dispo": 0.6,
      "mods": [
       "Incendiary Coat",
@@ -201,13 +179,13 @@
      "arcane": "Primary Merciless",
      "ttk": 1.99,
      "incarnon": false,
-     "rank": 8
+     "rank": 7
     },
     {
      "name": "Corinth Prime",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 215292,
+     "dps": 215156,
      "dispo": 1,
      "mods": [
       "Incendiary Coat",
@@ -223,13 +201,13 @@
      "arcane": "Primary Merciless",
      "ttk": 1.99,
      "incarnon": false,
-     "rank": 9
+     "rank": 8
     },
     {
      "name": "Strun Prime",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 206061,
+     "dps": 205939,
      "dispo": 1.2,
      "mods": [
       "Incendiary Coat",
@@ -245,13 +223,13 @@
      "arcane": "Primary Merciless",
      "ttk": 2.08,
      "incarnon": true,
-     "rank": 10
+     "rank": 9
     },
     {
      "name": "Vaykor Hek",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 204417,
+     "dps": 204284,
      "dispo": 1.15,
      "mods": [
       "Incendiary Coat",
@@ -267,13 +245,35 @@
      "arcane": "Primary Merciless",
      "ttk": 2.1,
      "incarnon": false,
+     "rank": 10
+    },
+    {
+     "name": "Tenet Quanta",
+     "category": "Primary",
+     "type": "Rifle",
+     "dps": 200530,
+     "dispo": 0.85,
+     "mods": [
+      "Infected Clip",
+      "Galvanized Chamber",
+      "Vital Sense",
+      "Critical Delay",
+      "Vile Acceleration",
+      "Primed Bane Of Grineer",
+      "Bladed Rounds",
+      "Stormbringer"
+     ],
+     "exilus": null,
+     "arcane": "Primary Merciless",
+     "ttk": 2.14,
+     "incarnon": false,
      "rank": 11
     },
     {
      "name": "Cedo Prime",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 194803,
+     "dps": 194652,
      "dispo": 0.55,
      "mods": [
       "Incendiary Coat",
@@ -295,7 +295,7 @@
      "name": "Boar Prime",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 193441,
+     "dps": 193331,
      "dispo": 1.34,
      "mods": [
       "Incendiary Coat",
@@ -309,31 +309,53 @@
      ],
      "exilus": null,
      "arcane": "Primary Merciless",
-     "ttk": 2.21,
+     "ttk": 2.22,
      "incarnon": true,
      "rank": 13
+    },
+    {
+     "name": "Purgator 1",
+     "category": "Primary",
+     "type": "Rifle",
+     "dps": 165287,
+     "dispo": 1.2,
+     "mods": [
+      "Thermite Rounds",
+      "Galvanized Chamber",
+      "Hellfire",
+      "Primed Bane Of Grineer",
+      "Vital Sense",
+      "Vile Acceleration",
+      "Critical Delay",
+      "Bladed Rounds"
+     ],
+     "exilus": null,
+     "arcane": "Primary Merciless",
+     "ttk": 2.59,
+     "incarnon": false,
+     "rank": 14
     },
     {
      "name": "Coda Hema",
      "category": "Primary",
      "type": "Rifle",
-     "dps": 176635,
+     "dps": 162600,
      "dispo": 1,
      "mods": [
       "Hellfire",
       "Galvanized Chamber",
       "Primed Bane Of Grineer",
-      "Vile Acceleration",
-      "Galvanized Aptitude",
-      "Galvanized Scope",
       "Bladed Rounds",
-      "Vital Sense"
+      "Vile Acceleration",
+      "Vital Sense",
+      "Critical Delay",
+      "Galvanized Aptitude"
      ],
      "exilus": null,
      "arcane": "Primary Merciless",
-     "ttk": 2.42,
+     "ttk": 2.63,
      "incarnon": false,
-     "rank": 14
+     "rank": 15
     }
    ],
    "sleepers": [
@@ -341,7 +363,7 @@
      "name": "Phage",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 523043,
+     "dps": 522484,
      "dispo": 1.46,
      "mods": [
       "Primed Charged Shell",
@@ -357,35 +379,35 @@
      "arcane": "Primary Merciless",
      "ttk": 0.82,
      "incarnon": false,
-     "rank": 2
+     "rank": 1
     },
     {
      "name": "Synapse",
      "category": "Primary",
      "type": "Rifle",
-     "dps": 334015,
+     "dps": 307561,
      "dispo": 1.31,
      "mods": [
       "Galvanized Chamber",
       "Primed Cryo Rounds",
       "Malignant Force",
-      "Galvanized Scope",
-      "Bladed Rounds",
       "Vile Acceleration",
+      "Vital Sense",
+      "Critical Delay",
       "Thermite Rounds",
       "Galvanized Aptitude"
      ],
      "exilus": null,
      "arcane": "Primary Merciless",
-     "ttk": 1.28,
+     "ttk": 1.39,
      "incarnon": false,
-     "rank": 4
+     "rank": 5
     },
     {
      "name": "Boar Prime",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 193441,
+     "dps": 193331,
      "dispo": 1.34,
      "mods": [
       "Incendiary Coat",
@@ -399,7 +421,7 @@
      ],
      "exilus": null,
      "arcane": "Primary Merciless",
-     "ttk": 2.21,
+     "ttk": 2.22,
      "incarnon": true,
      "rank": 13
     },
@@ -407,51 +429,29 @@
      "name": "Daikyu",
      "category": "Primary",
      "type": "Bow",
-     "dps": 159405,
+     "dps": 147179,
      "dispo": 1.3,
      "mods": [
       "Split Flights",
-      "Hellfire",
+      "Galvanized Aptitude",
       "Vile Acceleration",
+      "Primed Bane Of Grineer",
+      "Vital Sense",
+      "Critical Delay",
       "Hammer Shot",
-      "Primed Bane Of Grineer",
-      "Galvanized Scope",
-      "Bladed Rounds",
-      "Galvanized Aptitude"
-     ],
-     "exilus": null,
-     "arcane": "Primary Merciless",
-     "ttk": 2.69,
-     "incarnon": false,
-     "rank": 18
-    },
-    {
-     "name": "Quanta Vandal",
-     "category": "Primary",
-     "type": "Rifle",
-     "dps": 136062,
-     "dispo": 1.4,
-     "mods": [
-      "Infected Clip",
-      "Galvanized Chamber",
-      "Bladed Rounds",
-      "Galvanized Scope",
-      "Vile Acceleration",
-      "Primed Bane Of Grineer",
-      "Stormbringer",
       "Hellfire"
      ],
      "exilus": null,
      "arcane": "Primary Merciless",
-     "ttk": 3.15,
+     "ttk": 2.91,
      "incarnon": false,
-     "rank": 30
+     "rank": 23
     },
     {
      "name": "Sobek",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 127053,
+     "dps": 126982,
      "dispo": 1.33,
      "mods": [
       "Incendiary Coat",
@@ -467,7 +467,29 @@
      "arcane": "Primary Merciless",
      "ttk": 3.37,
      "incarnon": false,
-     "rank": 35
+     "rank": 31
+    },
+    {
+     "name": "Quanta Vandal",
+     "category": "Primary",
+     "type": "Rifle",
+     "dps": 125860,
+     "dispo": 1.4,
+     "mods": [
+      "Infected Clip",
+      "Galvanized Chamber",
+      "Vital Sense",
+      "Critical Delay",
+      "Vile Acceleration",
+      "Stormbringer",
+      "Hellfire",
+      "Primed Bane Of Grineer"
+     ],
+     "exilus": null,
+     "arcane": "Primary Merciless",
+     "ttk": 3.4,
+     "incarnon": false,
+     "rank": 33
     },
     {
      "name": "Convectrix",
@@ -489,13 +511,13 @@
      "arcane": "Primary Deadhead",
      "ttk": 3.44,
      "incarnon": false,
-     "rank": 37
+     "rank": 34
     },
     {
      "name": "Glaxion",
      "category": "Primary",
      "type": "Rifle",
-     "dps": 122311,
+     "dps": 122219,
      "dispo": 1.3,
      "mods": [
       "Infected Clip",
@@ -511,35 +533,13 @@
      "arcane": "Primary Merciless",
      "ttk": 3.5,
      "incarnon": false,
-     "rank": 39
-    },
-    {
-     "name": "Prisma Grakata",
-     "category": "Primary",
-     "type": "Rifle",
-     "dps": 112425,
-     "dispo": 1.3,
-     "mods": [
-      "Vital Sense",
-      "Galvanized Chamber",
-      "Primed Bane Of Grineer",
-      "Hellfire",
-      "Bladed Rounds",
-      "Galvanized Scope",
-      "Galvanized Aptitude",
-      "Vile Acceleration"
-     ],
-     "exilus": null,
-     "arcane": "Primary Merciless",
-     "ttk": 3.81,
-     "incarnon": false,
-     "rank": 54
+     "rank": 35
     },
     {
      "name": "Strun Wraith",
      "category": "Primary",
      "type": "Shotgun",
-     "dps": 112202,
+     "dps": 112142,
      "dispo": 1.35,
      "mods": [
       "Incendiary Coat",
@@ -555,7 +555,29 @@
      "arcane": "Primary Merciless",
      "ttk": 3.82,
      "incarnon": true,
-     "rank": 56
+     "rank": 49
+    },
+    {
+     "name": "Paracyst",
+     "category": "Primary",
+     "type": "Rifle",
+     "dps": 110028,
+     "dispo": 1.31,
+     "mods": [
+      "Primed Cryo Rounds",
+      "Galvanized Chamber",
+      "Infected Clip",
+      "Hellfire",
+      "Primed Bane Of Grineer",
+      "Vile Acceleration",
+      "Galvanized Aptitude",
+      "Magnetic Capacity"
+     ],
+     "exilus": null,
+     "arcane": "Primary Merciless",
+     "ttk": 3.89,
+     "incarnon": false,
+     "rank": 52
     }
    ]
   },
@@ -566,7 +588,7 @@
      "name": "Akbronco Prime",
      "category": "Secondary",
      "type": "Dual Pistols",
-     "dps": 498467,
+     "dps": 483122,
      "dispo": 1.3,
      "mods": [
       "Primed Heated Charge",
@@ -580,7 +602,7 @@
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 0.86,
+     "ttk": 0.89,
      "incarnon": false,
      "rank": 1
     },
@@ -588,21 +610,21 @@
      "name": "Scyotid",
      "category": "Secondary",
      "type": "Throwing",
-     "dps": 272203,
+     "dps": 265482,
      "dispo": 0.75,
      "mods": [
       "Primed Convulsion",
       "Galvanized Diffusion",
       "Lethal Torrent",
       "Primed Target Cracker",
-      "Galvanized Crosshairs",
+      "Primed Pistol Gambit",
       "Galvanized Shot",
       "Pressurized Magazine",
       "Primed Expel Grineer"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 1.57,
+     "ttk": 1.61,
      "incarnon": false,
      "rank": 2
     },
@@ -610,21 +632,21 @@
      "name": "Kuva Brakk",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 271429,
+     "dps": 264516,
      "dispo": 0.95,
      "mods": [
       "Primed Heated Charge",
       "Galvanized Diffusion",
       "Galvanized Shot",
       "Primed Target Cracker",
-      "Galvanized Crosshairs",
       "Lethal Torrent",
+      "Primed Pistol Gambit",
       "Primed Expel Grineer",
       "Magnetic Might"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 1.58,
+     "ttk": 1.62,
      "incarnon": false,
      "rank": 3
     },
@@ -632,7 +654,7 @@
      "name": "Coda Catabolyst",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 240144,
+     "dps": 223032,
      "dispo": 0.7,
      "mods": [
       "Primed Heated Charge",
@@ -640,13 +662,13 @@
       "Primed Expel Grineer",
       "Galvanized Shot",
       "Lethal Torrent",
+      "Primed Target Cracker",
       "Accelerated Isotope",
-      "Galvanized Crosshairs",
-      "Primed Target Cracker"
+      "Primed Pistol Gambit"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 1.78,
+     "ttk": 1.92,
      "incarnon": false,
      "rank": 4
     },
@@ -654,7 +676,7 @@
      "name": "Pyrana Prime",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 215180,
+     "dps": 209398,
      "dispo": 0.65,
      "mods": [
       "Primed Heated Charge",
@@ -662,13 +684,13 @@
       "Galvanized Shot",
       "Lethal Torrent",
       "Primed Target Cracker",
-      "Galvanized Crosshairs",
+      "Primed Pistol Gambit",
       "Primed Expel Grineer",
       "Magnetic Might"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 1.99,
+     "ttk": 2.05,
      "incarnon": false,
      "rank": 5
     },
@@ -676,7 +698,7 @@
      "name": "Catabolyst",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 207040,
+     "dps": 193425,
      "dispo": 1.2,
      "mods": [
       "Primed Heated Charge",
@@ -684,43 +706,21 @@
       "Primed Expel Grineer",
       "Galvanized Shot",
       "Lethal Torrent",
-      "Galvanized Crosshairs",
+      "Primed Pistol Gambit",
       "Primed Target Cracker",
       "Accelerated Isotope"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 2.07,
+     "ttk": 2.21,
      "incarnon": false,
      "rank": 6
-    },
-    {
-     "name": "Akmagnus Prime",
-     "category": "Secondary",
-     "type": "Dual Pistols",
-     "dps": 165773,
-     "dispo": 1.1,
-     "mods": [
-      "Primed Heated Charge",
-      "Galvanized Diffusion",
-      "Galvanized Shot",
-      "Primed Target Cracker",
-      "Galvanized Crosshairs",
-      "Primed Expel Grineer",
-      "Lethal Torrent",
-      "Primed Pistol Gambit"
-     ],
-     "exilus": null,
-     "arcane": "Secondary Merciless",
-     "ttk": 2.58,
-     "incarnon": false,
-     "rank": 7
     },
     {
      "name": "Dual Coda Torxica",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 164081,
+     "dps": 160329,
      "dispo": 0.55,
      "mods": [
       "Primed Heated Charge",
@@ -729,12 +729,34 @@
       "Lethal Torrent",
       "Galvanized Shot",
       "Primed Target Cracker",
-      "Galvanized Crosshairs",
+      "Primed Pistol Gambit",
       "Accelerated Isotope"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 2.61,
+     "ttk": 2.67,
+     "incarnon": false,
+     "rank": 7
+    },
+    {
+     "name": "Akmagnus Prime",
+     "category": "Secondary",
+     "type": "Dual Pistols",
+     "dps": 159241,
+     "dispo": 1.1,
+     "mods": [
+      "Primed Heated Charge",
+      "Galvanized Diffusion",
+      "Galvanized Shot",
+      "Primed Target Cracker",
+      "Primed Pistol Gambit",
+      "Primed Expel Grineer",
+      "Lethal Torrent",
+      "Magnetic Might"
+     ],
+     "exilus": null,
+     "arcane": "Secondary Merciless",
+     "ttk": 2.69,
      "incarnon": false,
      "rank": 8
     },
@@ -742,7 +764,7 @@
      "name": "Aksomati Prime",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 159576,
+     "dps": 155691,
      "dispo": 1.1,
      "mods": [
       "Primed Heated Charge",
@@ -750,13 +772,13 @@
       "Galvanized Shot",
       "Primed Target Cracker",
       "Lethal Torrent",
-      "Galvanized Crosshairs",
       "Primed Expel Grineer",
+      "Primed Pistol Gambit",
       "Accelerated Isotope"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 2.68,
+     "ttk": 2.75,
      "incarnon": false,
      "rank": 9
     },
@@ -764,73 +786,29 @@
      "name": "Pyrana",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 158705,
+     "dps": 154742,
      "dispo": 0.95,
      "mods": [
       "Primed Heated Charge",
       "Galvanized Diffusion",
       "Galvanized Shot",
       "Lethal Torrent",
-      "Magnetic Might",
-      "Galvanized Crosshairs",
-      "Primed Target Cracker",
-      "Primed Expel Grineer"
-     ],
-     "exilus": null,
-     "arcane": "Secondary Merciless",
-     "ttk": 2.7,
-     "incarnon": false,
-     "rank": 10
-    },
-    {
-     "name": "Brakk",
-     "category": "Secondary",
-     "type": "Pistol",
-     "dps": 156164,
-     "dispo": 1.25,
-     "mods": [
-      "Primed Heated Charge",
-      "Galvanized Diffusion",
-      "Galvanized Shot",
       "Primed Expel Grineer",
       "Primed Target Cracker",
-      "Lethal Torrent",
-      "Galvanized Crosshairs",
+      "Primed Pistol Gambit",
       "Magnetic Might"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 2.74,
+     "ttk": 2.77,
      "incarnon": false,
-     "rank": 11
-    },
-    {
-     "name": "Sancti Castanas",
-     "category": "Secondary",
-     "type": "Pistol",
-     "dps": 155259,
-     "dispo": 1.35,
-     "mods": [
-      "Pistol Pestilence",
-      "Galvanized Diffusion",
-      "Primed Convulsion",
-      "Primed Heated Charge",
-      "Lethal Torrent",
-      "Galvanized Shot",
-      "Primed Target Cracker",
-      "Galvanized Crosshairs"
-     ],
-     "exilus": null,
-     "arcane": "Secondary Merciless",
-     "ttk": 2.76,
-     "incarnon": false,
-     "rank": 12
+     "rank": 10
     },
     {
      "name": "Quatz",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 153853,
+     "dps": 153780,
      "dispo": 1.2,
      "mods": [
       "Pathogen Rounds",
@@ -844,16 +822,16 @@
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 2.78,
+     "ttk": 2.79,
      "incarnon": false,
-     "rank": 13
+     "rank": 11
     },
     {
-     "name": "Twin Rogga",
+     "name": "Brakk",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 151586,
-     "dispo": 1.3,
+     "dps": 152768,
+     "dispo": 1.25,
      "mods": [
       "Primed Heated Charge",
       "Galvanized Diffusion",
@@ -861,80 +839,12 @@
       "Primed Expel Grineer",
       "Primed Target Cracker",
       "Lethal Torrent",
-      "Primed Quickdraw",
-      "Accelerated Isotope"
+      "Primed Pistol Gambit",
+      "Magnetic Might"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 2.83,
-     "incarnon": false,
-     "rank": 14
-    },
-    {
-     "name": "Tenet Detron",
-     "category": "Secondary",
-     "type": "Pistol",
-     "dps": 149264,
-     "dispo": 1,
-     "mods": [
-      "Primed Heated Charge",
-      "Galvanized Diffusion",
-      "Primed Expel Grineer",
-      "Lethal Torrent",
-      "Galvanized Shot",
-      "Magnetic Might",
-      "Galvanized Crosshairs",
-      "Primed Target Cracker"
-     ],
-     "exilus": null,
-     "arcane": "Secondary Merciless",
-     "ttk": 2.87,
-     "incarnon": false,
-     "rank": 15
-    }
-   ],
-   "sleepers": [
-    {
-     "name": "Akbronco Prime",
-     "category": "Secondary",
-     "type": "Dual Pistols",
-     "dps": 498467,
-     "dispo": 1.3,
-     "mods": [
-      "Primed Heated Charge",
-      "Galvanized Diffusion",
-      "Damzav-Vati",
-      "Galvanized Shot",
-      "Lethal Torrent",
-      "Primed Expel Grineer",
-      "Primed Quickdraw",
-      "Amalgam Barrel Diffusion"
-     ],
-     "exilus": null,
-     "arcane": "Secondary Merciless",
-     "ttk": 0.86,
-     "incarnon": false,
-     "rank": 1
-    },
-    {
-     "name": "Sancti Castanas",
-     "category": "Secondary",
-     "type": "Pistol",
-     "dps": 155259,
-     "dispo": 1.35,
-     "mods": [
-      "Pistol Pestilence",
-      "Galvanized Diffusion",
-      "Primed Convulsion",
-      "Primed Heated Charge",
-      "Lethal Torrent",
-      "Galvanized Shot",
-      "Primed Target Cracker",
-      "Galvanized Crosshairs"
-     ],
-     "exilus": null,
-     "arcane": "Secondary Merciless",
-     "ttk": 2.76,
+     "ttk": 2.8,
      "incarnon": false,
      "rank": 12
     },
@@ -942,7 +852,7 @@
      "name": "Twin Rogga",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 151586,
+     "dps": 151525,
      "dispo": 1.3,
      "mods": [
       "Primed Heated Charge",
@@ -958,35 +868,35 @@
      "arcane": "Secondary Merciless",
      "ttk": 2.83,
      "incarnon": false,
-     "rank": 14
+     "rank": 13
     },
     {
-     "name": "Lato Prime",
+     "name": "Tenet Detron",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 142830,
-     "dispo": 1.35,
+     "dps": 145073,
+     "dispo": 1,
      "mods": [
       "Primed Heated Charge",
       "Galvanized Diffusion",
+      "Primed Expel Grineer",
       "Galvanized Shot",
       "Lethal Torrent",
-      "Primed Target Cracker",
-      "Galvanized Crosshairs",
-      "Primed Expel Grineer",
-      "Accelerated Isotope"
+      "Magnetic Might",
+      "Primed Pistol Gambit",
+      "Primed Target Cracker"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 3,
-     "incarnon": true,
-     "rank": 18
+     "ttk": 2.95,
+     "incarnon": false,
+     "rank": 14
     },
     {
      "name": "Embolist",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 142631,
+     "dps": 142558,
      "dispo": 1.4,
      "mods": [
       "Accelerated Isotope",
@@ -1002,13 +912,125 @@
      "arcane": "Secondary Merciless",
      "ttk": 3,
      "incarnon": false,
-     "rank": 19
+     "rank": 15
+    }
+   ],
+   "sleepers": [
+    {
+     "name": "Akbronco Prime",
+     "category": "Secondary",
+     "type": "Dual Pistols",
+     "dps": 483122,
+     "dispo": 1.3,
+     "mods": [
+      "Primed Heated Charge",
+      "Galvanized Diffusion",
+      "Damzav-Vati",
+      "Galvanized Shot",
+      "Lethal Torrent",
+      "Primed Expel Grineer",
+      "Primed Quickdraw",
+      "Amalgam Barrel Diffusion"
+     ],
+     "exilus": null,
+     "arcane": "Secondary Merciless",
+     "ttk": 0.89,
+     "incarnon": false,
+     "rank": 1
+    },
+    {
+     "name": "Twin Rogga",
+     "category": "Secondary",
+     "type": "Pistol",
+     "dps": 151525,
+     "dispo": 1.3,
+     "mods": [
+      "Primed Heated Charge",
+      "Galvanized Diffusion",
+      "Galvanized Shot",
+      "Primed Expel Grineer",
+      "Primed Target Cracker",
+      "Lethal Torrent",
+      "Primed Quickdraw",
+      "Accelerated Isotope"
+     ],
+     "exilus": null,
+     "arcane": "Secondary Merciless",
+     "ttk": 2.83,
+     "incarnon": false,
+     "rank": 13
+    },
+    {
+     "name": "Embolist",
+     "category": "Secondary",
+     "type": "Pistol",
+     "dps": 142558,
+     "dispo": 1.4,
+     "mods": [
+      "Accelerated Isotope",
+      "Galvanized Diffusion",
+      "Lethal Torrent",
+      "Primed Expel Grineer",
+      "Ice Storm",
+      "Pathogen Rounds",
+      "Primed Heated Charge",
+      "Galvanized Shot"
+     ],
+     "exilus": null,
+     "arcane": "Secondary Merciless",
+     "ttk": 3,
+     "incarnon": false,
+     "rank": 15
+    },
+    {
+     "name": "Lato Prime",
+     "category": "Secondary",
+     "type": "Pistol",
+     "dps": 139202,
+     "dispo": 1.35,
+     "mods": [
+      "Primed Heated Charge",
+      "Galvanized Diffusion",
+      "Galvanized Shot",
+      "Lethal Torrent",
+      "Primed Target Cracker",
+      "Primed Pistol Gambit",
+      "Primed Expel Grineer",
+      "Accelerated Isotope"
+     ],
+     "exilus": null,
+     "arcane": "Secondary Merciless",
+     "ttk": 3.08,
+     "incarnon": true,
+     "rank": 18
+    },
+    {
+     "name": "Sancti Castanas",
+     "category": "Secondary",
+     "type": "Pistol",
+     "dps": 120472,
+     "dispo": 1.35,
+     "mods": [
+      "Pistol Pestilence",
+      "Galvanized Diffusion",
+      "Primed Convulsion",
+      "Primed Heated Charge",
+      "Galvanized Shot",
+      "Lethal Torrent",
+      "Primed Target Cracker",
+      "Primed Pistol Gambit"
+     ],
+     "exilus": null,
+     "arcane": "Secondary Merciless",
+     "ttk": 3.56,
+     "incarnon": false,
+     "rank": 24
     },
     {
      "name": "Bronco Prime",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 113797,
+     "dps": 110129,
      "dispo": 1.4,
      "mods": [
       "Primed Heated Charge",
@@ -1018,19 +1040,19 @@
       "Lethal Torrent",
       "Primed Quickdraw",
       "Accelerated Isotope",
-      "Amalgam Barrel Diffusion"
+      "Magnetic Might"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 3.76,
+     "ttk": 3.89,
      "incarnon": true,
-     "rank": 34
+     "rank": 33
     },
     {
      "name": "Spectra Vandal",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 111420,
+     "dps": 109189,
      "dispo": 1.45,
      "mods": [
       "Primed Heated Charge",
@@ -1039,20 +1061,20 @@
       "Galvanized Shot",
       "Lethal Torrent",
       "Primed Target Cracker",
-      "Galvanized Crosshairs",
+      "Primed Pistol Gambit",
       "Accelerated Isotope"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 3.85,
+     "ttk": 3.92,
      "incarnon": false,
-     "rank": 38
+     "rank": 37
     },
     {
      "name": "Dex Furis",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 102609,
+     "dps": 102555,
      "dispo": 1.39,
      "mods": [
       "Primed Heated Charge",
@@ -1066,29 +1088,29 @@
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 4.17,
+     "ttk": 4.18,
      "incarnon": false,
-     "rank": 45
+     "rank": 43
     },
     {
      "name": "Akmagnus",
      "category": "Secondary",
      "type": "Dual Pistols",
-     "dps": 96502,
+     "dps": 94751,
      "dispo": 1.35,
      "mods": [
       "Primed Heated Charge",
       "Galvanized Diffusion",
       "Primed Expel Grineer",
       "Galvanized Shot",
-      "Primed Target Cracker",
-      "Galvanized Crosshairs",
       "Lethal Torrent",
+      "Primed Target Cracker",
+      "Primed Pistol Gambit",
       "Pistol Elementalist"
      ],
      "exilus": null,
      "arcane": "Secondary Merciless",
-     "ttk": 4.44,
+     "ttk": 4.52,
      "incarnon": false,
      "rank": 48
     },
@@ -1096,7 +1118,7 @@
      "name": "Secura Dual Cestra",
      "category": "Secondary",
      "type": "Pistol",
-     "dps": 91941,
+     "dps": 91886,
      "dispo": 1.3,
      "mods": [
       "Primed Heated Charge",
@@ -1112,7 +1134,7 @@
      "arcane": "Secondary Merciless",
      "ttk": 4.66,
      "incarnon": false,
-     "rank": 52
+     "rank": 50
     }
    ]
   },
@@ -1123,7 +1145,7 @@
      "name": "Sarofang Prime",
      "category": "Melee",
      "type": "Melee",
-     "dps": 55509,
+     "dps": 55508,
      "dispo": 0.75,
      "mods": [
       "Galvanized Elementalist",
@@ -1167,7 +1189,7 @@
      "name": "Venato Prime",
      "category": "Melee",
      "type": "Melee",
-     "dps": 52351,
+     "dps": 52350,
      "dispo": 0.65,
      "mods": [
       "Galvanized Elementalist",
@@ -1211,7 +1233,7 @@
      "name": "Orthos Prime",
      "category": "Melee",
      "type": "Melee",
-     "dps": 50640,
+     "dps": 50639,
      "dispo": 0.7,
      "mods": [
       "Galvanized Elementalist",
@@ -1233,7 +1255,7 @@
      "name": "Pulmonars",
      "category": "Melee",
      "type": "Melee",
-     "dps": 48316,
+     "dps": 48315,
      "dispo": 1.2,
      "mods": [
       "Molten Impact",
@@ -1255,7 +1277,7 @@
      "name": "War Prime",
      "category": "Melee",
      "type": "Melee",
-     "dps": 47821,
+     "dps": 47820,
      "dispo": 0.65,
      "mods": [
       "Molten Impact",
@@ -1277,7 +1299,7 @@
      "name": "Coda Mire",
      "category": "Melee",
      "type": "Melee",
-     "dps": 46780,
+     "dps": 46779,
      "dispo": 0.75,
      "mods": [
       "Galvanized Elementalist",
@@ -1321,7 +1343,7 @@
      "name": "Dual Keres Prime",
      "category": "Melee",
      "type": "Melee",
-     "dps": 44620,
+     "dps": 44619,
      "dispo": 0.8,
      "mods": [
       "Galvanized Elementalist",
@@ -1343,7 +1365,7 @@
      "name": "Reaper Prime",
      "category": "Melee",
      "type": "Melee",
-     "dps": 44463,
+     "dps": 44462,
      "dispo": 0.8,
      "mods": [
       "Galvanized Elementalist",
@@ -1365,7 +1387,7 @@
      "name": "Kuva Ghoulsaw",
      "category": "Melee",
      "type": "Melee",
-     "dps": 44406,
+     "dps": 44405,
      "dispo": 0.8,
      "mods": [
       "Galvanized Elementalist",
@@ -1387,7 +1409,7 @@
      "name": "Nepheri",
      "category": "Melee",
      "type": "Melee",
-     "dps": 44315,
+     "dps": 44314,
      "dispo": 1,
      "mods": [
       "Galvanized Elementalist",
@@ -1455,7 +1477,7 @@
      "name": "Volnus Prime",
      "category": "Melee",
      "type": "Melee",
-     "dps": 41493,
+     "dps": 41492,
      "dispo": 1.3,
      "mods": [
       "Volcanic Edge",
@@ -1499,7 +1521,7 @@
      "name": "Scindo Prime",
      "category": "Melee",
      "type": "Melee",
-     "dps": 39198,
+     "dps": 39197,
      "dispo": 1.3,
      "mods": [
       "Galvanized Elementalist",
@@ -1521,7 +1543,7 @@
      "name": "Caustacyst",
      "category": "Melee",
      "type": "Melee",
-     "dps": 38803,
+     "dps": 38802,
      "dispo": 1.3,
      "mods": [
       "Volcanic Edge",
@@ -1565,7 +1587,7 @@
      "name": "Synoid Heliocor",
      "category": "Melee",
      "type": "Melee",
-     "dps": 38340,
+     "dps": 38339,
      "dispo": 1.35,
      "mods": [
       "Molten Impact",
@@ -1587,7 +1609,7 @@
      "name": "Machete Wraith",
      "category": "Melee",
      "type": "Melee",
-     "dps": 38338,
+     "dps": 38337,
      "dispo": 1.4,
      "mods": [
       "Galvanized Elementalist",
@@ -1653,7 +1675,7 @@
      "name": "Venato",
      "category": "Melee",
      "type": "Rifle",
-     "dps": 35280,
+     "dps": 35279,
      "dispo": 1.3,
      "mods": [
       "Galvanized Elementalist",
