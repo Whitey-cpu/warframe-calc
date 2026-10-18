@@ -1,0 +1,36 @@
+name: Fetch wiki data module
+
+# Developer tool: downloads the source of WARFRAME Wiki Lua data modules (public MediaWiki API) as a build artifact,
+# so parsers for them can be written and tested offline. Nothing is committed.
+on:
+  workflow_dispatch:
+    inputs:
+      titles:
+        description: "Module titles separated by |"
+        default: "Module:Stances/data|Module:Weapons/data"
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download modules
+        env:
+          TITLES: ${{ github.event.inputs.titles }}
+        run: |
+          mkdir -p out
+          IFS='|' read -ra T <<< "$TITLES"
+          for t in "${T[@]}"; do
+            f="out/$(echo "$t" | tr ':/' '__').json"
+            curl -sS -G -A "warframe-calc data sync (https://warframe.hardn.net; public pages only)" \
+              --data-urlencode "action=query" --data-urlencode "prop=revisions" --data-urlencode "rvprop=content|timestamp" \
+              --data-urlencode "rvslots=main" --data-urlencode "format=json" --data-urlencode "formatversion=2" \
+              --data-urlencode "titles=$t" "https://wiki.warframe.com/api.php" -o "$f"
+            ls -l "$f"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wiki-modules
+          path: out/
