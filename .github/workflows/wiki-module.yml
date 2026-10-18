@@ -1,7 +1,7 @@
 name: Fetch wiki data module
 
 # Developer tool: downloads the source of WARFRAME Wiki Lua data modules (public MediaWiki API) as a build artifact,
-# so parsers for them can be written and tested offline. Nothing is committed.
+# so parsers for them can be written and tested offline. The files are pushed to the dev/wiki-modules branch only (never main).
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +10,7 @@ on:
         default: "Module:Stances/data|Module:Weapons/data"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   fetch:
@@ -30,7 +30,12 @@ jobs:
               --data-urlencode "titles=$t" "https://wiki.warframe.com/api.php" -o "$f"
             ls -l "$f"
           done
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wiki-modules
-          path: out/
+      - name: Push to the dev/wiki-modules branch
+        run: |
+          cd out
+          git init -q -b dev/wiki-modules
+          git config user.name "github-actions[bot]"
+          git config user.email "41898729+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -qm "WARFRAME Wiki data modules (CC BY-SA, https://wiki.warframe.com), fetched $(date -u +%F)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" dev/wiki-modules
