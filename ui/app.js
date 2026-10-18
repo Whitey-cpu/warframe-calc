@@ -132,6 +132,56 @@
     const i = +c.dataset.extra; const set = new Set(state.extraAttacks || []);
     c.checked ? set.add(i) : set.delete(i); state.extraAttacks = [...set].sort(); update();
   });
+  // ---------- melee stance (wiki Module:Stances/data) ----------
+  const STANCE_COMBOS = ['Neutral', 'Forward', 'Block', 'Forward Block', 'Slide'];
+  function renderStance(sel) {
+    const w = state.weapon;
+    const row = $('stanceRow');
+    const list = w && w.category === 'Melee' && D.stances ? Object.entries(D.stances).filter(([, st]) => st.type === w.meleeClass).map(([n]) => n).sort() : [];
+    row.hidden = !list.length;
+    if (!list.length) { $('stance').innerHTML = '<option value="">None (listed attack speed)</option>'; return; }
+    const want = sel !== undefined ? (sel && sel.name) || '' : $('stance').value;
+    $('stance').innerHTML = '<option value="">None (listed attack speed)</option>' + list.map(n => `<option${n === want ? ' selected' : ''}>${esc(n)}</option>`).join('');
+    renderStanceCombos(sel && sel.combo);
+  }
+  function renderStanceCombos(want) {
+    const st = D.stances && D.stances[$('stance').value];
+    const shared = st && D.stanceShared && D.stanceShared[st.type] || {};
+    const keys = st ? STANCE_COMBOS.filter(k => (st.combos[k] || shared[k]) && (st.combos[k] || shared[k]).duration) : [];
+    const cur = want || $('stanceCombo').value || 'Neutral';
+    $('stanceCombo').innerHTML = keys.map(k => { const c = st.combos[k] || shared[k]; return `<option value="${esc(k)}"${k === cur ? ' selected' : ''}>${esc(k)}${c.name ? ': ' + esc(c.name) : ''}</option>`; }).join('');
+    $('stanceCombo').disabled = !keys.length;
+  }
+  $('stance').addEventListener('input', () => renderStanceCombos());
+  // ---------- Archon Shards (5 slots) ----------
+  const SHARD_COLORS = ['crimson', 'azure', 'amber', 'violet', 'topaz', 'emerald'];
+  function renderShards() {
+    const opts = '<option value="">Empty</option>' + SHARD_COLORS.map(c => `<optgroup label="${c[0].toUpperCase() + c.slice(1)}">` +
+      Object.entries(S.SHARD_BONUSES[c]).map(([k, t]) => `<option value="${c}:${k}">${esc(t)}</option>`).join('') + '</optgroup>').join('');
+    $('shards').innerHTML = [0, 1, 2, 3, 4].map(i => `<div class="shard-row"><span class="shard-dot" data-dot="${i}"></span>
+      <select data-shard="${i}" aria-label="Archon Shard ${i + 1}">${opts}</select>
+      <label class="check small"><input type="checkbox" data-tau="${i}"> Tauforged</label></div>`).join('');
+    $('shards').addEventListener('input', paintShards);
+  }
+  function paintShards() { document.querySelectorAll('[data-shard]').forEach(sel => { const dot = document.querySelector(`[data-dot="${sel.dataset.shard}"]`); dot.dataset.color = sel.value.split(':')[0] || ''; }); }
+  function readShards() {
+    return [...document.querySelectorAll('[data-shard]')].map(sel => {
+      if (!sel.value) return null;
+      const [color, bonus] = sel.value.split(':');
+      return { color, bonus, tau: document.querySelector(`[data-tau="${sel.dataset.shard}"]`).checked };
+    }).filter(Boolean);
+  }
+  function writeShards(list) {
+    document.querySelectorAll('[data-shard]').forEach((sel, i) => {
+      const x = list[i];
+      sel.value = x ? `${x.color}:${x.bonus}` : '';
+      if (sel.value === '' && x) sel.value = ''; // unknown entry
+      document.querySelector(`[data-tau="${i}"]`).checked = !!(x && x.tau);
+    });
+    paintShards();
+  }
+  renderShards();
+
   function renderWeapon() {
     const w = state.weapon;
     const im = $('weaponImg');
@@ -149,12 +199,16 @@
       w.disposition ? ['Riven', '&#9679;'.repeat(Math.round(w.disposition)) + (w.omega ? ' ' + w.omega + 'x' : '')] : null
     ].filter(Boolean).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
     $('valenceRow').hidden = !S.isAdversaryWeapon(w.name);
+    renderStance();
     const pas = S.WEAPON_PASSIVES[w.name];
     $('passiveNote').hidden = !pas;
     $('passiveNote').innerHTML = pas ? `Weapon passive: <b>${esc(pas.name)}</b>. ${esc(pas.text)} <a href="${esc(pas.source)}" target="_blank" rel="noopener">wiki</a>` : '';
     const wn = $('weaponNotes');
     wn.hidden = !(w.dataNotes && w.dataNotes.length);
-    wn.innerHTML = wn.hidden ? '' : w.dataNotes.map(n => `<div>Data note: ${esc(n)}</div>`).join('');
+    const nN = wn.hidden ? 0 : w.dataNotes.length;
+    wn.textContent = nN ? `${nN} data note${nN > 1 ? 's' : ''} (Arsenal tab)` : '';
+    $('weaponNotesFull').hidden = !nN;
+    $('weaponNotesFull').innerHTML = nN ? `<summary>${nN} data note${nN > 1 ? 's' : ''}: where these numbers differ from the base dataset</summary><ul>${w.dataNotes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '';
   }
 
   // ---------- frame ----------
@@ -514,6 +568,8 @@
       valence: S.isAdversaryWeapon(state.weapon.name) && $('valenceEl').value ? { element: $('valenceEl').value, pct: Math.min(60, Math.max(25, parseFloat($('valencePct').value) || 60)) / 100 } : undefined,
       arcanes: state.arcanes.filter(Boolean),
       arcaneSlots: state.arcanes.slice(),
+      shards: readShards(),
+      stance: state.weapon.category === 'Melee' && $('stance').value ? { name: $('stance').value, combo: $('stanceCombo').value || 'Neutral' } : undefined,
       // riven: effects at its slot position (between the mods around it, so element order matches the game)
       riven: rivenIndex() >= 0 ? R.toEffects(state.riven, state.ranks[rivenIndex()]) : [],
       rivenSlot: rivenIndex() >= 0 ? state.mods.slice(0, rivenIndex()).filter(n => n && n !== RIVEN).length - 0.5 : undefined,
@@ -524,6 +580,8 @@
       extraAttacks: (state.extraAttacks || []).filter(i => i !== (parseInt($('attack').value, 10) || 0)),
       conditions: { assumeMax: $('assumeMax').checked, aiming: $('aiming').checked, combo: ev('combo') || 1, statusTypes: ev('statusTypes'), stacks,
         killRate: $('killRate').value === 'custom' ? undefined : $('killRate').value, killsPerMin: $('killRate').value === 'custom' ? Math.max(0, ev('killsPerMin')) : undefined,
+        distance: $('distance').value === '' ? undefined : Math.max(0, ev('distance')), aoeSpread: $('aoeSpread').checked, energyOver500: $('energyOver500').checked,
+        model: { falloff: $('mFalloff').checked, battery: $('mBattery').checked, range: $('mRange').checked, shards: $('mShards').checked },
         selfStatus: $('selfStatus').checked, fightSeconds: $('fightSeconds').value === '' ? undefined : ev('fightSeconds') },
       overrides,
       enemy: Object.assign({
@@ -599,6 +657,12 @@
     $('killRate').value = c.killsPerMin != null ? 'custom' : (['horde', 'steady', 'boss'].includes(c.killRate) ? c.killRate : 'horde');
     if (c.killsPerMin != null) $('killsPerMin').value = c.killsPerMin;
     $('killsPerMinWrap').hidden = $('killRate').value !== 'custom';
+    $('distance').value = c.distance != null ? c.distance : 10;
+    $('aoeSpread').checked = !!c.aoeSpread; $('energyOver500').checked = !!c.energyOver500;
+    const md = c.model || {};
+    $('mFalloff').checked = md.falloff !== false; $('mBattery').checked = md.battery !== false; $('mRange').checked = md.range !== false; $('mShards').checked = md.shards !== false;
+    if (b.shards) writeShards(b.shards);
+    if (state.weapon && state.weapon.category === 'Melee') { renderStance(b.stance || null); }
     $('combo').value = c.combo || 1; $('statusTypes').value = c.statusTypes || 0;
     $('selfStatus').checked = c.selfStatus !== false; $('fightSeconds').value = c.fightSeconds || '';
     $('targets').value = (b.enemy && b.enemy.targets) || 1;
@@ -945,7 +1009,7 @@
   // ---------- shared hooks for ui/features.js ----------
   window.WFUI = {
     D, E, S, WF, state, SLOT_COUNT, $, esc, fmt, pct, img, IMG, initials, modCard, modFx,
-    collect, apply, update, renderSlots, renderModBrowser, renderWeapon, findModByName, openPicker,
+    collect, apply, update, renderSlots, readShards, writeShards, renderModBrowser, renderWeapon, findModByName, openPicker,
     getCompatMods: () => compatMods, flashMsg: m => flashMsg(m), getUser: () => user, api: (p, o) => api(p, o), RIVEN, rivenIndex, addMod: (n, s) => addMod(n, s), isOwned: n => owned.has(n),
     accountsEnabled: () => ACCOUNTS && ACCOUNTS_UP, SITE_ORIGIN, API,
     hooks: [], onSlots: null, renderEnemyUnit: null
@@ -955,6 +1019,8 @@
   if (window.WFRiven) window.WFRiven(window.WFUI);
   if (window.WFMarket) window.WFMarket(window.WFUI);
   if (window.WFTeshin) window.WFTeshin(window.WFUI);
+  if (window.WFSim) window.WFSim(window.WFUI);
+  if (window.WFTips) window.WFTips(window.WFUI);
 
   // ---------- start ----------
   renderFrame(); renderArcanes(); renderSlots(); renderModBrowser();

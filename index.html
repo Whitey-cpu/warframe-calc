@@ -13,7 +13,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="description" content="Free Warframe damage calculator and build optimizer: mods, arcanes, Warframe buffs, enemy scaling, time to kill.">
 <link rel="stylesheet" href="ui/style.css">
-<script>try { document.documentElement.dataset.layout = localStorage.getItem('wfcalc.layout') || 'arsenal'; } catch (e) { document.documentElement.dataset.layout = 'arsenal'; }</script>
+<script>try { document.documentElement.dataset.layout = localStorage.getItem('wfcalc.layout') || 'arsenal'; } catch (e) { document.documentElement.dataset.layout = 'arsenal'; }
+try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.dataset.mode = m === 'beginner' || m === 'advanced' ? m : (localStorage.getItem('wfcalc.last.v1') ? 'advanced' : 'beginner'); } catch (e) { document.documentElement.dataset.mode = 'beginner'; }</script>
 </head>
 <body>
 <div id="bgArt" aria-hidden="true"></div>
@@ -24,12 +25,17 @@
   </div>
   <a id="dataInfo" class="muted small" href="#dataSources"></a>
   <span class="spacer"></span>
+  <div class="mode-switch" role="group" aria-label="Detail level" title="Beginner shows the essentials; Advanced shows every setting, the Simulacrum and full breakdowns">
+    <button type="button" class="btn ghost sm" data-mode="beginner" aria-pressed="true">Beginner</button>
+    <button type="button" class="btn ghost sm" data-mode="advanced" aria-pressed="false">Advanced</button>
+  </div>
+  <a class="btn ghost sm" href="learn.html" title="How the damage math works">Learn</a>
   <button type="button" id="whatsNew" class="btn ghost sm" title="Game updates, live events and site changes">What's new</button>
   <button type="button" id="bgButton" class="btn ghost sm" title="Choose a background from the official Warframe Fansite Kit">Background</button>
   <button type="button" id="layoutToggle" class="btn ghost sm" title="Switch between the arsenal layout and the classic layout">Classic view</button>
   <button type="button" id="themeToggle" class="btn ghost sm" title="Switch light/dark theme" aria-label="Switch theme">&#9680;</button>
   <a id="feedbackLink" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/issues/new" target="_blank" rel="noopener" title="Report a bug or wrong number">Feedback</a>
-  <a id="downloadApp" class="btn ghost" href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Download Windows app</a>
+  <a id="downloadApp" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Download Windows app</a>
   <button type="button" id="updateData" class="btn ghost" hidden>Update game data</button>
   <div id="account"></div>
 </header>
@@ -72,8 +78,9 @@
       <button type="button" role="tab" id="tab-arsenal" aria-controls="pane-arsenal" data-tab="arsenal" data-mgroup="stats">Arsenal</button>
       <button type="button" role="tab" id="tab-dps" aria-controls="pane-dps" data-tab="dps" data-mgroup="stats">DPS &amp; TTK</button>
       <button type="button" role="tab" id="tab-enemy" aria-controls="pane-enemy" data-tab="enemy" data-mgroup="enemy">Enemy</button>
-      <button type="button" role="tab" id="tab-buffs" aria-controls="pane-buffs" data-tab="buffs" data-mgroup="enemy">Buffs</button>
-      <button type="button" role="tab" id="tab-riven" aria-controls="pane-riven" data-tab="riven" data-mgroup="more">Riven</button>
+      <button type="button" role="tab" id="tab-buffs" aria-controls="pane-buffs" data-tab="buffs" data-mgroup="enemy" data-adv>Buffs</button>
+      <button type="button" role="tab" id="tab-sim" aria-controls="pane-sim" data-tab="sim" data-mgroup="enemy" data-adv>Simulacrum</button>
+      <button type="button" role="tab" id="tab-riven" aria-controls="pane-riven" data-tab="riven" data-mgroup="more" data-adv>Riven</button>
       <button type="button" role="tab" id="tab-optimize" aria-controls="pane-optimize" data-tab="optimize" data-mgroup="more">Optimize</button>
       <button type="button" role="tab" id="tab-builds" aria-controls="pane-builds" data-tab="builds" data-mgroup="more">Builds</button>
     </div>
@@ -83,17 +90,22 @@
       <h2 class="pane-title">Arsenal</h2>
       <div class="attack-row">
         <label>Attack <select id="attack"></select></label>
-        <div id="extraAttacks" class="extra-attacks"></div>
+        <div id="stanceRow" class="stance-row" hidden>
+          <label data-tip="stance">Stance <select id="stance"><option value="">None (listed attack speed)</option></select></label>
+          <label data-tip="stanceCombo">Combo <select id="stanceCombo"></select></label>
+        </div>
+        <div id="extraAttacks" class="extra-attacks" data-adv></div>
         <div id="valenceRow" class="valence-row" hidden>
           <label title="Kuva, Tenet and Coda weapons carry 25-60% of base damage as one extra damage type (the Valence bonus), set by the Progenitor or Valence Fusion.">Valence bonus
             <select id="valenceEl"><option value="">None</option><option value="impact">Impact</option><option value="heat">Heat</option><option value="cold">Cold</option><option value="electricity">Electricity</option><option value="toxin">Toxin</option><option value="magnetic">Magnetic</option><option value="radiation">Radiation</option></select></label>
           <label>% <input type="number" id="valencePct" min="25" max="60" step="0.1" value="60"></label>
         </div>
         <p id="passiveNote" class="muted small" hidden></p>
+        <details id="weaponNotesFull" class="muted small data-notes-full" hidden></details>
       </div>
       <div id="combatHead" class="combat-head"></div>
       <div id="gameStats" class="game-stats"></div>
-      <details class="ov">
+      <details class="ov" data-adv>
         <summary>Base stat overrides</summary>
         <div class="grid4">
           <label>Multishot <input type="number" step="any" data-ov="multishot"></label>
@@ -106,7 +118,7 @@
           <label>Charge (s) <input type="number" step="any" data-ov="chargeTime"></label>
         </div>
       </details>
-      <details id="arsenalBox">
+      <details id="arsenalBox" data-adv>
         <summary>Arsenal check table (compare with the in-game Upgrade screen)</summary>
         <p class="muted small">Unconditional numbers like the in-game arsenal shows: no enemy, no ability buffs, no On Kill stacks, no quantization. Total includes multishot.</p>
         <div id="arsenalOut"></div>
@@ -119,13 +131,17 @@
       <div id="resultPanel">
         <div id="tiles" class="tiles"></div>
         <div id="typeBars"></div>
-        <div id="selfStatusBox" class="small"></div>
-        <details id="detailBox" open>
+        <div id="selfStatusBox" class="small" data-adv></div>
+        <details id="mathBox" class="math-box">
+          <summary>How this number is made</summary>
+          <div id="mathSteps"></div>
+        </details>
+        <details id="detailBox" open data-adv>
           <summary>Full breakdown</summary>
           <div id="breakdown"></div>
         </details>
       </div>
-      <section id="comparePanel">
+      <section id="comparePanel" data-adv>
         <h2>Compare</h2>
         <p class="muted small">Pin the current build as A, change things, and see the difference.</p>
         <div class="row">
@@ -147,9 +163,9 @@
       </div>
       <div class="grid2" id="unitFields">
         <label>Level <input type="number" id="enemyLevel" value="100" min="1"></label>
-        <label title="Most enemies spawn at their own base level. Leave blank for 1.">Base level <input type="number" id="enemyBaseLevel" min="1" placeholder="1"></label>
+        <label data-adv title="Most enemies spawn at their own base level. Leave blank for 1.">Base level <input type="number" id="enemyBaseLevel" min="1" placeholder="1"></label>
         <label class="check"><input type="checkbox" id="steelPath"> Steel Path (+100 lvl, x2.5 HP/shields)</label>
-        <label class="check"><input type="checkbox" id="eximus"> Eximus (Overguard)</label>
+        <label class="check" data-adv><input type="checkbox" id="eximus"> Eximus (Overguard)</label>
       </div>
       <p class="small" id="unitStats"></p>
       <h3>Target</h3>
@@ -157,11 +173,11 @@
         <label>Faction <select id="faction"></select></label>
         <label>Armor <input type="number" id="armor" value="0" min="0"></label>
         <label>Headshot / weak point % <input type="number" id="headshotRate" value="0" min="0" max="100"></label>
-        <label>Weak point x <input type="number" id="weakPointMult" step="any" placeholder="auto"></label>
-        <label title="How many enemies area damage (explosions, clouds, Gas, Electricity chains, Blast bursts) hits.">Enemies in area <input type="number" id="targets" value="1" min="1" max="30"></label>
+        <label data-adv data-tip="weakPointMult">Weak point x <input type="number" id="weakPointMult" step="any" placeholder="auto"></label>
+        <label data-adv data-tip="targets">Enemies in area <input type="number" id="targets" value="1" min="1" max="30"></label>
       </div>
-      <h3>Statuses from others</h3>
-      <div class="grid2">
+      <h3 data-adv>Statuses from others</h3>
+      <div class="grid2" data-adv>
         <label>Viral stacks <input type="number" id="viralStacks" value="0" min="0" max="10"></label>
         <label>Corrosive stacks <input type="number" id="corrosiveStacks" value="0" min="0" max="10"></label>
         <label>Magnetic stacks <input type="number" id="magneticStacks" value="0" min="0" max="10"></label>
@@ -187,25 +203,45 @@
       <div id="frameAbilities"></div>
       <h3>Damage buffs</h3>
       <div id="abilities"></div>
-      <h3>Conditions</h3>
-      <div class="grid2">
-        <label class="check" title="On Kill, on-proc and other conditional buffs. Off counts none of them."><input type="checkbox" id="assumeMax" checked> Conditional buffs</label>
-        <label title="How often you get kills with this weapon. Stacks come from each buff's duration and how it loses stacks: Galvanized stacks drop one every 20s without a kill, so even Steady keeps them close to full. Boss counts no kills.">Kill rate <select id="killRate">
-          <option value="horde">Horde (60/min)</option><option value="steady">Steady (12/min)</option><option value="boss">Boss, no kills</option><option value="custom">Custom</option></select></label>
-        <label id="killsPerMinWrap" hidden>Kills per minute <input type="number" id="killsPerMin" min="0" step="1" value="30"></label>
-        <label class="check"><input type="checkbox" id="aiming" checked> Aiming</label>
-        <label>Melee combo <input type="number" id="combo" value="1" min="1" step="0.5"></label>
-        <label title="Extra status types from teammates or abilities. Your own procs are counted automatically when the box below is ticked.">Status types on target (min) <input type="number" id="statusTypes" value="0" min="0"></label>
-        <label class="check" title="Estimate the Viral, Corrosive, Heat, Magnetic, Puncture and Cold stacks your own procs keep on the target, and the number of status types for Galvanized Aptitude / Condition Overload."><input type="checkbox" id="selfStatus" checked> Count my own status effects</label>
-        <label title="DoTs stop when the target dies. Blank = use time to kill when an enemy unit is chosen.">Fight length (s) <input type="number" id="fightSeconds" min="1" step="0.5" placeholder="auto"></label>
-      </div>
-      <div id="stacks"></div>
+      <h3 data-tip="shards">Archon Shards</h3>
+      <div id="shards" class="shards"></div>
       <details>
-        <summary>Custom buffs (shards, other abilities)</summary>
+        <summary>Custom buffs (other abilities)</summary>
         <p class="muted small">Values are decimals: 0.5 = +50%.</p>
         <div id="custom"></div>
         <button type="button" id="addCustom" class="btn ghost sm">+ Custom buff</button>
       </details>
+    </section>
+
+    <!-- Simulacrum: what gets modeled, the scenario, and the first minute (ui/sim.js) -->
+    <section class="pane panel" role="tabpanel" id="pane-sim" aria-labelledby="tab-sim" data-pane="sim">
+      <h2 class="pane-title">Simulacrum</h2>
+      <p class="muted small">Choose what the calculator models and set the scene. These settings apply everywhere: DPS, the optimizer, Teshin and the leaderboard.</p>
+      <h3>Scenario</h3>
+      <div class="grid2">
+        <label data-tip="killRate">Kill rate <select id="killRate">
+          <option value="horde">Horde (60/min)</option><option value="steady">Steady (12/min)</option><option value="boss">Boss, no kills</option><option value="custom">Custom</option></select></label>
+        <label id="killsPerMinWrap" hidden>Kills per minute <input type="number" id="killsPerMin" min="0" step="1" value="30"></label>
+        <label data-tip="distance">Target distance (m) <input type="number" id="distance" min="0" step="1" value="10"></label>
+        <label data-tip="fightSeconds">Fight length (s) <input type="number" id="fightSeconds" min="1" step="0.5" placeholder="auto"></label>
+        <label data-tip="combo">Melee combo multiplier <input type="number" id="combo" value="1" min="1" max="13" step="1"></label>
+        <label data-tip="statusTypes">Status types on target (min) <input type="number" id="statusTypes" value="0" min="0"></label>
+        <label class="check" data-tip="aoeSpread"><input type="checkbox" id="aoeSpread"> Spread targets over the blast</label>
+        <label class="check" data-tip="energyOver500"><input type="checkbox" id="energyOver500"> Max energy over 500</label>
+      </div>
+      <h3>What gets modeled</h3>
+      <div class="grid2 sim-toggles">
+        <label class="check" data-tip="assumeMax"><input type="checkbox" id="assumeMax" checked> Conditional buffs</label>
+        <label class="check" data-tip="selfStatus"><input type="checkbox" id="selfStatus" checked> My own status effects</label>
+        <label class="check" data-tip="aiming"><input type="checkbox" id="aiming" checked> Aiming</label>
+        <label class="check" data-tip="falloff"><input type="checkbox" id="mFalloff" checked> Damage falloff</label>
+        <label class="check" data-tip="battery"><input type="checkbox" id="mBattery" checked> Regenerating ammo</label>
+        <label class="check" data-tip="range"><input type="checkbox" id="mRange" checked> Range conditions</label>
+        <label class="check" data-tip="shards"><input type="checkbox" id="mShards" checked> Archon Shards</label>
+      </div>
+      <div id="stacks"></div>
+      <h3 data-tip="timeline">First minute</h3>
+      <div id="simTimeline" class="sim-timeline"><p class="muted small">Choose a weapon first.</p></div>
     </section>
 
     <!-- Riven: builder, grader, best stats, saved rivens (ui/riven.js) -->
@@ -226,7 +262,7 @@
           <option value="ttk">Time to kill (needs enemy unit)</option>
           <option value="groupSustained">Group DPS (enemies in area)</option>
         </select></label>
-        <label>Exclude mods <input id="excluded" placeholder="comma separated"></label>
+        <label data-adv>Exclude mods <input id="excluded" placeholder="comma separated"></label>
         <label class="check"><input type="checkbox" id="optArcane" checked> Pick weapon arcane</label>
         <label class="check"><input type="checkbox" id="optExilus" checked> Use exilus slot</label>
         <label class="check" title="Star the mods you own in the mod browser"><input type="checkbox" id="optOwned"> Only mods I own</label>
@@ -234,7 +270,7 @@
       <p class="muted small">Locked slots are kept. Check the capacity bar afterwards; forma is not chosen for you.</p>
       <button type="button" id="runOpt" class="btn">Find best build</button>
       <div id="optOut" class="small"></div>
-      <details class="lb" id="leaderboard">
+      <details class="lb" id="leaderboard" data-adv>
         <summary><h2>Weapon leaderboard</h2></summary>
         <p class="muted small">Ranks weapons by DPS against the enemy and buffs you set. "Quick-optimize" builds a fresh mod set per weapon (slower); otherwise each weapon is unmodded.</p>
         <div class="row">
@@ -386,7 +422,7 @@
   Data: public sources only (listed above); images via the warframestat.us CDN.
   Lines marked ASSUMPTION in the notes are modeling choices the wiki does not state outright.
   <br>A free fan-made tool by <a href="https://hardn.net" target="_blank" rel="noopener">hardn</a>
-  (<a href="https://github.com/Whitey-cpu/warframe-calc" target="_blank" rel="noopener">source</a>, <a href="privacy.html">privacy</a>).
+  (<a href="https://github.com/Whitey-cpu/warframe-calc" target="_blank" rel="noopener">source</a>, <a href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Windows app</a>, <a href="learn.html">how the math works</a>, <a href="privacy.html">privacy</a>).
   Not affiliated with or endorsed by Digital Extremes. Warframe and all related names and images are trademarks and property of Digital Extremes Ltd.
 </footer>
 
@@ -408,6 +444,8 @@
 <script src="ui/riven.js"></script>
 <script src="ui/teshin.js"></script>
 <script src="ui/features.js"></script>
+<script src="ui/tips.js"></script>
+<script src="ui/sim.js"></script>
 <script src="ui/app.js"></script>
 </body>
 </html>

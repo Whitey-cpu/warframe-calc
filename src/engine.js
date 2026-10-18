@@ -131,11 +131,75 @@
     });
     const passive = S.WEAPON_PASSIVES && S.WEAPON_PASSIVES[weapon.name];
     if (passive && build.weaponPassive !== false) sources.push({ key: passive.name, kind: 'passive', slot: 90, item: { name: passive.name, effects: passive.effects }, scale: 1 });
+    // Archon Shards (https://wiki.warframe.com/w/Archon_Shard): weapon bonuses add to the matching mod pools (wiki: "additive
+    // with similar buffs such as Rifle Aptitude / Pistol Gambit / Organ Shatter / Stormbringer"). Tauforged = 1.5x.
+    const shardFx = (build.conditions && build.conditions.model && build.conditions.model.shards === false) ? [] : shardEffects(build.shards, build.conditions || {});
+    if (shardFx.length) sources.push({ key: 'Archon Shards', kind: 'shards', slot: 100, item: { name: 'Archon Shards', effects: shardFx }, scale: 1 });
     if (build.riven && build.riven.length) {
       sources.push({ key: 'Riven', kind: 'riven', slot: build.rivenSlot != null ? build.rivenSlot : 99,
         item: { name: 'Riven', effects: build.riven.map(e => Object.assign({}, e)) }, scale: 1 });
     }
     return sources;
+  }
+
+  // ---------- melee stances ----------
+  // build.stance = { name, combo } (combo: Neutral, Forward, Block, Forward Block, Slide). Returns averages over one combo.
+  function stanceCombo(data, weapon, sel) {
+    if (!sel || !sel.name || !data.stances) return null;
+    const st = data.stances[sel.name];
+    if (!st || (weapon.meleeClass && st.type !== weapon.meleeClass)) return null;
+    const key = sel.combo || 'Neutral';
+    const c = st.combos[key] || (data.stanceShared && data.stanceShared[st.type] && data.stanceShared[st.type][key]);
+    if (!c || !c.duration) return null;
+    let hits = 0, dmgSum = 0, bleed = 0; const physW = { impact: 0, puncture: 0, slash: 0 };
+    c.attacks.forEach(a => a.dmg.forEach((d, i) => {
+      const h = a.hits[i] || 1, w = d / 100 * h;
+      hits += h; dmgSum += w;
+      for (const k of Object.keys(physW)) physW[k] += w * ((a[k + 'Mult'] && a[k + 'Mult'][i]) || 1);
+      const pr = a.procs && a.procs[i];
+      if (pr && pr.some(x => /bleed|slash/i.test(x))) bleed += h;
+    }));
+    if (!hits) return null;
+    const phys = {}; for (const k of Object.keys(physW)) { const m = physW[k] / dmgSum; if (Math.abs(m - 1) > 1e-9) phys[k] = m; }
+    return { stance: sel.name, combo: key, comboName: c.name, duration: c.duration, hits, avgMult: dmgSum / hits, phys: Object.keys(phys).length ? phys : null, bleedPerHit: bleed / hits };
+  }
+
+  // ---------- Archon Shards ----------
+  // Weapon-relevant bonuses from https://wiki.warframe.com/w/Archon_Shard and the Violet / Topaz / Emerald shard pages.
+  S.SHARD_BONUSES = {
+    crimson: { meleeCritDamage: 'Melee Critical Damage +25%', primaryStatus: 'Primary Status Chance +25%', secondaryCrit: 'Secondary Critical Chance +25%', other: 'Ability bonus (no weapon effect)' },
+    azure: { other: 'Health, shields, energy or armor (no weapon effect)' },
+    amber: { other: 'Orbs, casting or parkour (no weapon effect)' },
+    violet: { primaryElectricity: 'Primary Electricity +30%, +10% per Crimson, Azure or Violet shard', meleeCritDamage: 'Melee Critical Damage +25% (x2 over 500 energy)', other: 'Other Violet bonus (no weapon effect)' },
+    topaz: { secondaryHeatKillCrit: 'Secondary Critical Chance +1% per Heat kill (max 50%)', other: 'Other Topaz bonus (no weapon effect)' },
+    emerald: { toxinStatusDamage: 'Toxin status damage +30%', corrosionStacks: 'Corrosion max stacks +2', other: 'Other Emerald bonus (no weapon effect)' }
+  };
+  function shardEffects(shards, cond) {
+    const list = (shards || []).filter(x => x && x.color).slice(0, 5); // 5 slots per Warframe (wiki)
+    const out = [];
+    const counted = list.filter(x => ['crimson', 'azure', 'violet'].includes(x.color)).length; // Violet Electricity counts these, itself included
+    for (const sh of list) {
+      const k = sh.tau ? 1.5 : 1;
+      const b = sh.bonus;
+      if (sh.color === 'crimson' && b === 'meleeCritDamage') out.push({ stat: 'critDamage', value: 0.25 * k, onlyFor: 'Melee', raw: 'Crimson shard: Melee Critical Damage' });
+      else if (sh.color === 'crimson' && b === 'primaryStatus') out.push({ stat: 'statusChance', value: 0.25 * k, onlyFor: 'Primary', raw: 'Crimson shard: Primary Status Chance' });
+      else if (sh.color === 'crimson' && b === 'secondaryCrit') out.push({ stat: 'critChance', value: 0.25 * k, onlyFor: 'Secondary', raw: 'Crimson shard: Secondary Critical Chance' });
+      else if (sh.color === 'violet' && b === 'primaryElectricity') out.push({ stat: 'element', element: 'electricity', value: (0.30 + 0.10 * counted) * k, onlyFor: 'Primary', raw: `Violet shard: Primary Electricity (${counted} Crimson/Azure/Violet)` });
+      else if (sh.color === 'violet' && b === 'meleeCritDamage') out.push({ stat: 'critDamage', value: 0.25 * k * (cond.energyOver500 ? 2 : 1), onlyFor: 'Melee', raw: 'Violet shard: Melee Critical Damage' + (cond.energyOver500 ? ' (doubled, over 500 energy)' : '') });
+      else if (sh.color === 'topaz' && b === 'secondaryHeatKillCrit') out.push({ stat: 'critChance', value: 0.01 * k, onlyFor: 'Secondary', cond: { trigger: 'On Kill of an enemy affected by Heat', maxStacks: 50, needsHeat: true }, raw: 'Topaz shard: +1% Secondary Critical Chance per Heat kill' });
+      else if (sh.color === 'emerald' && b === 'toxinStatusDamage') out.push({ stat: 'statusDamageType', element: 'toxin', value: 0.30 * k, raw: 'Emerald shard: Toxin status damage' });
+      else if (sh.color === 'emerald' && b === 'corrosionStacks') out.push({ stat: 'corrosiveMax', value: sh.tau ? 3 : 2, raw: 'Emerald shard: Corrosion max stacks' });
+    }
+    return out;
+  }
+
+  // Range conditions: "within 5m of target" needs the target within that distance; "if no enemies are within 10m" needs it
+  // farther away. Uses the target distance setting (default 10m, a Claude pick, not game data).
+  function rangeOk(trigger, ctx) {
+    const m = String(trigger || '').match(/within (\d+(?:\.\d+)?)\s*m\b/i);
+    if (!m || ctx.rangeOff) return true;
+    const n = parseFloat(m[1]);
+    return /no enem/i.test(trigger) ? ctx.distance > n : ctx.distance <= n;
   }
 
   // Can this build trigger the condition at all? Weak point / headshot triggers need headshots on a direct-hit attack,
@@ -161,7 +225,8 @@
   // ASSUMPTION: kills, procs and hits arrive at a steady random (Poisson) rate. ASSUMPTION: for 'one', each kill also restarts
   // the timer (the wiki does not say). ASSUMPTION: other kill buffs lose one stack at a time, other proc/hit buffs lose all.
   const EACH_TIMER = /^Galvanized (Scope|Crosshairs)$/;
-  const KILL_RATES = { horde: 60, steady: 12, boss: 0 }; // kills per minute: Claude's suggested presets, not game data
+  const KILL_RATES = { horde: 60, steady: 12, boss: 0 };
+  const DEFAULT_DISTANCE = 10; // metres to the target when none is set: Claude's pick, not game data // kills per minute: Claude's suggested presets, not game data
   function decayKind(src, trigger) {
     if (EACH_TIMER.test(src.key)) return 'each';
     return /kill/i.test(trigger) ? 'one' : 'all';
@@ -225,7 +290,16 @@
     if (conditions.stacks && conditions.stacks[src.key] != null) return conditions.stacks[src.key];
     if (cond.trigger === 'When Aiming') return conditions.aiming === false ? 0 : 1;
     if (ctx && !triggerPossible(cond.trigger, ctx)) return 0;
+    if (ctx && !rangeOk(cond.trigger, ctx)) return 0;
     if (conditions.assumeMax === false) return 0;
+    // Topaz shard: stacks never time out (reset on revive), so with kills on Heat-affected enemies it sits at its cap
+    if (cond.needsHeat) {
+      const kpm = conditions.killsPerMin != null ? conditions.killsPerMin : (KILL_RATES[conditions.killRate] != null ? KILL_RATES[conditions.killRate] : KILL_RATES.horde);
+      const heat = ctx && ctx.heat > 0 ? Math.min(1, ctx.heat) : 0;
+      const n = kpm > 0 ? (cond.maxStacks || 1) * heat : 0;
+      if (ctx && ctx.stackLog) ctx.stackLog.push({ key: `${src.key}#${idx}`, source: src.key, trigger: cond.trigger, kind: 'kill', rate: kpm / 60, duration: null, max: cond.maxStacks, stacks: n });
+      return n;
+    }
     const max = cond.maxStacks || 1;
     const tr = ctx ? triggerRate(cond.trigger, Object.assign({}, ctx, { eachTimer: EACH_TIMER.test(src.key) }), conditions) : null;
     if (!tr) return max;
@@ -248,9 +322,15 @@
     const atk = weapon.attacks[attackIdx] || weapon.attacks[0];
     const ov = build.overrides || {};
     const cond = Object.assign({ assumeMax: true, combo: 1, statusTypes: 0, aiming: true }, build.conditions || {});
+    const model = Object.assign({ falloff: true, battery: true, range: true, shards: true }, cond.model || {}); // Simulacrum toggles
     const enemy = Object.assign({ faction: 'None (neutral)', armor: 0, headshotRate: 0, viralStacks: 0, corrosiveStacks: 0, heatStrip: false, armorStripPct: 0 }, build.enemy || {});
     const isMelee = weapon.category === 'Melee';
-    const trigCtx = { isAoE: atk.shotType === 'AoE', hsRate: Math.max(0, enemy.headshotRate || 0), isMelee, baseCC: (ov.critChance != null ? ov.critChance : atk.critChance), stackLog: [], needsRates: false };
+    const isHeavy = !!atk.heavy;
+    // Stance combo (https://wiki.warframe.com/w/Stance, data: https://wiki.warframe.com/w/Module:Stances/data)
+    const stance = isMelee && !isHeavy ? stanceCombo(data, weapon, build.stance) : null;
+    const trigCtx = { isAoE: atk.shotType === 'AoE', hsRate: Math.max(0, enemy.headshotRate || 0), isMelee, baseCC: (ov.critChance != null ? ov.critChance : atk.critChance), stackLog: [], needsRates: false,
+      distance: cond.distance != null ? Math.max(0, cond.distance) : DEFAULT_DISTANCE, rangeOff: model.range === false,
+      heat: enemy.heatStrip === true ? 1 : (+enemy.heatStrip || 0) };
 
     const P = {
       dmg: 0, direct: 0, phys: { impact: 0, puncture: 0, slash: 0 },
@@ -259,7 +339,7 @@
       slashOnCrit: 0, separate: [], voidExtra: 0,
       // flat changes to the weapon's BASE stats (Incarnon evolutions, e.g. "+12 base damage per pellet")
       baseDmgFlat: 0, baseCCFlat: 0, baseCDFlat: 0, baseSCFlat: 0, baseMSFlat: 0, baseMagFlat: 0,
-      locks: {}, wpCrit: 0, lingerFirstDouble: 0, lastShotMS: 0, msDmg: 0
+      locks: {}, wpCrit: 0, lingerFirstDouble: 0, lastShotMS: 0, msDmg: 0, statusDamageType: {}, corrosiveMax: 0, windUp: 0, heavyEff: 0
     };
     const elementOrder = []; // [{el, bonus, slot}]
     const used = [];
@@ -297,7 +377,9 @@
 
     function applyEffect(src, eff, idx) {
       if (eff.onlyFor && eff.onlyFor !== weapon.category) return;
+      if (eff.onlyHeavy && !isHeavy) return;
       let v = eff.value * (src.scale || 1);
+      if (eff.heavyMult && isHeavy) v *= eff.heavyMult; // "(x2 for Heavy Attacks)"
       if (eff.bowMult && weapon.type === 'Bow') v *= eff.bowMult;
       let mult = 1;
       if (eff.cond) mult *= stackCount(src, eff, idx, eff.cond, cond, trigCtx);
@@ -330,6 +412,10 @@
         case 'reloadSpeed': P.reload += v; break;
         case 'statusDuration': P.statusDuration += v; break;
         case 'statusDamage': P.statusDamage += v; break;
+        case 'statusDamageType': P.statusDamageType[eff.element] = (P.statusDamageType[eff.element] || 0) + v; break;
+        case 'corrosiveMax': P.corrosiveMax += v; break;
+        case 'windUp': P.windUp += v; break;
+        case 'heavyEfficiency': P.heavyEff += v; break;
         case 'headshot': P.headshot += v; break;
         case 'weakPoint': P.weakPoint += v; break;
         case 'slashOnCrit': P.slashOnCrit += v; break;
@@ -398,6 +484,11 @@
       baseTotal += extra;
       if (!S.isAdversaryWeapon(weapon.name)) notes.push(`Valence bonus set on ${weapon.name}, which is not a Kuva, Tenet or Coda weapon.`);
     }
+    if (stance && stance.phys) {
+      // "Physical Damage = Base Physical x (1 + Stance Physical Bonus) x (1 + Modded Physical Bonus) x Combo Damage Multiplier"
+      // (wiki Stance page). Per-hit physical multipliers are averaged over the combo, weighted by each hit's damage.
+      for (const [k, m] of Object.entries(stance.phys)) if (base[k]) { baseTotal += base[k] * (m - 1); base[k] *= m; }
+    }
     const scale = baseTotal / 32;
 
     // Innate elements: merge into a matching modded element, else append last (HCET order for two).
@@ -464,9 +555,33 @@
     }
 
     // ---------- multipliers ----------
+    if (isHeavy) {
+      // Heavy attacks get the full Melee Combo multiplier (https://wiki.warframe.com/w/Melee_Combo); normal attacks do not.
+      const cm = Math.max(1, cond.combo || 1);
+      if (cm > 1) P.separate.push(cm);
+      notes.push(`Heavy attack: listed heavy damage (normal base x the weapon class multiplier) x ${cm} combo multiplier. A heavy attack spends 100% of the combo unless Heavy Attack Efficiency keeps some${P.heavyEff ? ` (here ${Math.round(Math.min(0.9, P.heavyEff) * 100)}% kept, capped at 90%)` : ''}.`);
+    }
+    if (stance) {
+      P.separate.push(stance.avgMult);
+      notes.push(`Stance ${stance.stance}, ${stance.combo} combo "${stance.comboName}": ${stance.hits} hits averaging ${Math.round(stance.avgMult * 100)}% damage over ${stance.duration}s at attack speed 1.0${stance.bleedPerHit ? `, ${Math.round(stance.bleedPerHit * stance.hits * 100) / 100} forced Slash procs` : ''}. ASSUMPTION: knockdowns, lifts and other forced procs that deal no damage are ignored.`);
+    }
     const sepMult = P.separate.reduce((a, b) => a * b, 1);
-    const hitMult = (1 + P.dmg + P.direct) * sepMult;
-    const dotDmgMult = (1 + P.dmg) * sepMult;
+    // Damage falloff (https://wiki.warframe.com/w/Damage_Falloff): 100% up to start, linear to (1 - reduction) at end and beyond.
+    // Area attacks fall off from the blast centre: the target is at the centre unless "spread over the blast" is on (then the
+    // average over a disc of radius = end). Wiki bug note: Condition Overload / Galvanized Aptitude bonuses ignore falloff, so
+    // "Direct Damage" is left out of it. ASSUMPTION: status DoTs inherit the hit's falloff (the wiki does not say).
+    let fall = 1;
+    const fo = atk.falloff;
+    if (model.falloff && fo && fo.end > fo.start) {
+      const at = r => 1 - fo.reduction * Math.min(1, Math.max(0, (r - fo.start) / (fo.end - fo.start)));
+      if (atk.shotType === 'AoE') {
+        if (cond.aoeSpread) { let a = 0; const N = 200; for (let i = 0; i < N; i++) { const r = Math.sqrt((i + 0.5) / N) * fo.end; a += at(r); } fall = a / N; }
+      } else fall = at(cond.distance != null ? Math.max(0, cond.distance) : DEFAULT_DISTANCE);
+      if (fall < 0.9999) notes.push(`Damage falloff: ${Math.round(fall * 1000) / 10}% damage ${atk.shotType === 'AoE' ? 'averaged over the blast' : `at ${cond.distance != null ? cond.distance : DEFAULT_DISTANCE}m`} (full to ${fo.start}m, ${Math.round((1 - fo.reduction) * 100)}% from ${fo.end}m). ASSUMPTION: status damage over time falls off the same way.`);
+    }
+    const hitMult = ((1 + P.dmg) * fall + P.direct) * sepMult;
+    const arsenalHitMult = (1 + P.dmg + P.direct) * sepMult; // the arsenal screen shows no falloff
+    const dotDmgMult = (1 + P.dmg) * sepMult * fall;
     if (P.direct) notes.push('ASSUMPTION: "Direct Damage" bonuses (Galvanized mods) add to the damage pool for hits but not for status DoTs.');
 
     const hitTyped = {};
@@ -503,7 +618,7 @@
     };
     let netArmor = Math.max(0, enemy.armor || 0);
     netArmor *= (1 - Math.min(1, enemy.armorStripPct || 0));
-    netArmor *= (1 - corrosiveStrip(enemy.corrosiveStacks));
+    netArmor *= (1 - Math.min(1, stackCurve(enemy.corrosiveStacks, Object.assign({}, S.CORROSIVE, { max: S.CORROSIVE.max + P.corrosiveMax }))));
     if (enemy.heatStrip) netArmor *= (1 - S.HEAT_STRIP_MAX * (typeof enemy.heatStrip === 'number' ? Math.min(1, enemy.heatStrip) : 1));
     const armorDM = netArmor > 0 ? 1 - S.ARMOR_DR_MAX * Math.sqrt(Math.min(netArmor, S.ARMOR_CAP) / S.ARMOR_CAP) : 1;
     const viral = viralMult(enemy.viralStacks);
@@ -550,6 +665,15 @@
     if (P.locks.fireRate && P.fr) notes.push('A mod says "Fire Rate cannot be modified": fire rate bonuses and penalties are ignored.');
     const fr = baseFR * (P.locks.fireRate ? 1 : (1 + P.fr));
     let effFR = fr;
+    if (isHeavy) {
+      // Wind-up is not shortened by attack speed, only by Heavy Attack Wind Up Speed (https://wiki.warframe.com/w/Attack_Speed).
+      const wu = (weapon.windUp || 0) / (1 + P.windUp);
+      effFR = 1 / (wu + 1 / fr);
+      notes.push(`ASSUMPTION: one heavy attack takes its ${Math.round(wu * 100) / 100}s wind-up (Wind Up Speed divides it; the wiki gives no formula) plus one normal swing at your attack speed.`);
+    } else if (stance) {
+      // combo length at attack speed 1.0 / (weapon attack speed x (1 + bonuses)) (https://wiki.warframe.com/w/Attack_Speed)
+      effFR = stance.hits / (stance.duration / ((ov.fireRate != null ? ov.fireRate : atk.fireRate) * (P.locks.fireRate ? 1 : (1 + P.fr))));
+    }
     const chargeTime = ov.chargeTime != null ? ov.chargeTime : atk.chargeTime;
     if (chargeTime > 0 && !isMelee) {
       effFR = 1 / (chargeTime / (P.locks.fireRate ? 1 : (1 + P.fr)) + 1 / fr);
@@ -557,7 +681,16 @@
     }
     if (weapon.trigger === 'Burst') notes.push('Burst trigger: dataset has no burst delay, so burst weapons are treated as their listed fire rate.');
     const mag = Math.max(1, Math.floor(((ov.magazine != null ? ov.magazine : weapon.magazine) + P.baseMagFlat) * (1 + P.mag)));
-    const reload = (ov.reload != null ? ov.reload : weapon.reload) / (1 + P.reload);
+    let reload = (ov.reload != null ? ov.reload : weapon.reload) / (1 + P.reload);
+    // Battery weapons (https://wiki.warframe.com/w/Battery_Weapon, https://wiki.warframe.com/w/Reload): the magazine refills at a
+    // fixed rate after a delay; "Reload speed bonuses only affect the Recharge Delay". Firing until empty, then waiting for a full
+    // magazine: time = delay / (1 + reload speed) + magazine / rate (delay = the weapon page's empty-magazine delay when it has one).
+    const bat = weapon.battery;
+    if (bat && model.battery && ov.reload == null) {
+      const delay = bat.emptyDelay != null ? bat.emptyDelay : bat.delay;
+      reload = delay / (1 + P.reload) + mag / bat.rate;
+      notes.push(`Regenerating ammo: ${bat.rate} rounds/s after a ${delay}s delay${P.reload ? ' (shortened by reload speed)' : ''}, so a full ${mag}-round magazine takes ${Math.round(reload * 100) / 100}s. Magazine mods add refill time; reload speed only shortens the delay.`);
+    }
     const sustainFactor = (isMelee || !weapon.magazine) ? 1 : mag / (effFR * reload + mag);
 
     // ---------- status ----------
@@ -565,7 +698,7 @@
     const wTotal = Object.values(typed).reduce((a, b) => a + b, 0);
     for (const [k, v] of Object.entries(typed)) if (k !== 'true') procWeights[k] = wTotal ? v / wTotal : 0;
     const procsPerShot = sc * ms; // ASSUMPTION: expected procs = status chance x projectiles (wiki gives no closed form)
-    const extraSlashPerShot = P.slashOnCrit * Math.min(1, cc) * ms;
+    const extraSlashPerShot = P.slashOnCrit * Math.min(1, cc) * ms + (stance ? stance.bleedPerHit : 0);
     notes.push('ASSUMPTION: expected status procs per shot = status chance x multishot.');
 
     const pureElementBonus = el => {
@@ -583,7 +716,7 @@
       const procs = (procWeights[t] || 0) * procsPerShot + (t === 'slash' ? extraSlashPerShot : 0);
       if (!procs) continue;
       const elemFactor = (t === 'slash' || d.noElementBonus) ? 1 : (1 + pureElementBonus(t));
-      const tick = baseTotal * dotDmgMult * d.pct * factionMult * factionMult * (1 + P.statusDamage) * elemFactor * critBodyHeadAvg;
+      const tick = baseTotal * dotDmgMult * d.pct * factionMult * factionMult * (1 + P.statusDamage + (P.statusDamageType[t] || 0)) * elemFactor * critBodyHeadAvg;
       const dur = d.duration * (1 + P.statusDuration);
       let ticks = d.fixedTicks || (Math.floor(dur - d.delay) + 1 - (d.lastTickNoDamage ? 1 : 0));
       // Heat: every proc refreshes all active Heat stacks (wiki: Damage/Heat_Damage), so while procs keep coming
@@ -629,7 +762,7 @@
     const result = {
       weapon: weapon.name, attack: atk.name, category: weapon.category, type: weapon.type,
       stats: {
-        baseTotal, quantizationScale: scale, damagePool: P.dmg, directPool: P.direct,
+        baseTotal, quantizationScale: scale, damagePool: P.dmg, directPool: P.direct, hitTotal: round(hitTotal), vsNonCrit: round(vsTotalNonCrit + voidPerHit), critAvg: round(critBodyHeadAvg), falloff: round(fall),
         critChance: cc, critMultiplier: cd, statusChance: sc, multishot: ms,
         fireRate: fr, effectiveFireRate: effFR, magazine: mag, reload,
         factionMultiplier: factionMult, separateMultiplier: sepMult,
@@ -654,9 +787,9 @@
       isAoE,
       // arsenal-style numbers: per projectile before quantization and enemy effects, total includes multishot
       arsenal: {
-        types: Object.fromEntries(Object.entries(unquant).map(([k, v]) => [k, round(v * hitMult)])),
+        types: Object.fromEntries(Object.entries(unquant).map(([k, v]) => [k, round(v * arsenalHitMult)])),
         multishot: msModded,
-        total: round(Object.values(unquant).reduce((a, c) => a + c, 0) * hitMult * msModded)
+        total: round(Object.values(unquant).reduce((a, c) => a + c, 0) * arsenalHitMult * msModded)
       },
       dps: {
         burstDirect: round(burstDirect),
@@ -669,7 +802,9 @@
       used, unparsed, notes: [...new Set(notes)],
       // expected stacks of rate-based buffs (kills, procs, weak point hits) and whether proc/hit rates were still missing
       stackModel: trigCtx.stackLog.map(x => Object.assign({}, x, { rate: round(x.rate), stacks: round(x.stacks) })),
-      needsRates: trigCtx.needsRates
+      needsRates: trigCtx.needsRates,
+      corrosiveMaxBonus: P.corrosiveMax,
+      falloffMult: round(fall)
     };
     if (trigCtx.stackLog.some(x => x.kind === 'kill')) {
       const kpm = cond.killsPerMin != null ? cond.killsPerMin : (KILL_RATES[cond.killRate] != null ? KILL_RATES[cond.killRate] : KILL_RATES.horde);
@@ -753,10 +888,11 @@
     const out = { types: 0, stacks: {}, uptime: {}, procsPerSecond: {} };
     const steps = 120;
     for (const [t, perShot] of Object.entries(r.procPerShotByType || {})) {
-      const def = S.STATUS[t];
+      let def = S.STATUS[t];
       if (!def || !(perShot > 0)) continue;
       const pps = perShot * rate;
       const dur = def.duration * durMult;
+      if (t === 'corrosive' && r.corrosiveMaxBonus) def = Object.assign({}, def, { max: def.max + r.corrosiveMaxBonus }); // Emerald shards
       out.procsPerSecond[t] = pps;
       if (T > 0 && isFinite(T)) {
         let st = 0, up = 0;
@@ -864,8 +1000,47 @@
     return r;
   }
 
+  // ---------- the first minute (Simulacrum timeline) ----------
+  // Instant DPS at time t after the fight starts with no stacks and no statuses on the target. ASSUMPTION: rate-based stacks
+  // (kills, procs, weak point hits) build up linearly at their rate until they reach their long-run average; your own
+  // statuses build as min(max, procs/s x min(t, duration)), the same rule the steady state uses.
+  function timeline(build, data, opts) {
+    const o = Object.assign({ seconds: 60, step: 2 }, opts || {});
+    const cond = build.conditions || {};
+    const base = calculate(build, data);
+    const sm = base.stackModel || [];
+    const ss = base.selfStatus;
+    const durMult = Math.max(0, 1 + (base.statusDurationBonus || 0));
+    const manual = Object.assign({}, build.enemy || {});
+    const KEY = { viral: 'viralStacks', corrosive: 'corrosiveStacks', magnetic: 'magneticStacks', puncture: 'punctureStacks', cold: 'coldStacks' };
+    const points = [];
+    for (let t = 0; t <= o.seconds + 1e-9; t += o.step) {
+      const stacks = Object.assign({}, cond.stacks || {});
+      const shown = {};
+      for (const x of sm) if (stacks[x.key] == null) { stacks[x.key] = Math.min(x.stacks, x.rate * t); shown[x.source] = Math.max(shown[x.source] || 0, stacks[x.key]); }
+      const e = Object.assign({}, manual);
+      let types = cond.statusTypes || 0, typeSum = 0;
+      if (cond.selfStatus !== false && ss) {
+        for (const [st, pps] of Object.entries(ss.procsPerSecond || {})) {
+          const def = S.STATUS[st]; if (!def) continue;
+          const max = def.max + (st === 'corrosive' ? (base.corrosiveMaxBonus || 0) : 0);
+          const x = Math.min(t, def.duration * durMult);
+          const n = Math.min(max, pps * x), up = 1 - Math.exp(-pps * x);
+          if (KEY[st]) e[KEY[st]] = Math.max(manual[KEY[st]] || 0, n);
+          if (st === 'heat') e.heatStrip = manual.heatStrip === true ? true : Math.max(+manual.heatStrip || 0, up);
+          typeSum += up;
+        }
+        types = Math.max(types, typeSum);
+      }
+      const c = Object.assign({}, cond, { stacks, selfStatus: false, statusTypes: types });
+      const r = calcWithExtras(Object.assign({}, build, { enemy: e, conditions: c }), data);
+      points.push({ t: round(t), dps: round(r.dps.sustainedTotal), burst: round(r.dps.burstTotal), stacks: shown, statusTypes: round(types) });
+    }
+    return { points, steady: base.dps.sustainedTotal, steadyBurst: base.dps.burstTotal };
+  }
+
   function round(v) { return Math.round(v * 1000) / 1000; }
   function mapRound(o) { const r = {}; for (const [k, v] of Object.entries(o)) r[k] = typeof v === 'number' ? round(v) : v; return r; }
 
-  WF.engine = { calculate, calcCore, expectedStacks, KILL_RATES, selfStatusState, findWeapon, findMod, findArcane, modsFor, compatibleCompats, quantize, expectedCrit, variantRoot };
+  WF.engine = { calculate, calcCore, timeline, expectedStacks, KILL_RATES, selfStatusState, findWeapon, findMod, findArcane, modsFor, compatibleCompats, quantize, expectedCrit, variantRoot };
 })();

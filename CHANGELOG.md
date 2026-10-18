@@ -4,9 +4,30 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.12.0**: Beginner and Advanced modes, the new Simulacrum tab, step-by-step math with help tips, and modeling for falloff, regenerating ammo, Archon Shards, stances and heavy attacks.
 - **v0.11.0**: On Kill buffs now follow a kill rate setting, proc-based arcanes work, and Coda Bubonico uses shotgun mods like in game.
 - **v0.10.0**: Ask Teshin: find out whether a weapon wants a crit, status or hybrid build, try mods from the latest patches, and check this week's sleeper picks.
-- **v0.9.1**: Plat prices are paused while I work out access with warframe.market.
+
+## v0.12.0 (2026-10-18)
+
+**TL;DR:** Beginner and Advanced modes, the new Simulacrum tab, step-by-step math with help tips, and modeling for falloff, regenerating ammo, Archon Shards, stances and heavy attacks.
+
+### Added
+
+- Beginner and Advanced modes. Beginner keeps the essentials; Advanced shows every setting. New visitors start in Beginner and your choice is remembered.
+- Simulacrum tab: switch each mechanic on or off, set kill rate, target distance and fight length, and see how DPS ramps up over the first minute.
+- "How this number is made" on the DPS tab walks through every step from base damage to sustained DPS with your numbers.
+- Help tips on stats and settings, each with a wiki link, and a Learn page that explains the whole damage formula.
+- Damage falloff by distance for every weapon that has it, plus area falloff from the blast centre.
+- Regenerating ammo for Coda Bubonico, Bubonico, Fulmin, Cycron, Plinx and other battery weapons.
+- Range conditions: Shotgun Vendetta and Range Advantage follow the target distance.
+- Archon Shards: five slots with Crimson, Violet, Topaz and Emerald weapon bonuses and Tauforged shards.
+- Melee stances with real per-hit combo data from the wiki, and heavy attacks with combo multiplier, wind-up and Killing Blow.
+
+### Changed
+
+- Kill rate, combo, fight length and the conditional buff switches moved from Buffs to the Simulacrum.
+- Weapon data notes now sit on the Arsenal tab instead of under the weapon name.
 
 ## v0.11.0 (2026-10-18)
 

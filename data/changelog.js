@@ -5,6 +5,27 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.12.0', date: '2026-10-18',
+    tldr: 'Beginner and Advanced modes, the new Simulacrum tab, step-by-step math with help tips, and modeling for falloff, regenerating ammo, Archon Shards, stances and heavy attacks.',
+    sections: [
+      { title: 'Added', items: [
+        'Beginner and Advanced modes. Beginner keeps the essentials; Advanced shows every setting. New visitors start in Beginner and your choice is remembered.',
+        'Simulacrum tab: switch each mechanic on or off, set kill rate, target distance and fight length, and see how DPS ramps up over the first minute.',
+        '"How this number is made" on the DPS tab walks through every step from base damage to sustained DPS with your numbers.',
+        'Help tips on stats and settings, each with a wiki link, and a Learn page that explains the whole damage formula.',
+        'Damage falloff by distance for every weapon that has it, plus area falloff from the blast centre.',
+        'Regenerating ammo for Coda Bubonico, Bubonico, Fulmin, Cycron, Plinx and other battery weapons.',
+        'Range conditions: Shotgun Vendetta and Range Advantage follow the target distance.',
+        'Archon Shards: five slots with Crimson, Violet, Topaz and Emerald weapon bonuses and Tauforged shards.',
+        'Melee stances with real per-hit combo data from the wiki, and heavy attacks with combo multiplier, wind-up and Killing Blow.'
+      ] },
+      { title: 'Changed', items: [
+        'Kill rate, combo, fight length and the conditional buff switches moved from Buffs to the Simulacrum.',
+        'Weapon data notes now sit on the Arsenal tab instead of under the weapon name.'
+      ] }
+    ]
+  },
+  {
     version: '0.11.0', date: '2026-10-18',
     tldr: 'On Kill buffs now follow a kill rate setting, proc-based arcanes work, and Coda Bubonico uses shotgun mods like in game.',
     sections: [

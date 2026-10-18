@@ -37,8 +37,8 @@ In the UI, **Copy build JSON** gives you a build you can paste to Claude or feed
 
 ## Not modeled yet
 
-Burst-fire delay, heavy attacks/melee stances, Radiation/Magnetic side effects beyond damage, ability damage,
-ammo economy (Plentiful Mayhem style ammo use). Mod and perk text the parser does not understand is listed
+Burst-fire delay, Radiation/Magnetic side effects beyond damage, ability damage, ammo economy (Plentiful Mayhem style ammo use),
+Initial Combo and Heavy Attack Efficiency loops (the combo multiplier is set by hand), projectile speed extending falloff range. Mod and perk text the parser does not understand is listed
 under "Not modeled" so nothing is dropped silently.
 
 ## Where values come from
@@ -87,6 +87,13 @@ Public sources only. Nothing is read from the game client or a player account.
   online sellers at that rank, PC) through the accounts API `/market/price`, cached 10 minutes, following warframe.market's API rules
 - Ask Teshin: crit / status / hybrid lean for the current weapon (three optimizer runs, `src/teshin.js`), mods and arcanes from recent
   patch notes tried in your build, and weekly sleepers from `scripts/meta-scan.js` (own math, Steel Path L150 Heavy Gunner, `data/meta.json`)
+- Beginner / Advanced modes (Advanced shows every setting), help tips with wiki links on stats and settings, "How this number is made"
+  step-by-step on the DPS tab, and `learn.html` explaining the whole formula
+- Simulacrum tab (`ui/sim.js`): switch mechanics on or off (conditional buffs, own statuses, falloff, regenerating ammo, range
+  conditions, Archon Shards), set kill rate, target distance (default 10m, a starting point rather than game data) and fight length, and a first-minute DPS timeline
+- Damage falloff from the wiki falloff data per attack, battery weapons (refill rate and delay from each weapon's wiki page,
+  `data/overrides.json`), Archon Shards, melee heavy attacks (listed heavy damage x combo multiplier, wind-up) and stances
+  (per-hit multipliers from the wiki's Module:Stances/data, scraped weekly by `scripts/scrape-web.js` with `scripts/lua-table.js`)
 - What's new: Game updates (DE patch notes with a TL;DR from DE's own headings, full notes, search, calculator items highlighted),
   live Events (events, Baro Ki'Teer, Prime Resurgence, Nightwave, resets, open world cycles, DE news) and the changelog
 - Installable web app with offline support (`sw.js`), light/dark toggle, feedback button, patch-change banner

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>How the Math Works - Warframe Damage Calc</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="description" content="How Warframe weapon damage is calculated: base damage, mods, elements, quantization, crits, status, armor, factions, fire rate, reloads, stacking buffs, falloff, melee and Archon Shards.">
+<link rel="stylesheet" href="ui/style.css">
+<script>try { var t = JSON.parse(localStorage.getItem('wfcalc.theme') || 'null'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<style>
+  .learn { max-width: 820px; margin: 0 auto; padding: 24px 16px 64px; line-height: 1.6; }
+  .learn h1 { font-size: 1.7rem; margin: 8px 0 4px; }
+  .learn h2 { margin-top: 36px; font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .learn nav ol { columns: 2; gap: 24px; padding-left: 20px; }
+  .learn .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; overflow-x: auto; white-space: pre; font-size: 13px; }
+  .learn .src { color: var(--muted); font-size: 13px; }
+  .learn .note { border-left: 3px solid var(--accent); padding: 4px 12px; color: var(--muted); }
+  .learn table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .learn th, .learn td { border-bottom: 1px solid var(--border); padding: 4px 8px; text-align: left; }
+  .learn .back { display: inline-block; margin-bottom: 8px; }
+  @media (max-width: 640px) { .learn nav ol { columns: 1; } }
+</style>
+</head>
+<body>
+<main class="learn">
+  <a class="back btn ghost sm" href="./">&larr; Back to the calculator</a>
+  <h1>How the math works</h1>
+  <p class="muted">A walk through every step between a weapon's listed stats and the DPS number, in the order the calculator does it. Each section links the WARFRAME Wiki page it is based on. Anything the wiki does not state outright is marked as an assumption in the calculator's notes.</p>
+
+  <nav aria-label="Sections"><ol>
+    <li><a href="#base">Base damage</a></li>
+    <li><a href="#mods">Damage mods</a></li>
+    <li><a href="#elements">Elements</a></li>
+    <li><a href="#quant">Quantization</a></li>
+    <li><a href="#enemy">Armor and factions</a></li>
+    <li><a href="#crit">Critical hits</a></li>
+    <li><a href="#status">Status effects</a></li>
+    <li><a href="#rate">Fire rate, reload and sustained DPS</a></li>
+    <li><a href="#stacks">On Kill and stacking buffs</a></li>
+    <li><a href="#falloff">Damage falloff and range</a></li>
+    <li><a href="#melee">Melee: stances, combo and heavy attacks</a></li>
+    <li><a href="#shards">Archon Shards</a></li>
+    <li><a href="#sim">The Simulacrum</a></li>
+  </ol></nav>
+
+  <h2 id="base">1. Base damage</h2>
+  <p>Every attack lists damage split into types: Impact, Puncture and Slash (physical) and sometimes an element. Kuva, Tenet and Coda weapons add a Valence bonus: 25 to 60% of base damage as one extra type, counted as base damage.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Damage" target="_blank" rel="noopener">Damage</a>, <a href="https://wiki.warframe.com/w/Kuva_Weapons" target="_blank" rel="noopener">Kuva Weapons</a></p>
+
+  <h2 id="mods">2. Damage mods</h2>
+  <p>Base damage mods (Serration, Point Blank, Primary Merciless stacks) add together into one pool, then multiply every damage type:</p>
+  <div class="formula">damage = base x (1 + sum of damage bonuses)</div>
+  <p>"Direct Damage" from Galvanized Aptitude, Savvy and Shot joins the same pool for hits. Faction mods (Bane, Cleanse, Expel) are a separate multiplier, applied later against that faction only.</p>
+  <p class="src">Source: <a href="https://wiki.warframe.com/w/Damage_calculation" target="_blank" rel="noopener">Damage calculation</a></p>
+
+  <h2 id="elements">3. Elements</h2>
+  <p>An elemental mod adds its % of the modded base damage as a new type. Two primary elements next to each other (by slot order, top left first) combine:</p>
+  <table><thead><tr><th>Combination</th><th>Result</th></tr></thead><tbody>
+    <tr><td>Heat + Cold</td><td>Blast</td></tr><tr><td>Heat + Electricity</td><td>Radiation</td></tr>
+    <tr><td>Heat + Toxin</td><td>Gas</td></tr><tr><td>Cold + Electricity</td><td>Magnetic</td></tr>
+    <tr><td>Cold + Toxin</td><td>Viral</td></tr><tr><td>Electricity + Toxin</td><td>Corrosive</td></tr>
+  </tbody></table>
+  <p>A weapon's own innate element joins the combination last.</p>
+  <p class="src">Source: <a href="https://wiki.warframe.com/w/Damage/Overview_Table" target="_blank" rel="noopener">Damage overview</a></p>
+
+  <h2 id="quant">4. Quantization</h2>
+  <p>The game rounds each damage type to a multiple of 1/32 of the attack's base damage. Small elemental bonuses can round away; that is why the arsenal screen and the actual hit can differ slightly.</p>
+  <div class="formula">type damage = round(type damage / (base / 32)) x (base / 32)</div>
+  <p class="src">Source: <a href="https://wiki.warframe.com/w/Quantization" target="_blank" rel="noopener">Quantization</a></p>
+
+  <h2 id="enemy">5. Armor and factions</h2>
+  <p>Armor reduces damage taken from most types, up to 90% at 2,700 armor:</p>
+  <div class="formula">damage taken = 1 - 0.9 x sqrt(min(armor, 2700) / 2700)</div>
+  <p>Corrosive stacks and Heat strip armor. Each faction is weak (x1.5) or resistant (x0.5) to some types. Viral stacks raise damage to health: +100% at the first stack, +25% per extra stack, up to +325%.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Armor" target="_blank" rel="noopener">Armor</a>, <a href="https://wiki.warframe.com/w/Status_Effect" target="_blank" rel="noopener">Status Effect</a></p>
+
+  <h2 id="crit">6. Critical hits</h2>
+  <p>Crit chance = base x (1 + crit mods). Above 100%, every hit crits and the remainder is the chance of a higher tier (orange, then red):</p>
+  <div class="formula">crit multiplier at tier n = n x (crit damage - 1) + 1</div>
+  <p>The calculator averages this over all hits. Headshots double crit damage on top of the weak point multiplier.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Critical_Hit" target="_blank" rel="noopener">Critical Hit</a>, <a href="https://wiki.warframe.com/w/Weak_Point" target="_blank" rel="noopener">Weak Point</a></p>
+
+  <h2 id="status">7. Status effects</h2>
+  <p>Each pellet rolls status chance on its own. The status type is picked in proportion to each damage type's share. Slash, Heat, Toxin, Gas and Electricity deal damage over time; Viral, Corrosive, Magnetic, Puncture and Cold change how much damage the target takes.</p>
+  <p class="note">Assumption: expected procs per shot = status chance x multishot. Statuses you apply yourself build up over the fight when "My own status effects" is on.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Status_Effect" target="_blank" rel="noopener">Status Effect</a>, <a href="https://wiki.warframe.com/w/Damage_over_Time" target="_blank" rel="noopener">Damage over Time</a></p>
+
+  <h2 id="rate">8. Fire rate, reload and sustained DPS</h2>
+  <p>Burst DPS is damage per shot times shots per second. Sustained DPS also counts the time spent reloading:</p>
+  <div class="formula">sustained = burst x magazine / (magazine + fire rate x reload time)</div>
+  <p>Battery weapons (Coda Bubonico, Fulmin, Cycron) refill on their own. Reload speed only shortens the delay before the refill starts:</p>
+  <div class="formula">refill time = delay / (1 + reload speed) + magazine / refill rate</div>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Reload" target="_blank" rel="noopener">Reload</a>, <a href="https://wiki.warframe.com/w/Battery_Weapon" target="_blank" rel="noopener">Battery Weapon</a></p>
+
+  <h2 id="stacks">9. On Kill and stacking buffs</h2>
+  <p>Buffs like Galvanized Hell, Primary Merciless and Primary Frostbite build stacks. How many you actually hold depends on how often you trigger them and how they wear off:</p>
+  <table><thead><tr><th>Buff</th><th>When the timer runs out</th></tr></thead><tbody>
+    <tr><td>Galvanized mods, Merciless, Deadhead</td><td>One stack is lost and the timer restarts</td></tr>
+    <tr><td>Galvanized Scope, Galvanized Crosshairs</td><td>Each stack has its own timer</td></tr>
+    <tr><td>Primary Frostbite, Blight, Crux, Conjunction Voltage</td><td>All stacks are lost at once</td></tr>
+  </tbody></table>
+  <p>The calculator turns your kill rate (or your proc and headshot rate for on-proc arcanes) into the average number of stacks over a long fight. Galvanized mods (20s per stack, one lost at a time) stay near full even at one kill every few seconds; Primary Merciless (4s) needs a steady stream of kills.</p>
+  <p class="note">Assumption: kills and procs arrive at a steady random rate, and each kill restarts the timer.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Galvanized_Mods" target="_blank" rel="noopener">Galvanized Mods</a>, <a href="https://wiki.warframe.com/w/Primary_Merciless" target="_blank" rel="noopener">Primary Merciless</a>, <a href="https://wiki.warframe.com/w/Primary_Frostbite" target="_blank" rel="noopener">Primary Frostbite</a></p>
+
+  <h2 id="falloff">10. Damage falloff and range</h2>
+  <p>Many shotguns and some other weapons lose damage with distance: full damage up to a start distance, then a straight drop to a minimum at the end distance.</p>
+  <div class="formula">damage x (1 - max reduction x clamp((distance - start) / (end - start), 0, 1))</div>
+  <p>Example from the wiki: Hek keeps 100% up to 10m and drops to 20% at 20m. Area attacks lose damage away from the blast centre in the same way. Buffs with a range condition (Shotgun Vendetta: kill within 5m) follow the target distance you set.</p>
+  <p class="note">Assumption: status damage over time falls off the same way as the hit.</p>
+  <p class="src">Source: <a href="https://wiki.warframe.com/w/Damage_Falloff" target="_blank" rel="noopener">Damage Falloff</a></p>
+
+  <h2 id="melee">11. Melee: stances, combo and heavy attacks</h2>
+  <p><b>Stances.</b> Each combo hit deals a % of the weapon's damage, and some hits carry extra Slash or forced procs. Attack speed shortens the whole combo:</p>
+  <div class="formula">hits per second = hits in combo / (combo length at speed 1.0 / attack speed)</div>
+  <p><b>Melee Combo.</b> The counter gives 2x at 20 hits and +1x every 20 hits up to 12x at 220. It does not multiply normal swings; it multiplies heavy attacks and powers Blood Rush (crit) and Weeping Wounds (status).</p>
+  <p><b>Heavy attacks.</b> The listed heavy damage is normal base damage times the weapon class heavy multiplier. A heavy attack spends the whole combo unless Heavy Attack Efficiency keeps some (capped at 90%). Wind-up is shortened only by Heavy Attack Wind Up Speed, not attack speed.</p>
+  <div class="formula">heavy hit = base x (1 + damage mods) x (1 + elements) x heavy multiplier x combo multiplier</div>
+  <p class="note">Assumption: one heavy attack takes its wind-up plus one normal swing.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Melee" target="_blank" rel="noopener">Melee</a>, <a href="https://wiki.warframe.com/w/Melee_Combo" target="_blank" rel="noopener">Melee Combo</a>, <a href="https://wiki.warframe.com/w/Stance" target="_blank" rel="noopener">Stance</a>, <a href="https://wiki.warframe.com/w/Module:Stances/data" target="_blank" rel="noopener">stance data</a></p>
+
+  <h2 id="shards">12. Archon Shards</h2>
+  <p>Five slots per Warframe. The weapon bonuses add to the matching mods; Tauforged shards are 1.5x:</p>
+  <table><thead><tr><th>Shard</th><th>Weapon bonus</th></tr></thead><tbody>
+    <tr><td>Crimson</td><td>+25% melee crit damage, +25% primary status chance or +25% secondary crit chance</td></tr>
+    <tr><td>Violet</td><td>+30% primary Electricity, +10% per Crimson, Azure or Violet shard; or +25% melee crit damage (doubled over 500 max energy)</td></tr>
+    <tr><td>Topaz</td><td>+1% secondary crit chance per kill on an enemy with Heat, up to 50%</td></tr>
+    <tr><td>Emerald</td><td>+30% Toxin status damage, or +2 max Corrosive stacks</td></tr>
+  </tbody></table>
+  <p class="note">Assumption: shard Electricity joins the element order after your mods.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Archon_Shard" target="_blank" rel="noopener">Archon Shard</a>, <a href="https://wiki.warframe.com/w/Violet_Archon_Shard" target="_blank" rel="noopener">Violet</a>, <a href="https://wiki.warframe.com/w/Topaz_Archon_Shard" target="_blank" rel="noopener">Topaz</a>, <a href="https://wiki.warframe.com/w/Emerald_Archon_Shard" target="_blank" rel="noopener">Emerald</a></p>
+
+  <h2 id="sim">13. The Simulacrum</h2>
+  <p>The Simulacrum tab (Advanced mode) holds every switch above: turn a mechanic off to see what it is worth, set the kill rate and distance, and watch the first minute of a fight as stacks and statuses build up. The rest of the site, including the optimizer and Teshin, uses the same settings.</p>
+
+  <p class="muted small" style="margin-top:40px">A free fan-made tool by <a href="https://hardn.net" target="_blank" rel="noopener">hardn</a>. Formulas from the <a href="https://wiki.warframe.com" target="_blank" rel="noopener">WARFRAME Wiki</a> (CC BY-SA). Not affiliated with or endorsed by Digital Extremes.</p>
+</main>
+</body>
+</html>

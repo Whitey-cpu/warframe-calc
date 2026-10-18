@@ -28,7 +28,8 @@
     'headshot multiplier': 'headshot', 'headshot damage': 'headshot',
     'weak point damage': 'weakPoint', 'weak point critical chance': 'weakPointCrit',
     // "Direct Damage" (Galvanized mods) adds to the base damage pool for the hit itself.
-    'direct damage': 'directDamage'
+    'direct damage': 'directDamage',
+    'heavy attack wind up speed': 'windUp', 'heavy attack efficiency': 'heavyEfficiency'
   };
 
   const TAG_WORDS = {
@@ -58,6 +59,12 @@
     let bowMult = 1;
     const bow = t.match(/\(x(\d+(?:\.\d+)?) for Bows\)/i);
     if (bow) bowMult = parseFloat(bow[1]);
+    // "+120% Critical Chance (x2 for Heavy Attacks)"
+    const hv = t.match(/\(x(\d+(?:\.\d+)?) for Heavy Attacks\)/i);
+    const heavyMult = hv ? parseFloat(hv[1]) : 1;
+    // "+120% Melee Damage on Heavy Attack": only heavy attacks get it
+    let onlyHeavy = false;
+    if (/\s+on Heavy Attacks?$/i.test(t.replace(/\s*\([^)]*\)/g, '').trim()) && !/wind up|efficiency/i.test(t)) { onlyHeavy = true; t = t.replace(/\s+on Heavy Attacks?(\s*\(|$)/i, '$1'); }
     t = t.replace(/\s*\([^)]*\)/g, '').trim();
     let duration = null;
     const dur = t.match(/\s+for\s+(\d+(?:\.\d+)?)s$/i);
@@ -92,6 +99,8 @@
     if (!eff) return null;
     if (eff.stat === 'critChance' && ctx && FLAT_CRIT.includes(ctx.name)) eff.stat = 'critChanceFlat';
     if (bowMult !== 1) eff.bowMult = bowMult;
+    if (heavyMult !== 1) eff.heavyMult = heavyMult;
+    if (onlyHeavy) eff.onlyHeavy = true;
     if (onlyFor) eff.onlyFor = onlyFor;
     if (aiming) eff.cond = { trigger: 'When Aiming' };
     if (duration != null) eff.duration = duration;
@@ -155,7 +164,12 @@
             }
             continue;
           }
+          // trailing condition: "+300% damage if no enemies are within 10m"
+          let ifCond = null;
+          const ifm = s.match(/^([+-]?\d+(?:\.\d+)?%.+?)\s+(if .+?)\.?$/i);
+          if (ifm) { ifCond = { trigger: ifm[2].charAt(0).toUpperCase() + ifm[2].slice(1) }; s = ifm[1]; }
           const eff = parseStatPhrase(s, ctx);
+          if (eff && ifCond) eff.cond = Object.assign({}, eff.cond || {}, ifCond);
           if (eff) {
             if (cond || chance != null) eff.cond = Object.assign({}, eff.cond || {}, cond || { trigger: 'Chance' }, chance != null ? { chance } : {});
             if (eff.duration != null && eff.cond) eff.cond.duration = eff.duration;

@@ -232,7 +232,7 @@
     const SLOTS = ['A', 'B', 'C', 'D'];
     let cfgs = store.get(CFG_KEY, {});
     let suppress = 0;
-    const WEAPON_FIELDS = ['attack', 'mods', 'slotLayout', 'slotLocks', 'slotRanks', 'slotPolarities', 'incarnon', 'valence', 'riven', 'rivenSlot', 'rivenMod', 'extraAttacks', 'overrides'];
+    const WEAPON_FIELDS = ['attack', 'mods', 'slotLayout', 'slotLocks', 'slotRanks', 'slotPolarities', 'incarnon', 'valence', 'riven', 'rivenSlot', 'rivenMod', 'extraAttacks', 'overrides', 'stance'];
     function pick(b) {
       const o = {};
       WEAPON_FIELDS.forEach(k => { if (b[k] !== undefined) o[k] = JSON.parse(JSON.stringify(b[k])); });

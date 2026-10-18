@@ -119,6 +119,44 @@ async function scrapeIncarnon() {
   return { weapons: result.sort((a, b) => a.weapon.localeCompare(b.weapon)), failed };
 }
 
+// Melee classes and stance combos from the wiki's Lua data modules (Module:Weapons/data/melee, Module:Stances/data).
+const STANCE_COMBOS = ['Neutral', 'Forward', 'Block', 'Forward Block', 'Slide'];
+function parseMeleeModules(stanceSrc, meleeSrc) {
+  const L = require('./lua-table.js');
+  const W = L.readTableAfter(meleeSrc, 'return');
+  const classes = {};
+  for (const [name, w] of Object.entries(W)) if (w && w.Class && w.Class !== 'Exalted Weapon') classes[name] = w.Class;
+  const T = L.readTableAfter(stanceSrc, 'local StanceData =');
+  const slimCombo = c => c && c.Attacks ? {
+    name: c.Name || null, duration: typeof c.Duration === 'number' ? c.Duration : null,
+    attacks: c.Attacks.map(a => {
+      const o = { dmg: a.Dmg || [], hits: a.Hits || (a.Dmg || []).map(() => 1) };
+      if (a.Procs) o.procs = a.Procs.map(x => Array.isArray(x) ? x : (x ? [x] : []));
+      for (const k of ['Impact', 'Puncture', 'Slash', 'Status']) if (a[k + 'Multiplier']) o[k.toLowerCase() + 'Mult'] = a[k + 'Multiplier'];
+      return o;
+    })
+  } : null;
+  const stances = {}, shared = {};
+  for (const [name, st] of Object.entries(T)) {
+    if (!st || name === '__Legend' || !st.WeaponType) continue;
+    const combos = {};
+    for (const k of STANCE_COMBOS.concat(['Heavy'])) { const c = slimCombo(st[k]); if (c) combos[k] = c; }
+    if (name === st.WeaponType) { shared[name] = combos; continue; } // weapon-type entry: shared slide / heavy combos
+    if (st.ConclaveOnly) continue;
+    stances[name] = { type: st.WeaponType, unique: !!st.UniqueToWeapon, combos };
+  }
+  return { classes, stances, shared };
+}
+async function scrapeMelee() {
+  const ps = await pages(['Module:Stances/data', 'Module:Weapons/data/melee']);
+  const get = t => ps.find(p => p.title === t);
+  const st = get('Module:Stances/data'), me = get('Module:Weapons/data/melee');
+  const parsed = parseMeleeModules(st.revisions[0].slots.main.content, me.revisions[0].slots.main.content);
+  return Object.assign(parsed, {
+    sources: [{ page: `${WIKI}/w/Module:Stances/data`, lastEdited: st.revisions[0].timestamp }, { page: `${WIKI}/w/Module:Weapons/data/melee`, lastEdited: me.revisions[0].timestamp }]
+  });
+}
+
 async function scrapeBuild() {
   try {
     const r = await fetch('https://www.warframe.com/en/patch-notes', { headers: { 'User-Agent': UA } });
@@ -144,11 +182,17 @@ async function main() {
     process.exit(1);
   }
   const build = await scrapeBuild();
-  const out = { scrapedAt: new Date().toISOString(), build, incarnon };
+  let melee = prev && prev.melee;
+  try {
+    const m = await scrapeMelee();
+    if (Object.keys(m.stances).length >= 50 && Object.keys(m.classes).length >= 150) melee = m;
+    else console.error(`Only ${Object.keys(m.stances).length} stances / ${Object.keys(m.classes).length} melee classes parsed; keeping the previous melee data.`);
+  } catch (e) { console.error('Melee modules failed, keeping the previous melee data:', e.message); }
+  const out = { scrapedAt: new Date().toISOString(), build, incarnon, melee };
   fs.writeFileSync(OUT, JSON.stringify(out, null, 1));
   console.log(`Incarnon weapons: ${incarnon.weapons.length}, failed: ${incarnon.failed.join(', ') || 'none'}`);
   console.log('Build:', JSON.stringify(build));
 }
 
 if (require.main === module) main().catch(e => { console.error(e); process.exit(1); });
-module.exports = { parseEvolutionTable, clean };
+module.exports = { parseEvolutionTable, clean, parseMeleeModules };

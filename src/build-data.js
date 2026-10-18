@@ -25,8 +25,19 @@ function slimWeapon(w) {
     statusChance: a.status_chance != null ? a.status_chance / 100 : w.procChance,
     chargeTime: a.charge_time || 0,
     shotType: a.shot_type || null,
+    // damage falloff: full damage up to start (m), then linear down to (1 - reduction) at end and beyond
+    // (https://wiki.warframe.com/w/Damage_Falloff; e.g. Hek reduction 0.8 = "100% - 20%" on its wiki page)
+    falloff: a.falloff && a.falloff.end > a.falloff.start ? { start: a.falloff.start, end: a.falloff.end, reduction: a.falloff.reduction } : undefined,
     damage: nonZero(a.damage)
   })).filter(a => Object.keys(a.damage).length);
+  // Melee heavy attack: the weapon's listed heavy damage is its normal base damage x the class heavy attack multiplier
+  // (wiki Melee page, Fragor example: 200 normal -> 1,200 heavy). Same damage-type split, crit and status as the normal attack.
+  const normal = w.category === 'Melee' && attacks[0];
+  if (normal && w.heavyAttackDamage && !attacks.some(a => /^heavy attack$/i.test(a.name))) {
+    const tot = Object.values(normal.damage).reduce((x, y) => x + y, 0);
+    if (tot > 0) attacks.push(Object.assign({}, normal, { name: 'Heavy Attack', heavy: true, falloff: undefined,
+      damage: Object.fromEntries(Object.entries(normal.damage).map(([k, v]) => [k, Math.round(v / tot * w.heavyAttackDamage * 1000) / 1000])) }));
+  }
   if (!attacks.length) {
     attacks.push({
       name: 'Default', fireRate: w.fireRate, critChance: w.criticalChance, critMult: w.criticalMultiplier,
@@ -52,6 +63,10 @@ function slimWeapon(w) {
     mastery: w.masteryReq || 0,
     image: w.imageName || null,
     url: w.wikiaUrl || null,
+    // melee: listed heavy attack damage (= normal base x the class heavy multiplier, wiki Melee page) and wind-up
+    heavyAttackDamage: w.category === 'Melee' && w.heavyAttackDamage ? w.heavyAttackDamage : undefined,
+    windUp: w.category === 'Melee' && w.windUp ? w.windUp : undefined,
+    comboDuration: w.category === 'Melee' && w.comboDuration ? w.comboDuration : undefined,
     attacks
   };
 }
@@ -211,12 +226,19 @@ function applyExtras(data, x) {
     data.incarnon = web.incarnon.weapons;
   }
   if (web && web.build && (web.build.latestHotfix || web.build.latestUpdate)) data.meta.gameBuild = web.build;
+  if (web && web.melee && web.melee.stances) {
+    data.meta.sources.push({ name: 'WARFRAME Wiki (melee classes and stances)', url: 'https://wiki.warframe.com/w/Module:Stances/data',
+      role: `Melee weapon classes and ${Object.keys(web.melee.stances).length} stances with per-hit combo multipliers (Module:Stances/data, Module:Weapons/data/melee)` });
+    data.stances = web.melee.stances;
+    data.stanceShared = web.melee.shared;
+    for (const w of data.weapons) if (w.category === 'Melee' && web.melee.classes[w.name]) w.meleeClass = web.melee.classes[w.name];
+  }
   if (ov) {
     data.meta.sources.push({ name: 'Manual corrections', url: 'data/overrides.json', role: 'Official values checked by hand where the datasets lag (each entry lists its source)' });
     if (!data.meta.gameBuild && ov.gameBuild) data.meta.gameBuild = ov.gameBuild;
     for (const o of ov.weapons || []) {
       for (const w of data.weapons.filter(x => x.name === o.name || (o.variants && o.variants.includes(x.name)))) {
-        for (const [k, v] of Object.entries(o.set || {})) { const old = w[k]; w[k] = v; addNote(w, `${k} ${old} -> ${v} (${o.source})`); }
+        for (const [k, v] of Object.entries(o.set || {})) { const old = w[k]; w[k] = v; const sv = x => x != null && typeof x === 'object' ? JSON.stringify(x) : x; addNote(w, `${k} ${sv(old)} -> ${sv(v)} (${(k === 'battery' && o.batterySource) || o.source})`); }
         // per-attack values, e.g. { "Burst": { "multishot": 1 } } for alt-fires that do not share the weapon's multishot
         for (const [an, vals] of Object.entries(o.attackSet || {})) {
           const a = (w.attacks || []).find(x => x.name === an);

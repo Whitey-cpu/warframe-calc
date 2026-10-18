@@ -22,7 +22,12 @@
   {
    "name": "Coda Bubonico",
    "set": {
-    "type": "Shotgun"
+    "type": "Shotgun",
+    "battery": {
+     "rate": 9,
+     "delay": 1.5,
+     "emptyDelay": 0.1
+    }
    },
    "source": "WARFRAME Wiki: \"The Coda Bubonico uses Shotgun Mods.\" (https://wiki.warframe.com/w/Coda_Bubonico), confirmed in-game 2026-10-17 with Primed Point Blank and Galvanized Hell equipped",
    "attackSet": {
@@ -33,7 +38,122 @@
      "multishot": 1
     }
    },
-   "attackSource": "WARFRAME Wiki attack table lists Multishot 1 for Burst and Radial Attack (https://wiki.warframe.com/w/Coda_Bubonico); in-game arsenal 2026-10-17 shows the Burst total at 2.1x its per-pellet sum with Galvanized Hell (+110%)"
+   "attackSource": "WARFRAME Wiki attack table lists Multishot 1 for Burst and Radial Attack (https://wiki.warframe.com/w/Coda_Bubonico); in-game arsenal 2026-10-17 shows the Burst total at 2.1x its per-pellet sum with Galvanized Hell (+110%)",
+   "batterySource": "WARFRAME Wiki https://wiki.warframe.com/w/Coda_Bubonico: regenerates 9 ammo/s, 1.5s delay, 0.1s when emptied; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Bubonico",
+   "set": {
+    "battery": {
+     "rate": 9,
+     "delay": 1.5,
+     "emptyDelay": 0.1
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Bubonico: regenerates 9 ammo/s, 1.5s delay, 0.1s when emptied; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Basmu",
+   "set": {
+    "battery": {
+     "rate": 42,
+     "delay": 0.2,
+     "emptyDelay": 2.0
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Basmu: regenerates 42 ammo/s, 0.2s delay, 2.0s when emptied; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Flux Rifle",
+   "set": {
+    "battery": {
+     "rate": 40,
+     "delay": 1
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Flux_Rifle: regenerates 40 ammo/s, 1s delay; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Fulmin",
+   "set": {
+    "battery": {
+     "rate": 30,
+     "delay": 1
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Fulmin: regenerates 30 ammo/s, 1s delay; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Fulmin Prime",
+   "set": {
+    "battery": {
+     "rate": 40,
+     "delay": 0.7
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Fulmin_Prime: regenerates 40 ammo/s, 0.7s delay; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Haalvu",
+   "set": {
+    "battery": {
+     "rate": 300,
+     "delay": 0.5,
+     "emptyDelay": 2.0
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Haalvu: regenerates 300 ammo/s, 0.5s delay, 2.0s when emptied; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Shedu",
+   "set": {
+    "battery": {
+     "rate": 28,
+     "delay": 0.4,
+     "emptyDelay": 1.0
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Shedu: regenerates 28 ammo/s, 0.4s delay, 1.0s when emptied; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Cycron",
+   "set": {
+    "battery": {
+     "rate": 40,
+     "delay": 1
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Cycron: regenerates 40 ammo/s, 1s delay; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Tenet Cycron",
+   "set": {
+    "battery": {
+     "rate": 40,
+     "delay": 0.5
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Tenet_Cycron: regenerates 40 ammo/s, 0.5s delay; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Plinx",
+   "set": {
+    "battery": {
+     "rate": 20,
+     "delay": 0.8
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Plinx: regenerates 20 ammo/s, 0.8s delay; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
+  },
+  {
+   "name": "Tenet Plinx",
+   "set": {
+    "battery": {
+     "rate": 20,
+     "delay": 0.8
+    }
+   },
+   "source": "WARFRAME Wiki https://wiki.warframe.com/w/Tenet_Plinx: regenerates 20 ammo/s, 0.8s delay; reload speed only affects the delay (https://wiki.warframe.com/w/Battery_Weapon)"
   }
  ]
 }

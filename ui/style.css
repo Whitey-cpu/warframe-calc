@@ -691,3 +691,60 @@ dialog#teshinDialog::backdrop { background: rgb(0 0 0 / .55); }
 .ts-notes, .ts-ideas, .ts-list { margin: 6px 0; padding-left: 18px; display: grid; gap: 3px; font-size: .86rem; }
 .ts-ideas .pos { color: var(--good); font-weight: 700; }
 @media (max-width: 760px) { dialog#teshinDialog { width: 100%; max-width: none; max-height: none; height: 100dvh; border-radius: 0; } }
+
+/* ---------- Beginner / Advanced ---------- */
+html[data-mode="beginner"] [data-adv] { display: none !important; }
+.mode-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.mode-switch .btn { border: 0; border-radius: 0; }
+.mode-switch .btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); }
+
+/* ---------- help tips ---------- */
+.tip-q { display: inline-grid; place-items: center; width: 16px; height: 16px; margin: 0 4px; padding: 0; border-radius: 50%;
+  border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 10px; line-height: 1; cursor: help; vertical-align: middle; flex: none; }
+.tip-q:hover, .tip-q:focus-visible { color: var(--accent); border-color: var(--accent); outline: none; }
+.tipbox { position: absolute; z-index: 1000; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--panel); color: var(--text); font-size: 12.5px; line-height: 1.45; box-shadow: 0 6px 24px rgba(0, 0, 0, .35); }
+.tipbox a { color: var(--accent); }
+
+/* ---------- How this number is made ---------- */
+.math-box { margin: 10px 0; }
+.math-steps { margin: 8px 0; padding-left: 22px; display: grid; gap: 8px; }
+.math-steps li { padding-left: 2px; }
+.ms-head { display: flex; justify-content: space-between; gap: 12px; }
+.ms-head b { font-variant-numeric: tabular-nums; }
+
+/* ---------- Archon Shards ---------- */
+.shards { display: grid; gap: 6px; margin-bottom: 10px; }
+.shard-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.shard-row select { flex: 1 1 0; width: 0; min-width: 0; }
+.shard-dot { width: 12px; height: 12px; border-radius: 3px; transform: rotate(45deg); border: 1px solid var(--border); background: transparent; flex: none; }
+.shard-dot[data-color="crimson"] { background: #c8323c; }
+.shard-dot[data-color="azure"] { background: #2f7fd6; }
+.shard-dot[data-color="amber"] { background: #e2a33a; }
+.shard-dot[data-color="violet"] { background: #8d5cd6; }
+.shard-dot[data-color="topaz"] { background: #e07a2a; }
+.shard-dot[data-color="emerald"] { background: #2fa36b; }
+
+/* ---------- stance ---------- */
+.stance-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.stance-row label { flex: 1 1 180px; }
+
+/* ---------- Simulacrum timeline ---------- */
+.sim-toggles { margin-bottom: 8px; }
+.tl-wrap { position: relative; }
+.tl-svg { width: 100%; height: auto; display: block; touch-action: pan-y; }
+.tl-grid { stroke: var(--border); stroke-width: 1; }
+.tl-ax { fill: var(--muted); font-size: 11px; }
+.tl-ref { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.tl-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.tl-cross { stroke: var(--muted); stroke-width: 1; }
+.tl-dot { fill: var(--accent); stroke: var(--panel); stroke-width: 2; }
+.tl-hit { fill: transparent; cursor: crosshair; }
+.tl-tip { position: absolute; top: 8px; min-width: 120px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--panel); color: var(--text); font-size: 12px; pointer-events: none; font-variant-numeric: tabular-nums; }
+.tl-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.tl-table th, .tl-table td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--border); }
+
+#weaponNotes details summary { cursor: pointer; }
+@media (max-width: 1520px) { .topbar #downloadApp { display: none; } }
+.tip-lbl { display: inline-flex; align-items: center; gap: 0; }

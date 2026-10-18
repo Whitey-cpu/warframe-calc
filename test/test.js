@@ -311,5 +311,37 @@ if (data.incarnon) {
   eq('Primary Frostbite gives nothing without Cold procs', noCold.stackModel.find(x => x.source === 'Primary Frostbite').stacks, 0);
 }
 
+
+// 28. Falloff (wiki Damage_Falloff; Hek page: 100% to 10m, 20% from 20m), battery refill (wiki Battery_Weapon / Coda Bubonico),
+//     range conditions, Archon Shards (wiki Archon_Shard / Violet example), melee heavy attacks and stances, timeline
+{
+  const hek = d => E.calculate({ weapon: 'Hek', mods: [], conditions: { distance: d, selfStatus: false } }, data).perShotVsEnemy;
+  eq('Hek falloff: 15m = 60% of point blank', hek(15) / hek(5), 0.6, 1e-6);
+  eq('Hek falloff: 30m = 20%', hek(30) / hek(5), 0.2, 1e-6);
+  eq('Falloff off: 30m = 100%', E.calculate({ weapon: 'Hek', mods: [], conditions: { distance: 30, selfStatus: false, model: { falloff: false } } }, data).perShotVsEnemy / hek(5), 1, 1e-9);
+  const bub = E.calculate({ weapon: 'Coda Bubonico', mods: [], conditions: { selfStatus: false } }, data);
+  eq('Coda Bubonico refill: 0.1s empty delay + 36 / 9 per s = 4.1s', bub.stats.reload, 4.1, 1e-6);
+  const vend = d => E.calculate({ weapon: 'Kuva Hek', mods: [], arcanes: ['Shotgun Vendetta'], conditions: { distance: d, selfStatus: false } }, data).stats.multishot;
+  eq('Shotgun Vendetta counts within 5m', vend(3) > vend(10), true);
+  const ra = E.findMod(data, E.findWeapon(data, 'Akjagara'), 'Range Advantage');
+  eq('Range Advantage parses with its distance condition', !!ra && ra.effects[0].cond.trigger === 'If no enemies are within 10m', true);
+  const sh = E.calculate({ weapon: 'Soma Prime', mods: [], conditions: { selfStatus: false },
+    shards: [{ color: 'violet', bonus: 'primaryElectricity', tau: true }, { color: 'violet', bonus: 'primaryElectricity', tau: true }, { color: 'crimson', bonus: 'other' }, { color: 'azure', bonus: 'other' }, { color: 'violet', bonus: 'other' }] }, data);
+  eq('Violet shards: 2 Tauforged + 3 others = +240% Electricity (wiki example)', sh.used.filter(u => u.source === 'Archon Shards').reduce((a, u) => a + u.value, 0), 2.4, 1e-9);
+  const cs = E.calculate({ weapon: 'Soma Prime', mods: [], conditions: { selfStatus: false }, shards: [{ color: 'crimson', bonus: 'primaryStatus' }] }, data);
+  eq('Crimson shard: +25% primary status chance', cs.stats.statusChance / E.calculate({ weapon: 'Soma Prime', mods: [], conditions: { selfStatus: false } }, data).stats.statusChance, 1.25, 1e-9);
+  const frag = E.findWeapon(data, 'Fragor');
+  const hi = frag.attacks.findIndex(a => a.heavy);
+  eq('Fragor heavy attack = 1,200 (wiki)', E.calculate({ weapon: 'Fragor', attack: hi, mods: [], conditions: { selfStatus: false } }, data).perHitNonCrit, 1200, 1e-6);
+  eq('Heavy attack x combo x Killing Blow: 1,200 x 4 x 2.2', E.calculate({ weapon: 'Fragor', attack: hi, mods: ['Killing Blow'], conditions: { combo: 4, selfStatus: false } }, data).perHitNonCrit, 10560, 1e-6);
+  eq('Normal melee swings ignore the combo multiplier', E.calculate({ weapon: 'Fragor', mods: [], conditions: { combo: 6, selfStatus: false } }, data).perHitNonCrit, 200, 1e-6);
+  const st = E.calculate({ weapon: 'Skana', mods: [], stance: { name: 'Crimson Dervish', combo: 'Neutral' }, conditions: { selfStatus: false } }, data);
+  const sk = E.findWeapon(data, 'Skana');
+  eq('Crimson Dervish Neutral: 5 hits in 2.0s at attack speed 1.0', st.stats.effectiveFireRate, 5 / (2 / sk.attacks[0].fireRate), 1e-9);
+  eq('Stance data loaded for 80+ stances', Object.keys(data.stances || {}).length >= 80, true);
+  const tl = E.timeline({ weapon: 'Coda Bubonico', mods: ['Galvanized Hell'], arcanes: ['Primary Merciless'] }, data, { seconds: 30, step: 5 });
+  eq('Timeline starts below and ends at the long-run DPS', tl.points[0].dps < tl.steady && Math.abs(tl.points[tl.points.length - 1].dps - tl.steady) / tl.steady < 0.01, true);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
