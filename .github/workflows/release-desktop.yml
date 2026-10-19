@@ -39,7 +39,7 @@ jobs:
         run: |
           TITLE="Warframe Damage Calc ${VERSION}"
           if gh release view "v${VERSION}" >/dev/null 2>&1; then
-            gh release upload "v${VERSION}" "dist/WarframeDamageCalc-Setup-${VERSION}.exe" --clobber
+            gh release upload "v${VERSION}" "dist/WarframeDamageCalc-Setup-${VERSION}.exe" "dist/WarframeDamageCalc-Setup-${VERSION}.exe.blockmap" dist/latest.yml --clobber
           else
-            gh release create "v${VERSION}" "dist/WarframeDamageCalc-Setup-${VERSION}.exe" --title "$TITLE" --notes-file release-notes.md --target "${GITHUB_SHA}"
+            gh release create "v${VERSION}" "dist/WarframeDamageCalc-Setup-${VERSION}.exe" "dist/WarframeDamageCalc-Setup-${VERSION}.exe.blockmap" dist/latest.yml --title "$TITLE" --notes-file release-notes.md --target "${GITHUB_SHA}"
           fi

@@ -118,7 +118,7 @@ Public sources only. Nothing is read from the game client or a player account.
 - What's new: Game updates (DE patch notes with a TL;DR from DE's own headings, full notes, search, calculator items highlighted),
   live Events (events, Baro Ki'Teer, Prime Resurgence, Nightwave, resets, open world cycles, DE news) and the changelog
 - Installable web app with offline support (`sw.js`), light/dark toggle, feedback button, patch-change banner
-- Desktop app: Discord sign-in, cloud sync, update notifications
+- Desktop app: Discord sign-in, cloud sync, automatic updates (electron-updater reads `latest.yml` from the newest GitHub release; the "Release desktop app" workflow publishes the installer, its blockmap and `latest.yml`)
 
 ## Accounts (website and desktop app)
 

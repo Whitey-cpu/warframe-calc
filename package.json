@@ -1,7 +1,7 @@
 {
   "name": "warframe-calc",
   "productName": "Warframe Damage Calc",
-  "version": "0.13.1",
+  "version": "0.14.0",
   "private": true,
   "description": "Personal Warframe damage calculator and build optimizer",
   "author": "Ethan",
@@ -16,6 +16,9 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.9"
   },
   "devDependencies": {
     "electron": "44.7.2",
@@ -70,6 +73,12 @@
       "uninstallerIcon": "build/icon.ico",
       "artifactName": "WarframeDamageCalc-Setup-${version}.exe"
     },
-    "publish": null
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Whitey-cpu",
+        "repo": "warframe-calc"
+      }
+    ]
   }
 }

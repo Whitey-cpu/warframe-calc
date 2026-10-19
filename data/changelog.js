@@ -5,6 +5,18 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.14.0', date: '2026-10-19',
+    tldr: 'The Windows app now updates itself.',
+    sections: [
+      { title: 'Added', items: [
+        'Automatic updates for the Windows app: it checks for a new version when it starts and every few hours, downloads it in the background and installs it when you close the app. A "Restart to update" button installs it right away.'
+      ] },
+      { title: 'Notes', items: [
+        'Apps on 0.13.1 or older need this version installed once by hand from the download page; after that, updates arrive on their own.'
+      ] }
+    ]
+  },
+  {
     version: '0.13.1', date: '2026-10-19',
     tldr: 'More accurate critical headshots, Heat damage and armor, with a Critical headshots setting on the Enemy tab.',
     sections: [

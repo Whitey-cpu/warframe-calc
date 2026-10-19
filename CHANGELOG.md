@@ -4,9 +4,21 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.14.0**: The Windows app now updates itself.
 - **v0.13.1**: More accurate critical headshots, Heat damage and armor, with a Critical headshots setting on the Enemy tab.
 - **v0.13.0**: Shot-by-shot fights with a combat log, a Forma-aware optimizer, an automatic melee combo loop, and riven import from screenshots with a roll scanner.
-- **v0.12.0**: Beginner and Advanced modes, the new Simulacrum tab, step-by-step math with help tips, and modeling for falloff, regenerating ammo, Archon Shards, stances and heavy attacks.
+
+## v0.14.0 (2026-10-19)
+
+**TL;DR:** The Windows app now updates itself.
+
+### Added
+
+- Automatic updates for the Windows app: it checks for a new version when it starts and every few hours, downloads it in the background and installs it when you close the app. A "Restart to update" button installs it right away.
+
+### Notes
+
+- Apps on 0.13.1 or older need this version installed once by hand from the download page; after that, updates arrive on their own.
 
 ## v0.13.1 (2026-10-19)
 

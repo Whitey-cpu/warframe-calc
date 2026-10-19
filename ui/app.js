@@ -1063,7 +1063,25 @@
     }
     if (DESKTOP) {
       try { API = (await window.wfApp.config()).api || API; WFUI.API = API; } catch (e) { /* keep default */ }
-      window.wfApp.checkAppUpdate().then(u => {
+      // automatic updates: the app downloads new versions itself and installs them when it closes
+      const showUpd = s => {
+        const el = $('patchBanner');
+        if (!s || !['downloading', 'ready'].includes(s.status)) return;
+        if (s.status === 'downloading') el.innerHTML = `Downloading version ${esc(s.version || '')}${s.percent ? ` (${s.percent}%)` : ''}. It installs when you close the app.`;
+        else {
+          el.innerHTML = `<b>Version ${esc(s.version || '')} is ready.</b> It installs when you close the app. <button type="button" class="btn sm" id="installUpdate">Restart to update</button> <button type="button" class="btn ghost sm" id="skipUpdate">Later</button>`;
+          $('installUpdate').onclick = () => window.wfApp.installUpdate();
+          $('skipUpdate').onclick = () => { el.hidden = true; };
+        }
+        el.hidden = false;
+      };
+      let auto = false;
+      if (window.wfApp.updateStatus) {
+        try { const s = await window.wfApp.updateStatus(); auto = !!s.auto; showUpd(s); } catch (e) { auto = false; }
+        if (window.wfApp.onUpdateStatus) window.wfApp.onUpdateStatus(showUpd);
+      }
+      // running from source: fall back to a link to the release page
+      if (!auto) window.wfApp.checkAppUpdate().then(u => {
         if (!u || !u.available) return;
         const el = $('patchBanner');
         el.innerHTML = `<b>Update available:</b> version ${esc(u.latest)} (you have ${esc(u.current)}). <button type="button" class="btn sm" id="getUpdate">Download</button> <button type="button" class="btn ghost sm" id="skipUpdate">Later</button>`;

@@ -77,6 +77,33 @@ ipcMain.handle('wf:check-app-update', async () => {
     return { ok: true, current: app.getVersion(), latest: String(j.tag_name || '').replace(/^v/, ''), available: newer(j.tag_name, app.getVersion()) && !!asset, url: j.html_url };
   } catch (e) { return { ok: false, error: e.message }; }
 });
+// ---- automatic updates (electron-updater reads latest.yml from the newest GitHub release) ----
+// Checks a few seconds after start and every 4 hours, downloads in the background, and installs when the app closes or
+// when you press "Restart to update". Running from source (npm start) skips it.
+let autoUpdater = null;
+try { ({ autoUpdater } = require('electron-updater')); } catch (e) { autoUpdater = null; }
+const updState = { status: 'idle' };
+function sendUpd(s) {
+  Object.assign(updState, s);
+  if (win && !win.isDestroyed()) win.webContents.send('wf:update-status', Object.assign({}, updState));
+}
+function setupAutoUpdate() {
+  if (!autoUpdater || !app.isPackaged) return;
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on('checking-for-update', () => sendUpd({ status: 'checking' }));
+  autoUpdater.on('update-not-available', () => sendUpd({ status: 'none' }));
+  autoUpdater.on('update-available', info => sendUpd({ status: 'downloading', version: info.version, percent: 0 }));
+  autoUpdater.on('download-progress', p => sendUpd({ status: 'downloading', percent: Math.round(p.percent || 0) }));
+  autoUpdater.on('update-downloaded', info => sendUpd({ status: 'ready', version: info.version }));
+  autoUpdater.on('error', err => sendUpd({ status: 'error', message: String((err && err.message) || err).slice(0, 200) }));
+  const check = () => autoUpdater.checkForUpdates().catch(() => { /* offline: try again later */ });
+  setTimeout(check, 5000);
+  setInterval(check, 4 * 60 * 60 * 1000);
+}
+ipcMain.handle('wf:update-status', () => Object.assign({ auto: !!(autoUpdater && app.isPackaged), current: app.getVersion() }, updState));
+ipcMain.handle('wf:install-update', () => { if (autoUpdater && updState.status === 'ready') setImmediate(() => autoUpdater.quitAndInstall(true, true)); });
+
 ipcMain.handle('wf:open-external', (e, url) => { if (/^https:\/\/(github\.com|warframe\.hardn\.net|wiki\.warframe\.com)\//.test(url)) shell.openExternal(url); });
 
 // ---- Discord sign-in + API calls from the main process (cookies live in the default session) ----
@@ -120,6 +147,6 @@ Menu.setApplicationMenu(Menu.buildFromTemplate([
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
-  app.whenReady().then(createWindow);
+  app.whenReady().then(() => { createWindow(); setupAutoUpdate(); });
   app.on('window-all-closed', () => app.quit());
 }
