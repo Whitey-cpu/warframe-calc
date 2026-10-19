@@ -379,5 +379,44 @@ if (data.incarnon) {
   eq('Roll scanner: perfect roll = 1.1 x average', top / avg, 1.1, 1e-9);
 }
 
+// 30. Critical headshots, armor above 2700 and the 1-damage floor per type (wiki Critical_Hit, Enemy_Body_Parts, Armor),
+//     Heat stacks that share one timer (wiki Damage/Heat_Damage) checked against the shot-by-shot simulation
+{
+  const crit = (faction, extra = {}) => {
+    const w = testWeapon({ impact: 100 });
+    w.attacks[0].critChance = 2; w.attacks[0].critMult = 2;
+    return E.calculate(Object.assign({ weapon: w, riven: [{ stat: 'critDamage', value: 1.2 }], enemy: { faction, headshotRate: 1 } }, extra), data);
+  };
+  // Critical_Hit wiki: headcrit tier 2 = 1 + 2 x (2 x 2.0 x (1 + 1.2) - 1) = 16.6, times the 3.0 headshot multiplier
+  const grineer = crit('Grineer');
+  eq('Headcrit tier 2: 1 + 2 x (2 x 2.0 x 2.2 - 1) = 16.6 (wiki)', grineer.stats.avgCritHead, 16.6, 1e-9);
+  eq('Headcrit x 3.0 headshot = 49.8 (wiki)', grineer.stats.avgCritHead * grineer.stats.headshotMultiplier, 49.8, 1e-9);
+  // Corpus humanoid heads do not take the headcrit bonus (Enemy_Body_Parts): tier 2 = 1 + 2 x 3.4 = 7.8
+  eq('Corpus head: no headcrit, tier 2 = 7.8', crit('Corpus').stats.avgCritHead, 7.8, 1e-9);
+  eq('Corpus head flag can be overridden on the enemy', crit('Corpus', { enemy: { faction: 'Corpus', headshotRate: 1, headcrit: true } }).stats.avgCritHead, 16.6, 1e-9);
+
+  // Armor above 2700 (Armor wiki, exceptional conditions): damage multiplier = 300 / (armor + 300)
+  eq('Armor 3000: 300 / 3300 damage taken', E.calculate({ weapon: testWeapon({ impact: 100 }), enemy: { armor: 3000 } }, data).stats.armorDamageMultiplier, 300 / 3300, 1e-9);
+  eq('Armor 2700 is still 90% DR (continuous at the cap)', E.calculate({ weapon: testWeapon({ impact: 100 }), enemy: { armor: 2700 } }, data).stats.armorDamageMultiplier, 0.1, 1e-9);
+  // Each damage type takes at least 1 through armor (Armor wiki: "minimum damage of 1")
+  eq('Three 1-damage types vs 2700 armor deal 3 (1 each)', E.calculate({ weapon: testWeapon({ impact: 1, puncture: 1, slash: 1 }), enemy: { armor: 2700 } }, data).perShotVsEnemy, 3, 1e-6);
+  eq('The 1-damage floor does not apply without armor (3 x 1.03125 quantized)', E.calculate({ weapon: testWeapon({ impact: 1, puncture: 1, slash: 1 }) }, data).perShotVsEnemy, 3 * 1.03125, 1e-3);
+
+  // Heat: with almost no procs each one ticks the usual 6 times (1 s delay, 6 s duration)
+  const heatW = (sc, fr) => { const w = testWeapon({ heat: 100 }); w.fireRate = fr; w.attacks[0].fireRate = fr; w.attacks[0].statusChance = sc; return w; };
+  eq('Heat with almost no procs: 6 ticks per proc (no fight length, steady state)', E.calculate({ weapon: heatW(0.00001, 1), conditions: { selfStatus: false } }, data).dots.heat.ticks, 6, 1e-3);
+  // In a 60 s fight the procs are spread over it, so ticks near the end are cut: average = sum of (60 - x) / 60 over x = 1..6 = 5.65
+  eq('Heat with almost no procs in a 60 s fight: 5.65 ticks per proc', E.calculate({ weapon: heatW(0.00001, 1), conditions: { selfStatus: false, fightSeconds: 60 } }, data).dots.heat.ticks, 5.65, 1e-2);
+  // Heat ticks grow smoothly as procs refresh the shared timer (no jump at 3 procs per duration)
+  const ht = sc => E.calculate({ weapon: heatW(sc, 10), conditions: { selfStatus: false } }, data).dots.heat.ticks;
+  eq('Heat tick count is continuous across 3 procs per duration (3.0 vs 2.98)', Math.abs(ht(0.05) - ht(0.0497)) / ht(0.05) < 0.02, true);
+  eq('Heat refresh: more ticks per proc than the 6 base ticks', ht(0.05) > 6, true);
+  eq('Heat without a fight length: a refreshed stack counts for at most 20 s (20 ticks)', ht(1) <= 20 + 1e-9 && ht(1) > 19, true);
+  // Shot-by-shot simulation (procs per pellet, Heat stacks refreshed by later procs) against the formula, 60 s fight
+  const hw = E.calculate({ weapon: heatW(0.05, 10), conditions: { selfStatus: false, fightSeconds: 60 } }, data);
+  const hs = global.WF.sim.simulate(hw, { seconds: 60, runs: 300, seed: 11 });
+  eq('Heat sim matches the formula within 3% (refresh regime, 60 s)', Math.abs(hs.mean / hw.dps.sustainedTotal - 1) < 0.03, true);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

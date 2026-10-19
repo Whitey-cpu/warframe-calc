@@ -4,9 +4,23 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.13.1**: More accurate critical headshots, Heat damage and armor, with a Critical headshots setting on the Enemy tab.
 - **v0.13.0**: Shot-by-shot fights with a combat log, a Forma-aware optimizer, an automatic melee combo loop, and riven import from screenshots with a roll scanner.
 - **v0.12.0**: Beginner and Advanced modes, the new Simulacrum tab, step-by-step math with help tips, and modeling for falloff, regenerating ammo, Archon Shards, stances and heavy attacks.
-- **v0.11.0**: On Kill buffs now follow a kill rate setting, proc-based arcanes work, and Coda Bubonico uses shotgun mods like in game.
+
+## v0.13.1 (2026-10-19)
+
+**TL;DR:** More accurate critical headshots, Heat damage and armor, with a Critical headshots setting on the Enemy tab.
+
+### Fixed
+
+- Critical headshots now double the weapon's base crit multiplier with crit mods applied on top, and only on enemies whose heads take them. Corpus humanoids, most of The Murmur and Techrot do not.
+- Heat stacks share one timer that every Heat proc resets, worked out from your proc rate instead of an on/off cutoff. The shot-by-shot sim follows the same rule.
+- Armor above 2,700 now uses 300 / (armor + 300), and every damage type gets at least 1 damage through armor.
+
+### Added
+
+- Critical headshots setting on the Enemy tab (Auto, Yes, No), for targets like Corpus Ospreys that do take them.
 
 ## v0.13.0 (2026-10-18)
 

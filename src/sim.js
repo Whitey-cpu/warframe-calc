@@ -6,7 +6,7 @@
  * spread: min, 10th percentile, median, 90th percentile, max.
  * ASSUMPTION: enemy statuses (Viral, Corrosive...) and buff stacks use the long-run average from the main calculation,
  * so the spread shows luck, not ramp-up (the Simulacrum timeline shows ramp-up). DoT ticks from procs land after the
- * window ends are not counted, and each Heat proc ticks on its own (no refresh).
+ * window ends are not counted. Heat stacks share one timer that every proc resets, as in the engine (heatTicksPerProc).
  */
 (function () {
   const WF = (typeof window !== 'undefined') ? (window.WF = window.WF || {}) : (global.WF = global.WF || {});
@@ -32,6 +32,7 @@
     const dots = r.dots || {};
     const perSecond = new Array(Math.ceil(T)).fill(0);
     const ticks = []; // [time, damage]
+    const heatProcs = []; // Heat procs, resolved into stacks after the fight (they share one timer)
     const events = [];
     let t = 0, left = mag, total = 0, shot = 0;
     const add = (time, dmg) => { if (time < T) { total += dmg; perSecond[Math.min(perSecond.length - 1, Math.floor(time))] += dmg; } };
@@ -45,8 +46,10 @@
         const cc = head ? (s.critChanceHead != null ? s.critChanceHead : s.critChance) : s.critChance;
         const tier = roll(rand, Math.max(0, cc));
         crits[Math.min(3, tier)]++;
-        let mult = 1 + tier * (s.critMultiplier - 1);
-        if (head) mult *= s.headshotMultiplier * (tier >= 1 ? 2 : 1);
+        // a critical headshot uses the headcrit multiplier (base crit x2) only when that enemy's head has the flag
+        const cdUse = head ? (s.critMultiplierHead != null ? s.critMultiplierHead : s.critMultiplier) : s.critMultiplier;
+        let mult = 1 + tier * (cdUse - 1);
+        if (head) mult *= s.headshotMultiplier;
         const hit = s.vsNonCrit * mult;
         dmg += hit;
         // status procs on this pellet; DoT ticks inherit this pellet's crit (scaled from the average-crit tick)
@@ -59,7 +62,8 @@
           const d = dots[ty];
           if (d && d.tick > 0) {
             const tickDmg = d.tick * mult / critAvg;
-            for (let k = 0; k < (d.fullTicks || 0); k++) ticks.push([t + (d.delay || 0) + k, tickDmg]);
+            if (ty === 'heat') heatProcs.push({ t, tickDmg, delay: d.delay || 0, dur: d.duration || 6 });
+            else for (let k = 0; k < (d.fullTicks || 0); k++) ticks.push([t + (d.delay || 0) + k, tickDmg]);
           }
         }
       }
@@ -72,7 +76,22 @@
       } else t += 1 / fr;
     }
     for (const [time, dmg] of ticks) add(time, dmg);
-    return { total, dps: total / T, events, perSecond, dotTotal: ticks.filter(x => x[0] < T).reduce((a, x) => a + x[1], 0) };
+    // Heat: every proc resets the one timer that all Heat stacks share (wiki: Damage/Heat Damage). Procs less than one
+    // duration apart belong to the same episode; each stack ticks once a second until the episode's last proc + duration.
+    let heatDot = 0;
+    heatProcs.sort((x, y) => x.t - y.t);
+    for (let i = 0; i < heatProcs.length;) {
+      let j = i;
+      while (j + 1 < heatProcs.length && heatProcs[j + 1].t - heatProcs[j].t < heatProcs[j].dur) j++;
+      const death = heatProcs[j].t + heatProcs[j].dur;
+      for (let q = i; q <= j; q++) {
+        const hp = heatProcs[q];
+        for (let x = hp.t + hp.delay; x <= death + 1e-9; x += 1) { add(x, hp.tickDmg); if (x < T) heatDot += hp.tickDmg; }
+      }
+      i = j + 1;
+    }
+    const dotTotal = ticks.filter(x => x[0] < T).reduce((a, x) => a + x[1], 0) + heatDot;
+    return { total, dps: total / T, events, perSecond, dotTotal };
   }
 
   function quantile(sorted, q) {

@@ -47,6 +47,7 @@ window.WFTips = function (UI) {
     timeline: ['How DPS ramps up from the first shot: On Kill stacks, arcane stacks and your statuses on the target all need time to build.', null],
     stance: ['Stance combos change how hard and how often each swing hits. Damage = weapon damage x the hit\'s %, and attack speed shortens the whole combo.', 'Stance'],
     stanceCombo: ['Which combo you repeat. Neutral is standing still, Forward is moving, Block holds block.', 'Stance'],
+    headcrit: ['Whether a headshot crit doubles the base crit multiplier on this enemy. Auto follows the faction: on for most Grineer, Infested and Sentient heads, off for Corpus humanoids, most of The Murmur and Techrot. Airborne Corpus units such as Ospreys do take it, so set Yes for those.', 'Critical_Hit'],
     weakPointMult: ['Headshot multiplier for this enemy. Blank uses 2x for most enemies (3x if your mods say so).', 'Weak_Point'],
     targets: ['How many enemies area damage hits: explosions, clouds, Gas, Electricity chains, Blast bursts.', 'Area_of_Effect'],
     shotSim: ['Simulates every shot with real dice rolls: pellet count, crit tier, headshots and status per pellet. Repeating the fight shows the range between unlucky and lucky.', 'Critical_Hit'],

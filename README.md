@@ -23,7 +23,7 @@ In the UI, **Copy build JSON** gives you a build you can paste to Claude or feed
 
 - Mods by slot order, element combination (HCET rules, innate elements merge or go last), quantization (1/32 of base)
 - Base damage pool (Serration, Galvanized, arcane damage stacks, Vex Armor), separate multipliers (Eclipse), faction pool (Bane, Roar), extra Void (Xata's Whisper)
-- Crit tiers (orange/red), flat crit (Arcane Avenger etc.), headshot crit x2, weak point and headshot bonuses
+- Crit tiers (orange/red), flat crit (Arcane Avenger etc.), critical headshots (base crit multiplier x2, only on heads with that flag: `S.HEADCRIT_BY_FACTION`), weak point and headshot bonuses
 - Status chance and proc weighting; Slash/Heat/Toxin/Electricity/Gas DoTs (faction applied twice), Heat refresh, Blast fuse and 10-stack burst
 - Statuses you apply yourself (Viral, Corrosive, Magnetic, Puncture, Cold, Heat strip) build up over the fight and feed back into damage
 - Fight length: DoT ticks, lingering clouds and status build-up all need time, so the calculator solves time-to-kill = fight length
@@ -40,6 +40,19 @@ In the UI, **Copy build JSON** gives you a build you can paste to Claude or feed
 Burst-fire delay, Radiation/Magnetic side effects beyond damage, ability damage, ammo economy (Plentiful Mayhem style ammo use),
 Initial Combo and Heavy Attack Efficiency loops (the combo multiplier is set by hand), projectile speed extending falloff range. Mod and perk text the parser does not understand is listed
 under "Not modeled" so nothing is dropped silently.
+
+## Open modeling questions
+
+Things the wiki does not settle, or that are not modeled yet. Each one is labeled in the code where it applies.
+
+- **Not yet checked in game:** Heat stacks sharing one timer that every proc resets (`heatTicksPerProc`), and Corpus heads not taking critical headshots. Both follow the wiki; an in-game test with a real build would confirm them.
+- **Heat without a fight length:** every Heat proc refreshes all Heat stacks, so on a target that never dies they would tick forever. With no enemy health or fight length set, each stack counts for at most 20 s (`S.HEAT_STEADY_CAP`); pick an enemy unit for the real time to kill.
+- **Corpus critical headshots:** off for all Corpus by default (`S.HEADCRIT_BY_FACTION`), but the wiki says airborne Corpus units (Osprey, Raptor) do take them. The Enemy tab has a "Critical headshots" setting (Auto / Yes / No) to override it per target.
+- **Crit promotion on some weak points** (The Murmur, Techrot, Scaldra backpacks, Rogue Culverin) is not modeled.
+- **Status damage and headshots:** DoT ticks inherit the hit's average crit including headshots. The wiki does not say whether headshots carry over into DoTs; kept as an ASSUMPTION.
+- **Heat armor strip** uses its steady-state uptime; the wiki ramps it to 50% over 2 s, and Status Duration slows the ramp.
+- **Magnetic on Overguard break** (Electricity, 3% per stack, max 30%) is not modeled.
+- **Code structure:** `src/sim.js` repeats some crit and DoT logic from the engine; the engine could hand the sim per-tier probabilities and tick counts instead.
 
 ## Where values come from
 

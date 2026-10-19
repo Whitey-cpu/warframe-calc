@@ -5,6 +5,20 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.13.1', date: '2026-10-19',
+    tldr: 'More accurate critical headshots, Heat damage and armor, with a Critical headshots setting on the Enemy tab.',
+    sections: [
+      { title: 'Fixed', items: [
+        'Critical headshots now double the weapon\'s base crit multiplier with crit mods applied on top, and only on enemies whose heads take them. Corpus humanoids, most of The Murmur and Techrot do not.',
+        'Heat stacks share one timer that every Heat proc resets, worked out from your proc rate instead of an on/off cutoff. The shot-by-shot sim follows the same rule.',
+        'Armor above 2,700 now uses 300 / (armor + 300), and every damage type gets at least 1 damage through armor.'
+      ] },
+      { title: 'Added', items: [
+        'Critical headshots setting on the Enemy tab (Auto, Yes, No), for targets like Corpus Ospreys that do take them.'
+      ] }
+    ]
+  },
+  {
     version: '0.13.0', date: '2026-10-18',
     tldr: 'Shot-by-shot fights with a combat log, a Forma-aware optimizer, an automatic melee combo loop, and riven import from screenshots with a roll scanner.',
     sections: [

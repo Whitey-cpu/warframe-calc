@@ -54,18 +54,28 @@
   // Bane/Smite/etc. of Grineer/Corpus/Infested do NOT apply to Corrupted, Narmer or Techrot.
   // Source: https://wiki.warframe.com/w/Faction_Damage_Mods
 
-  // Armor: enemy DR = 0.9 * sqrt(armor / 2700), armor clamped by level scaling to 200..2700.
-  // Source: https://wiki.warframe.com/w/Armor , https://wiki.warframe.com/w/Damage_calculation
+  // Armor: enemy DR = 0.9 * sqrt(armor / 2700) up to 2700 Net Armor; above that (exceptional conditions) DR = armor / (armor + 300).
+  // Initial armor is clamped by level scaling to 200..2700. Each damage type takes at least 1 damage through armor.
+  // Source: https://wiki.warframe.com/w/Armor (Enemy Damage Reduction Formula)
   S.ARMOR_CAP = 2700;
   S.ARMOR_DR_MAX = 0.9;
+  S.ARMOR_OVER_CAP_K = 300;
+  S.ARMOR_MIN_DAMAGE_PER_TYPE = 1;
 
-  // Weak points. Source: https://wiki.warframe.com/w/Weak_Point
+  // Weak points. Source: https://wiki.warframe.com/w/Enemy_Body_Parts
   // Typical headshot multiplier 3.0 (Grineer, Corpus, Infested, Sentient, Anarchs, Narmer,
   // Corrupted); ~1.5 for Murmur and Techrot. Weak point bonuses add at 1.5x rate on heads.
-  // Critical headshots: 2x applied to the crit multiplier.
   S.HEADSHOT_MULT_DEFAULT = 3.0;
   S.HEADSHOT_MULT_BY_FACTION = { 'The Murmur': 1.5, 'Techrot': 1.5 };
+  // Critical headshot ("headcrit"): doubles the weapon's base critical multiplier, relative bonuses still apply
+  // (https://wiki.warframe.com/w/Critical_Hit, "Critical Headshots"). Not every head has the flag: the wiki says Corpus
+  // humanoids, most of The Murmur and much of Techrot do not get it, and Grineer, Infested, Sentient, Scaldra, Anarchs
+  // and Narmer usually do (https://wiki.warframe.com/w/Enemy_Body_Parts). Factions not listed here count as headcrit.
   S.HEADSHOT_CRIT_BONUS = 2.0;
+  S.HEADCRIT_BY_FACTION = { 'Corpus': false, 'Corpus Amalgam': false, 'The Murmur': false, 'Techrot': false };
+  // Heat stacks refreshed by every proc never expire on a target that never dies; with no fight length the engine
+  // counts each stack for at most this many seconds (ASSUMPTION: the shot-by-shot default fight length).
+  S.HEAT_STEADY_CAP = 20;
 
   // Status DoTs. Source: https://wiki.warframe.com/w/Status_Effect and
   // https://wiki.warframe.com/w/Damage_over_Time

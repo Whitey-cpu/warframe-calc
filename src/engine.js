@@ -79,13 +79,13 @@
 
   function critTierMult(tier, cd) { return 1 + tier * (cd - 1); }
 
-  // Expected crit multiplier. Headshot crits get an extra x2 (Weak_Point wiki page).
-  function expectedCrit(cc, cd, headshot) {
+  // Expected crit multiplier over the crit tiers. Crit chance above 100% gives a chance of the next tier (Critical_Hit wiki).
+  // A critical headshot is handled by the caller, which passes the headcrit multiplier as cd (see calcCore).
+  function expectedCrit(cc, cd) {
     const c = Math.max(0, cc);
     const t = Math.floor(c);
     const f = c - t;
-    const h = tier => (headshot && tier >= 1) ? S.HEADSHOT_CRIT_BONUS : 1;
-    return (1 - f) * critTierMult(t, cd) * h(t) + f * critTierMult(t + 1, cd) * h(t + 1);
+    return (1 - f) * critTierMult(t, cd) + f * critTierMult(t + 1, cd);
   }
 
   // Stack curves accept fractional (expected) stacks: below 1 stack the first-stack effect is scaled by the stack count.
@@ -95,7 +95,7 @@
     return n < 1 ? def.first * n : def.first + def.perExtra * (n - 1);
   }
   // Average damaging ticks per proc when procs land uniformly over a fight of T seconds.
-  // Ticks happen at delay, delay+1, ... (n ticks, n may be Infinity for refreshing Heat).
+  // Ticks happen at delay, delay+1, ... (n ticks). Heat, whose timer is shared and refreshed, uses heatTicksPerProc instead.
   function avgTicksInFight(T, delay, n) {
     if (!(T > 0)) return n === Infinity ? 0 : n;
     const steps = 400; let sum = 0;
@@ -106,6 +106,43 @@
       sum += Math.min(n, k);
     }
     return sum / steps;
+  }
+  // Heat (https://wiki.warframe.com/w/Damage/Heat_Damage): a Heat proc adds a stack AND resets the remaining duration of every
+  // active Heat stack, so all stacks share one timer and keep ticking while procs keep coming. A stack lives from its proc
+  // until a gap of `dur` seconds with no proc. With proc rate lam (a = lam x dur) the timer is never refreshed with chance
+  // q = e^-a; otherwise the extra life has mean (e^a - 1 - a) / lam over all procs. ASSUMPTION: that positive part is
+  // exponential with the same mean, so P(life >= x) = 1 for x <= dur and p x e^-((x - dur) / m) after it (p = 1 - q).
+  // Expected ticks per proc = sum of P(life >= x) over tick times x = delay + k. With a fight of T seconds, procs are spread
+  // evenly over it, so each tick counts for the share of the fight left after it (T - x) / T.
+  // Without refresh (a -> 0) this is exactly floor(dur - delay) + 1 ticks, the usual 6 for Heat.
+  // Without a fight length, a refreshed stack would tick forever on a target that never dies, so its life is capped at
+  // `cap` seconds (S.HEAT_STEADY_CAP, ASSUMPTION: 20 s, the shot-by-shot default fight).
+  function heatTicksPerProc(lam, dur, delay, T, cap) {
+    if (!(lam > 0) || !(dur > 0)) return 0;
+    const a = lam * dur;
+    const p = -Math.expm1(-a);
+    const k0 = Math.max(0, Math.floor(dur - delay) + 1); // ticks that land within one full duration
+    const numer = a < 1e-3 ? a * a * (0.5 + a / 6) : Math.expm1(a) - a; // e^a - 1 - a, series for small a
+    const m = p > 0 ? numer / lam / p : 0;                                // mean extra life after a refresh
+    if (!(T > 0)) {
+      const kCap = cap > 0 ? Math.floor(cap - delay) + 1 : Infinity;   // ticks that fit inside the cap
+      let sum = Math.min(k0, kCap);
+      if (m > 0 && kCap > k0) {
+        // geometric tail over later ticks, cut at the cap
+        const first = p * Math.exp(-(delay + k0 - dur) / m), n = kCap - k0;
+        // sum of first x r^i for i < n with r = e^(-1/m), written with expm1 so it stays exact when m is huge
+        sum += n === Infinity ? first / -Math.expm1(-1 / m) : first * Math.expm1(-n / m) / Math.expm1(-1 / m);
+      }
+      return sum;
+    }
+    let sum = 0;
+    const kMax = Math.floor(T - delay);
+    for (let k = 0; k <= kMax; k++) {
+      const x = delay + k;
+      const surv = x <= dur ? 1 : (m > 0 ? p * Math.exp(-(x - dur) / m) : 0);
+      sum += surv * (T - x);
+    }
+    return sum / T;
   }
   function viralMult(stacks) { return 1 + stackCurve(stacks, S.VIRAL); }
   function corrosiveStrip(stacks) { return stackCurve(stacks, S.CORROSIVE); }
@@ -606,10 +643,14 @@
     const hsRate = isAoE ? 0 : Math.min(1, Math.max(0, enemy.headshotRate || 0)); // AoE cannot headshot (wiki: Weak Point)
     const wpBase = enemy.weakPointMult != null ? enemy.weakPointMult : (S.HEADSHOT_MULT_BY_FACTION[enemy.faction] || S.HEADSHOT_MULT_DEFAULT);
     const headMult = (wpBase + 1.5 * P.weakPoint) * (1 + P.headshot);
-    const critBody = expectedCrit(cc, cd, false);
+    // Critical headshot ("headcrit", https://wiki.warframe.com/w/Critical_Hit#Critical_Headshots): doubles the weapon's base
+    // critical multiplier and the relative bonuses still apply on top. Only some enemies' heads have the flag (static.js).
+    const headcrit = enemy.headcrit != null ? !!enemy.headcrit : S.HEADCRIT_BY_FACTION[enemy.faction] !== false;
+    const cdHead = headcrit ? cd + baseCD * (1 + P.cd) * (S.HEADSHOT_CRIT_BONUS - 1) : cd;
+    const critBody = expectedCrit(cc, cd);
     // weak point crit chance (Primary Acuity): adds to the crit chance pool for weak point hits only
     const ccHead = P.wpCrit ? baseCC * (1 + P.cc + P.wpCrit) + P.ccFlat + statusCC : cc;
-    const critHead = expectedCrit(ccHead, cd, true);
+    const critHead = expectedCrit(ccHead, cdHead);
     const critBodyHeadAvg = (1 - hsRate) * critBody + hsRate * critHead * headMult;
 
     // enemy
@@ -623,7 +664,10 @@
     netArmor *= (1 - Math.min(1, enemy.armorStripPct || 0));
     netArmor *= (1 - Math.min(1, stackCurve(enemy.corrosiveStacks, Object.assign({}, S.CORROSIVE, { max: S.CORROSIVE.max + P.corrosiveMax }))));
     if (enemy.heatStrip) netArmor *= (1 - S.HEAT_STRIP_MAX * (typeof enemy.heatStrip === 'number' ? Math.min(1, enemy.heatStrip) : 1));
-    const armorDM = netArmor > 0 ? 1 - S.ARMOR_DR_MAX * Math.sqrt(Math.min(netArmor, S.ARMOR_CAP) / S.ARMOR_CAP) : 1;
+    // Enemy damage reduction (https://wiki.warframe.com/w/Armor): 90% x sqrt(armor / 2700) up to 2700, armor / (armor + 300) above.
+    const armorDM = netArmor <= 0 ? 1
+      : netArmor <= S.ARMOR_CAP ? 1 - S.ARMOR_DR_MAX * Math.sqrt(netArmor / S.ARMOR_CAP)
+      : S.ARMOR_OVER_CAP_K / (netArmor + S.ARMOR_OVER_CAP_K);
     const viral = viralMult(enemy.viralStacks);
     if (enemy.armor && (enemy.armorStripPct || enemy.corrosiveStacks || enemy.heatStrip))
       notes.push('ASSUMPTION: armor strip sources are applied multiplicatively (flat % strip, then Corrosive, then Heat).');
@@ -631,8 +675,11 @@
     const vsTyped = {};
     let vsTotalNonCrit = 0;
     for (const [k, v] of Object.entries(hitTyped)) {
-      const dm = (k === 'true') ? 1 : typeMod(k) * armorDM;
-      vsTyped[k] = v * dm;
+      const tm = (k === 'true') ? 1 : typeMod(k);
+      const am = (k === 'true') ? 1 : armorDM;
+      // Armor cannot take a damage type below 1 (https://wiki.warframe.com/w/Armor: "each damage type has a minimum damage of 1")
+      const floorDmg = am < 1 && v > 0 ? Math.min(S.ARMOR_MIN_DAMAGE_PER_TYPE, v * tm) : 0;
+      vsTyped[k] = Math.max(v * tm * am, floorDmg);
       vsTotalNonCrit += vsTyped[k];
     }
     vsTotalNonCrit *= factionMult * viral;
@@ -723,18 +770,21 @@
       const dur = d.duration * (1 + P.statusDuration);
       let ticks = d.fixedTicks || (Math.floor(dur - d.delay) + 1 - (d.lastTickNoDamage ? 1 : 0));
       const fullTicks = ticks;
-      // Heat: every proc refreshes all active Heat stacks (wiki: Damage/Heat_Damage), so while procs keep coming
-      // (ASSUMPTION: when procs/s x duration >= 3) each stack keeps ticking until the target dies.
       const pps = procs * effFR * sustainFactor;
-      const refresh = t === 'heat' && pps * dur >= 3;
-      if (fightKnown) {
-        // DoTs stop when the target dies: average the ticks a proc lands within a fight of T seconds.
-        ticks = avgTicksInFight(fightSeconds, d.fixedTicks ? d.delay : d.delay, refresh ? Infinity : ticks);
+      let refresh = false;
+      if (t === 'heat') {
+        // Heat: every proc resets the timer of all active Heat stacks, so stacks keep ticking while procs keep coming
+        // (heatTicksPerProc). Without a fight length this is the steady state.
+        ticks = heatTicksPerProc(pps, dur, d.delay, fightKnown ? fightSeconds : 0, S.HEAT_STEADY_CAP);
+        refresh = ticks > fullTicks + 1e-9;
         if (refresh) heatRefresh = true;
+      } else if (fightKnown) {
+        // DoTs stop when the target dies: average the ticks a proc lands within a fight of T seconds.
+        ticks = avgTicksInFight(fightSeconds, d.delay, ticks);
       }
       const tickVs = tick * typeMod(t) * (d.bypassArmor ? 1 : armorDM) * viral;
       const perProc = tickVs * ticks;
-      dots[t] = { procsPerShot: procs, tick: tickVs, ticks: Math.round(ticks * 100) / 100, perProc, perShot: perProc * procs, fullTicks, delay: d.delay, refresh };
+      dots[t] = { procsPerShot: procs, tick: tickVs, ticks: Math.round(ticks * 100) / 100, perProc, perShot: perProc * procs, fullTicks, delay: d.delay, duration: dur, refresh };
       dotPerShot += perProc * procs;
       dotGroupPerShot += perProc * procs * (d.aoe ? targets : 1);
       if (t === 'blast' && targets > 1) {
@@ -744,6 +794,7 @@
       }
     }
     if (fightKnown) notes.push(`DoTs are counted only until the target dies (${Math.round(fightSeconds * 100) / 100}s fight)${heatRefresh ? '; Heat stacks refresh each other and tick until then' : ''}.`);
+    if (heatRefresh && !fightKnown) notes.push(`Heat procs refresh every active Heat stack (wiki: Damage/Heat Damage), so stacks keep ticking while procs keep coming. ASSUMPTION: with no fight length (pick an enemy or set one in the Simulacrum) each stack counts for at most ${S.HEAT_STEADY_CAP}s.`);
     if (Object.keys(dots).some(t => t !== 'slash')) notes.push('ASSUMPTION: elemental DoTs (Heat/Toxin/Electricity/Gas) are scaled by mods of that exact element only (wiki: combined elements are not buffed by component mods).');
 
     const burstDirect = perShot * effFR;
@@ -771,6 +822,7 @@
         fireRate: fr, effectiveFireRate: effFR, magazine: mag, reload,
         factionMultiplier: factionMult, separateMultiplier: sepMult,
         headshotMultiplier: headMult, avgCritBody: critBody, avgCritHead: critHead, critChanceHead: ccHead, headshotRate: hsRate, slashOnCrit: P.slashOnCrit,
+        headcrit, critMultiplierHead: cdHead,
         heavyEfficiency: Math.min(0.9, P.heavyEff), initialCombo: P.initialCombo,
         comboDuration: isMelee ? Math.max(0.1, ((weapon.comboDuration || 5) + P.comboDurFlat) * (1 + P.comboDurPct)) : null,
         armorAfterStrip: netArmor, armorDamageMultiplier: armorDM, viralMultiplier: viral

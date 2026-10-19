@@ -72,19 +72,20 @@
   <p class="src">Source: <a href="https://wiki.warframe.com/w/Quantization" target="_blank" rel="noopener">Quantization</a></p>
 
   <h2 id="enemy">5. Armor and factions</h2>
-  <p>Armor reduces damage taken from most types, up to 90% at 2,700 armor:</p>
-  <div class="formula">damage taken = 1 - 0.9 x sqrt(min(armor, 2700) / 2700)</div>
+  <p>Armor reduces damage taken from most types, up to 90% at 2,700 armor. Above 2,700 (exceptional cases) it becomes 300 / (armor + 300). Each damage type always gets at least 1 damage through armor:</p>
+  <div class="formula">damage taken = 1 - 0.9 x sqrt(armor / 2700)  (armor up to 2700)</div>
   <p>Corrosive stacks and Heat strip armor. Each faction is weak (x1.5) or resistant (x0.5) to some types. Viral stacks raise damage to health: +100% at the first stack, +25% per extra stack, up to +325%.</p>
   <p class="src">Sources: <a href="https://wiki.warframe.com/w/Armor" target="_blank" rel="noopener">Armor</a>, <a href="https://wiki.warframe.com/w/Status_Effect" target="_blank" rel="noopener">Status Effect</a></p>
 
   <h2 id="crit">6. Critical hits</h2>
   <p>Crit chance = base x (1 + crit mods). Above 100%, every hit crits and the remainder is the chance of a higher tier (orange, then red):</p>
   <div class="formula">crit multiplier at tier n = n x (crit damage - 1) + 1</div>
-  <p>The calculator averages this over all hits. Headshots double crit damage on top of the weak point multiplier.</p>
+  <p>The calculator averages this over all hits. On heads with the critical headshot flag (most Grineer, Infested and Sentient; not Corpus humanoids, most of The Murmur or Techrot), a headshot crit doubles the weapon's base crit multiplier, and crit damage mods still apply on top. The weak point multiplier applies to headshots on top of that.</p>
   <p class="src">Sources: <a href="https://wiki.warframe.com/w/Critical_Hit" target="_blank" rel="noopener">Critical Hit</a>, <a href="https://wiki.warframe.com/w/Weak_Point" target="_blank" rel="noopener">Weak Point</a></p>
 
   <h2 id="status">7. Status effects</h2>
   <p>Each pellet rolls status chance on its own. The status type is picked in proportion to each damage type's share. Slash, Heat, Toxin, Gas and Electricity deal damage over time; Viral, Corrosive, Magnetic, Puncture and Cold change how much damage the target takes.</p>
+  <p>Heat is the exception: every Heat proc adds a stack and resets the timer of all Heat stacks, so they keep ticking while procs keep coming. Each proc's ticks are therefore counted over how long the shared timer stays alive (the calculator works this out in closed form and the shot-by-shot simulation checks it).</p>
   <p class="note">Assumption: expected procs per shot = status chance x multishot. Statuses you apply yourself build up over the fight when "My own status effects" is on.</p>
   <p class="src">Sources: <a href="https://wiki.warframe.com/w/Status_Effect" target="_blank" rel="noopener">Status Effect</a>, <a href="https://wiki.warframe.com/w/Damage_over_Time" target="_blank" rel="noopener">Damage over Time</a></p>
 

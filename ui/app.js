@@ -589,6 +589,7 @@
         faction: $('faction').value, armor: ev('armor'), headshotRate: ev('headshotRate') / 100,
         magneticStacks: ev('magneticStacks'), targets: Math.max(1, ev('targets') || 1),
         weakPointMult: $('weakPointMult').value === '' ? undefined : ev('weakPointMult'),
+        headcrit: $('headcrit').value === '' ? undefined : $('headcrit').value === 'on',
         viralStacks: ev('viralStacks'), corrosiveStacks: ev('corrosiveStacks'), armorStripPct: ev('armorStripPct') / 100, heatStrip: $('heatStrip').checked
       }, enemyUnitStats())
     };
@@ -671,7 +672,7 @@
     document.querySelectorAll('[data-ov]').forEach(i => { i.value = (b.overrides && b.overrides[i.dataset.ov] != null) ? b.overrides[i.dataset.ov] : ''; });
     const e = b.enemy || {};
     $('faction').value = e.faction || 'None (neutral)'; $('armor').value = e.armor || 0;
-    $('headshotRate').value = Math.round((e.headshotRate || 0) * 100); $('weakPointMult').value = e.weakPointMult != null ? e.weakPointMult : '';
+    $('headshotRate').value = Math.round((e.headshotRate || 0) * 100); $('weakPointMult').value = e.weakPointMult != null ? e.weakPointMult : ''; $('headcrit').value = e.headcrit == null ? '' : (e.headcrit ? 'on' : 'off');
     $('viralStacks').value = e.viralStacks || 0; $('corrosiveStacks').value = e.corrosiveStacks || 0;
     $('armorStripPct').value = Math.round((e.armorStripPct || 0) * 100); $('heatStrip').checked = !!e.heatStrip;
     $('magneticStacks').value = e.magneticStacks || 0;
