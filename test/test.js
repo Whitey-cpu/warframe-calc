@@ -218,19 +218,20 @@ if (data.incarnon) {
   same('Title case for DE capitals', PN.titleCase("NEW GAMEMODE: THE ICEBIND") + ' / ' + PN.titleCase('MEMETICA GLYPH PACK III'), 'New Gamemode: The Icebind / Memetica Glyph Pack III');
 }
 
-// 24. Riven math (WARFRAME Wiki, Riven Mods: base x disposition x stat-count multiplier x roll 0.9-1.1)
+// 24. Riven math (WARFRAME Wiki, Riven Mods: b x 10 x (rank + 1) x 1.2 x stat-count multiplier x roll 0.9-1.1;
+//     Hotfix 44.1.3 replaced the per-weapon Disposition with 1.2 for every riven)
 {
   require('../src/riven.js');
   const R = ((global.window && global.window.WF && global.window.WF.riven) ? global.window.WF : global.WF).riven;
   const soma = E.findWeapon(data, 'Soma Prime');
-  const d = soma.omega;
+  const d = 1.2;
   const r = R.range('critChance', soma, 3, 1, false);
   eq('Riven range: rifle Critical Chance, 3 positive + 1 negative, average', r.avg, 149.99 * d * 0.9375, 1e-9);
   eq('Riven range: max roll is 1.1x the average', r.max / r.avg, 1.1, 1e-9);
   eq('Riven range: negative Zoom uses the 0.75 malus', R.range('zoom', soma, 3, 1, true).avg, 59.99 * d * 0.75, 1e-9);
   eq('Riven range: 2 positive, no negative uses 0.99', R.range('damage', soma, 2, 0, false).avg, 165 * d * 0.99, 1e-9);
   const hikou = E.findWeapon(data, 'Hikou');
-  eq('Riven type: Hikou (secondary) uses pistol bases', R.range('damage', hikou, 2, 0, false).avg, 219.6 * hikou.omega * 0.99, 1e-9);
+  eq('Riven type: Hikou (secondary) uses pistol bases', R.range('damage', hikou, 2, 0, false).avg, 219.6 * 1.2 * 0.99, 1e-9);
   const bad = R.validate({ stats: [{ key: 'heat', value: 50, neg: true }, { key: 'critChance', value: 100 }] }, soma);
   eq('Riven validate: Heat cannot be negative, needs 2 positives', bad.length, 2);
   eq('Riven validate: two spliced traits rejected', R.validate({ stats: [{ key: 'viral', value: 90 }, { key: 'blast', value: 90 }] }, soma).some(m => /spliced/.test(m)), true);
@@ -416,6 +417,56 @@ if (data.incarnon) {
   const hw = E.calculate({ weapon: heatW(0.05, 10), conditions: { selfStatus: false, fightSeconds: 60 } }, data);
   const hs = global.WF.sim.simulate(hw, { seconds: 60, runs: 300, seed: 11 });
   eq('Heat sim matches the formula within 3% (refresh regime, 60 s)', Math.abs(hs.mean / hw.dps.sustainedTotal - 1) < 0.03, true);
+}
+
+// 31. Hotfix 44.1.3 (riven disposition removed), Riven Splicing in the editor, and crafting odds
+{
+  require('../src/riven-odds.js');
+  const W = (global.window && global.window.WF) || global.WF;
+  const R = W.riven, O = W.rivenOdds;
+  const old = require('../data/old-dispositions.json');
+  const soma = data.weapons.find(w => w.name === 'Soma Prime');
+  const nataruk = data.weapons.find(w => w.name === 'Nataruk');
+  eq('Riven multiplier is 1.2 for every weapon (Nataruk and Soma Prime ranges match)', R.range('critChance', nataruk, 2, 0, false).avg / R.range('critChance', soma, 2, 0, false).avg, 1, 1e-12);
+  // wiki formula at rank 8: b x 10 x 9 x 1.2 x L; rifle Critical Chance b = 0.016666 (table stores b x 90 = 149.99)
+  eq('Wiki formula: rifle Critical Chance, 2 positive, rank 8 = 0.016666 x 90 x 1.2 x 0.99', R.range('critChance', soma, 2, 0, false).avg, 149.99 * 1.2 * 0.99, 1e-9);
+  eq('Wiki formula: rank 0 is (0 + 1) / 9 of rank 8', R.range('critChance', soma, 2, 0, false, 0).avg / R.range('critChance', soma, 2, 0, false, 8).avg, 1 / 9, 1e-12);
+  // DE's list: Nataruk 0.65 -> 1.2, Soma Prime 1.1 -> 1.2
+  eq('Old disposition: Nataruk 0.65 from the patch notes', R.oldDisposition(nataruk, old).value, 0.65);
+  eq('Old disposition: Soma Prime 1.1', R.oldDisposition(soma, old).value, 1.1);
+  eq('Old card value converted: +150% on a 0.65 weapon becomes about +276.9%', R.convertOld(150, 0.65), 150 * 1.2 / 0.65, 1e-9);
+  // splicing: Critical Chance + Zoom -> Weak Point Critical Chance, keeps the higher roll, frees a negative row
+  const avg = k => R.range(k, soma, 3, 1, false).avg;
+  const riv = { stats: [{ key: 'critChance', value: R.range('critChance', soma, 3, 1, false).max }, { key: 'multishot', value: avg('multishot') }, { key: 'damage', value: avg('damage') },
+    { key: 'zoom', value: R.range('zoom', soma, 3, 1, true).min, neg: true }] };
+  eq('Splice options: Critical Chance + Zoom and Critical Chance + Multishot both listed', R.spliceOptions(riv, soma).filter(r => r[0] === 'weakPointCrit').length, 2);
+  const sp = R.splice(riv, soma, ['weakPointCrit', 'critChance', 'zoom']);
+  eq('Splice: spliced trait keeps the higher roll (max Critical Chance roll = 1.0)', sp.roll, 1, 1e-9);
+  eq('Splice: spliced value = top of the Weak Point Critical Chance range', sp.riven.stats[0].value, +R.range('weakPointCrit', soma, 3, 1, false).max.toFixed(2), 1e-9);
+  eq('Splice: a consumed negative leaves a negative row to fill', sp.pendingNegative && R.counts(sp.riven).neg === 1 && R.counts(sp.riven).list.filter(s => s.neg).length === 0, true);
+  eq('Splice: layout kept while the row is empty (3 positive, 1 negative)', R.counts(sp.riven).pos === 3 && R.counts(sp.riven).pending, true);
+  // odds (community data: 1 in 4 per layout, equal chance per trait, no repeats)
+  const pl = O.pools(soma);
+  const n = pl.pos.length;
+  eq('Odds: Critical Chance somewhere = 1/4 x (2+2+3+3)/n', O.cycleChance(soma, { need: ['critChance'] }).p, (0.5 * 2 + 0.5 * 3) / n, 1e-12);
+  eq('Odds: two exact positives, 2-positive layout only, no negative = 1/4 / C(n,2)', O.cycleChance(soma, { need: ['critChance', 'multishot'], neg: 'none', layouts: ['2-0'] }).p, 0.25 / O.choose(n, 2), 1e-12);
+  eq('Odds: lock Critical Chance on a 3+1 riven, want Critical Damage among the 2 other positives = 2/(n-1)', O.cycleChance(soma, { need: ['critDamage'] }, { locked: { key: 'critChance', neg: false, u: 0.5 }, layout: '3-1' }).p, 2 / (n - 1), 1e-12);
+  eq('Odds: minimum roll 50% halves a one-trait chance', O.cycleChance(soma, { need: ['critChance'], minRoll: 0.5 }).p, 0.5 * (0.5 * 2 + 0.5 * 3) / n, 1e-12);
+  const negOnly = O.cycleChance(soma, { need: ['critChance'], neg: 'list', negList: ['zoom'], negOptional: false, layouts: ['2-1'] }).p;
+  eq('Odds: 2+1 with Critical Chance and exactly -Zoom = 1/4 x 2/n x 1/(negatives not already on it)', negOnly > 0 && negOnly < 0.25 * 2 / n, true);
+  const e = O.expected(0.1, 0, false);
+  eq('Kuva: first cycle 900, a locked cycle costs double', O.cycleCost(1, false) + O.cycleCost(1, true), 2700);
+  eq('Kuva: from the 10th cycle on 3500', O.cycleCost(25, false), 3500);
+  eq('Expected cycles at 10% per cycle = 10, half done by 7', e.mean === 10 && e.n50 === 7, true, 1e-9);
+  // Monte Carlo against the exact odds: fresh cycles, no lock, Critical Chance wanted (start from a random riven)
+  const pCC = O.cycleChance(soma, { need: ['critChance'] }).p;
+  const mc = O.simulatePlan(soma, { goal: { need: ['critChance'] }, lock: 'never', runs: 4000, seed: 3 });
+  eq('Plan simulation matches the exact odds within 6% (expected cycles (1-p)/p from a random start)', Math.abs(mc.cycles.mean / ((1 - pCC) / pCC) - 1) < 0.06, true);
+  const rec = R.recipesFor(soma).find(r => r[0] === 'weakPointCrit');
+  const plan = lock => O.simulatePlan(soma, { goal: { need: ['weakPointCrit', 'multishot'], layouts: ['3-1'] }, splice: rec, lock, runs: 300, seed: 5, maxCycles: 20000 });
+  const smart = plan('smart'), never = plan('never');
+  eq('Splice plan: every run finishes and uses one Riven Splicer', smart.done === 300 && smart.splicers === 1, true);
+  eq('Splice plan: locking needs fewer cycles than never locking', smart.cycles.mean < never.cycles.mean, true);
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

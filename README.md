@@ -94,8 +94,16 @@ Public sources only. Nothing is read from the game client or a player account.
 - Enemy units with level scaling and Steel Path (`src/enemy.js`), shields, Overguard, Magnetic, time to kill
 - Build compare (pin A vs current), weapon leaderboard (optionally quick-optimized per weapon)
 - Community builds (public share links, likes, reports), Discord link previews
-- Riven tab: builder with each stat's real range for the weapon (wiki base values x disposition x stat-count multiplier), grader for
-  your own riven, best stats for the current build, saved rivens (browser or account). The riven is a Riven Mod card in a real slot (`src/riven.js`, `ui/riven.js`)
+- Riven tab: builder with each stat's real range for the weapon (wiki formula b x 10 x (rank + 1) x 1.2 x stat-count multiplier; Hotfix 44.1.3
+  retired per-weapon dispositions on 2026-10-22), grader for your own riven, Riven Splicing in the editor, conversion of values from before the
+  hotfix (DE's final disposition list in `data/old-dispositions.json`), best stats for the current build, saved rivens (browser or account).
+  The riven is a Riven Mod card in a real slot (`src/riven.js`, `ui/riven.js`)
+- Riven crafting suite (`src/riven-odds.js`, `ui/riven-craft.js`): exact chance per cycle for a goal (needed positives, allowed extras, negative,
+  layouts, minimum roll), Trait Locking, expected Kuva and 50% / 90% marks, a Monte Carlo Riven Splicing planner (smart locking vs never), and the
+  Kuva table. Layout odds (1 in 4 each) and equal trait odds are community data, not DE's, and the layout odds are editable
+- Build importer (`src/modmatch.js`, `ui/import.js`, Builds tab): reads mod and arcane names from a screenshot of the in-game mod screen or
+  single mod cards (bundled Tesseract.js, on the device), or from a typed list with optional ranks; edit-distance matching against the mods that
+  fit the weapon, a review table (mod, rank, slot), and the weapon name on the screenshot offered as a switch
 - Plat prices (switched off: warframe.market's bot protection blocks requests from the Worker; turn on with `MARKET_ENABLED = "1"` and the toggle in index.html if that changes): equipped mods, weapon arcane and Prime weapon sets priced from the warframe.market public API (median of the 5 cheapest
   online sellers at that rank, PC) through the accounts API `/market/price`, cached 10 minutes, following warframe.market's API rules
 - Ask Teshin: crit / status / hybrid lean for the current weapon (three optimizer runs, `src/teshin.js`), mods and arcanes from recent

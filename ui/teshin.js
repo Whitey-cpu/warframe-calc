@@ -107,8 +107,8 @@ window.WFTeshin = function (UI) {
     if (!c) { el.innerHTML = '<p class="muted small">Not available for this weapon type.</p>'; return; }
     const s = m.scenario;
     const mine = c.top.find(r => r.name === w.name) || c.sleepers.find(r => r.name === w.name);
-    const row = r => `<li><button type="button" class="linkbtn" data-open="${esc(r.name)}">${esc(r.name)}</button> <span class="muted small">#${r.rank} of ${c.count}, disposition ${r.dispo}</span> <b>${fmt(r.dps)}</b></li>`;
-    el.innerHTML = `<p class="muted small">Underused weapons (riven disposition 1.3+) that still rank high. ${esc(s.unit)}, level ${s.level}${s.steelPath ? ' Steel Path' : ''}, ${esc(s.metric)}, no riven or Warframe buffs. Updated ${esc(String(m.builtAt).slice(0, 10))}.</p>
+    const row = r => `<li><button type="button" class="linkbtn" data-open="${esc(r.name)}">${esc(r.name)}</button> <span class="muted small">#${r.rank} of ${c.count}${r.dispo ? `, old disposition ${r.dispo}` : ''}</span> <b>${fmt(r.dps)}</b></li>`;
+    el.innerHTML = `<p class="muted small">Weapons DE rated as least used (1.3+ in its last riven disposition list, before dispositions were retired on 2026-10-22) that still rank high. ${esc(s.unit)}, level ${s.level}${s.steelPath ? ' Steel Path' : ''}, ${esc(s.metric)}, no riven or Warframe buffs. Updated ${esc(String(m.builtAt).slice(0, 10))}.</p>
       ${c.sleepers.length ? `<ol class="ts-list">${c.sleepers.slice(0, 8).map(row).join('')}</ol>` : '<p class="muted small">None this week.</p>'}
       <details class="small"><summary>Top ${esc(w.category.toLowerCase())} weapons</summary><ol class="ts-list">${c.top.slice(0, 15).map(row).join('')}</ol></details>
       ${mine ? '' : `<p class="muted small">${esc(w.name)} is outside the top 15.</p>`}`;

@@ -4,9 +4,32 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **v0.15.0**: Rivens follow Hotfix 44.1.3, with a new crafting suite and a build importer that reads screenshots.
 - **v0.14.0**: The Windows app now updates itself.
 - **v0.13.1**: More accurate critical headshots, Heat damage and armor, with a Critical headshots setting on the Enemy tab.
-- **v0.13.0**: Shot-by-shot fights with a combat log, a Forma-aware optimizer, an automatic melee combo loop, and riven import from screenshots with a roll scanner.
+
+## v0.15.0 (2026-10-22)
+
+**TL;DR:** Rivens follow Hotfix 44.1.3, with a new crafting suite and a build importer that reads screenshots.
+
+### Changed
+
+- Riven dispositions are gone, as of Hotfix 44.1.3. Every riven now rolls with the same 1.2 multiplier, so riven ranges, grades and the roll scanner use 1.2 for every weapon. The Arsenal shows each weapon's old number for reference.
+- Riven numbers from before October 22 can be converted in one click, in the editor, when importing a screenshot, and in your saved rivens. The old values come from DE's list in the patch notes.
+- The Riven tab now uses the wiki's full riven formula, so lower riven ranks follow it exactly.
+
+### Added
+
+- Riven crafting suite (Riven tab): pick the traits you want and see your chance per cycle, the average cycles and Kuva, and when half or 90% of players would have it. Each trait on your riven also gets a row for locking it.
+- Splicing planner: plays out "cycle, lock, splice, cycle" hundreds of times for each recipe and compares smart locking with never locking.
+- Riven Splicing in the editor: splice buttons apply the recipe, keep the higher roll, and leave the new random trait for you to fill in.
+- Build importer (Builds tab): read mods from a screenshot of the in-game mod screen or from single mod cards, or type a list like "Serration 10". You check each match, rank and slot before anything changes. Screenshots stay on your device.
+- How the math works: a new section on riven math and crafting odds.
+
+### Notes
+
+- DE has not published the riven cycling odds. The suite uses community testing (each layout about 1 in 4, every trait equally likely), and you can change the layout odds.
+- Ammo Efficiency is now capped at 75% (Hotfix 44.1.3). The calculator does not model ammo use, so damage numbers do not change.
 
 ## v0.14.0 (2026-10-19)
 

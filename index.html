@@ -261,6 +261,7 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
     <section class="pane panel" role="tabpanel" id="pane-riven" aria-labelledby="tab-riven" data-pane="riven">
       <h2 class="pane-title">Riven mod</h2>
       <div id="rivenPanel"><p class="muted small">Choose a weapon first.</p></div>
+      <div id="rivenCraft"></div>
     </section>
 
     <!-- Optimize: optimizer + leaderboard -->
@@ -326,6 +327,7 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
         <button type="button" id="pasteJson" class="btn ghost sm">Load from JSON</button>
       </div>
       <textarea id="jsonBox" rows="4" spellcheck="false" placeholder="Build JSON (paste here to load, or share with Claude)"></textarea>
+      <section id="importPanel" class="imp"></section>
       <section id="publicPanel" hidden>
         <h2>Community builds</h2>
         <p class="muted small">Builds people chose to publish. Publish yours with the share button and "Make public".</p>
@@ -450,7 +452,10 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
 <script src="src/enemy.js"></script>
 <script src="src/capacity.js"></script>
 <script src="src/incarnon.js"></script>
+<script src="data/old-dispositions.js"></script>
 <script src="src/riven.js"></script>
+<script src="src/riven-odds.js"></script>
+<script src="src/modmatch.js"></script>
 <script src="src/teshin.js"></script>
 <script src="src/sim.js"></script>
 <script src="data/changelog.js"></script>
@@ -459,6 +464,8 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
 <script src="ui/background.js"></script>
 <script src="ui/layout.js"></script>
 <script src="ui/riven.js"></script>
+<script src="ui/riven-craft.js"></script>
+<script src="ui/import.js"></script>
 <script src="ui/teshin.js"></script>
 <script src="ui/features.js"></script>
 <script src="ui/tips.js"></script>

@@ -159,7 +159,11 @@
         if (opts.main && s.reload) rows.push(row('Reload', bs.reload ? 1 / s.reload : 0, bs.reload ? 1 / bs.reload : 0, n2(s.reload) + 's'));
         if (opts.main && s.chargeTime) rows.push(row('Charge Time', s.chargeTime, bs.chargeTime, n2(s.chargeTime) + 's'));
         if (opts.main && w.trigger) rows.push(row('Trigger', null, null, esc(String(w.trigger).toUpperCase())));
-        if (opts.main && w.disposition) rows.push(row('Riven Disposition', null, null, `<span class="dispo">${'&#9679;'.repeat(Math.round(w.disposition))}${'&#9675;'.repeat(5 - Math.round(w.disposition))}</span>${w.omega ? ' ' + w.omega + 'x' : ''}`));
+        if (opts.main && w.disposition) {
+          // Hotfix 44.1.3 (2026-10-22): every riven uses 1.2; the old per-weapon number is shown for reference
+          const od = WF.riven.oldDisposition(w, window.WF_OLD_DISPO);
+          rows.push(row('Riven multiplier', null, null, `${WF.riven.DISPOSITION}x${od && od.value !== WF.riven.DISPOSITION ? ` <span class="muted small">(was ${od.value}x)</span>` : ''}`));
+        }
       }
       const dmg = [
         row('Critical Chance', s.critChance, bs.critChance, pc(s.critChance)),

@@ -766,3 +766,25 @@ html[data-mode="beginner"] [data-adv] { display: none !important; }
 .rv-import { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
 .rv-import #rvImportMsg { flex-basis: 100%; }
 .rv-scan select[multiple] { min-height: 84px; }
+
+/* Riven splicing buttons, crafting suite (ui/riven-craft.js) and build importer (ui/import.js) */
+.rv-splice { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.rv-old { margin: 4px 0; }
+.rc .rc-goal { gap: 10px 14px; align-items: start; }
+.rc select[multiple] { width: 100%; min-width: 0; }
+.rc-lay { display: grid; gap: 2px; }
+.rc-odds { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.rc-odds input { width: 4.2em; }
+.rc-phys { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.rc-adv { margin: 6px 0; }
+.rc-table td:first-child { min-width: 9em; }
+.rc-table td, .rc-table th, .imp-table td, .imp-table th { vertical-align: top; }
+.rc-cost td, .rc-cost th { text-align: center; }
+.rc-cost td:first-child { text-align: left; white-space: nowrap; }
+.tbl-wrap { overflow-x: auto; max-width: 100%; }
+.imp { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px; }
+.imp h3 { margin: 0 0 4px; font-size: 1rem; }
+.imp textarea { width: 100%; margin-top: 4px; }
+.imp-src { flex-wrap: wrap; align-items: center; }
+.imp-table select { max-width: 100%; }
+.imp-rank { width: 4em; }

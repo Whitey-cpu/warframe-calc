@@ -3,11 +3,11 @@
  * App files: served from cache, refreshed in the background (stale-while-revalidate).
  * Item images (cdn.warframestat.us): cache-first, capped. The accounts API is never cached.
  */
-const VERSION = 'wfcalc-v23';
+const VERSION = 'wfcalc-v24';
 const SHELL = [
   './', 'index.html', 'privacy.html', 'manifest.webmanifest', 'favicon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png',
-  'ui/style.css', 'ui/app.js', 'ui/features.js', 'ui/layout.js', 'ui/background.js', 'ui/news.js', 'ui/changelog.js', 'ui/riven.js', 'ui/teshin.js', 'ui/sim.js', 'ui/tips.js', 'src/sim.js', 'learn.html', 'data/changelog.js',
-  'src/static.js', 'src/parser.js', 'src/engine.js', 'src/optimizer.js', 'src/enemy.js', 'src/capacity.js', 'src/incarnon.js', 'src/riven.js', 'src/teshin.js',
+  'ui/style.css', 'ui/app.js', 'ui/features.js', 'ui/layout.js', 'ui/background.js', 'ui/news.js', 'ui/changelog.js', 'ui/riven.js', 'ui/riven-craft.js', 'ui/import.js', 'ui/teshin.js', 'ui/sim.js', 'ui/tips.js', 'src/sim.js', 'learn.html', 'data/changelog.js',
+  'src/static.js', 'src/parser.js', 'src/engine.js', 'src/optimizer.js', 'src/enemy.js', 'src/capacity.js', 'src/incarnon.js', 'src/riven.js', 'src/riven-odds.js', 'src/modmatch.js', 'src/teshin.js', 'data/old-dispositions.js',
   'data/game-data.js'
 ];
 const IMG_CACHE = 'wfcalc-img';

@@ -1,13 +1,16 @@
 /*
- * Riven mods: stat ranges, grading and engine effects.
+ * Riven mods: stat ranges, grading, splicing and engine effects.
  * Source for every number here: https://wiki.warframe.com/w/Riven_Mods (Attribute Value Formula, Base Values,
- * Spliced Values, Splicing), read 2026-10-17, plus DE's Update 44.1 patch notes for the splice recipes.
+ * Spliced Values, Splicing, Trait Locking), read 2026-10-22, plus DE's patch notes: Update 44.0 (Trait Locking),
+ * Update 44.1 (Riven Splicing recipes) and Hotfix 44.1.3 (Riven Dispositions removed).
  *
- *   value = base(stat, weapon type) x disposition x bonus/malus multiplier x random roll (0.9 to 1.1)
- *   multiplier: 2 bonus 0 malus 0.99 | 2 bonus 1 malus 1.2375 / -0.495 | 3 bonus 0 malus 0.75 | 3 bonus 1 malus 0.9375 / -0.75
+ *   value = b x 10 x (rank + 1) x 1.2 x L x W        (wiki "Detailed Explanation of Attribute Value Formula")
+ *   b: base coefficient per stat and weapon class. The tables below store b x 90, the rank 8 value at 1.0.
+ *   1.2: since Hotfix 44.1.3 (2026-10-22) every riven uses this one multiplier. Before it, each weapon had its own
+ *        Disposition (0.5 to 1.55). data/old-dispositions.json keeps the old numbers so old card values can be converted.
+ *   L: 2 bonus 0 malus 0.99 | 2 bonus 1 malus 1.2375 / -0.495 | 3 bonus 0 malus 0.75 | 3 bonus 1 malus 0.9375 / -0.75
+ *   W: 0.9 + 0.2u, where u (0 to 1) is the trait's roll quality.
  *
- * ASSUMPTION: the base values are at rank 8 (max) and a lower rank scales them by (rank + 1) / 9, the same linear
- * rule as other mods. The wiki page does not say this outright.
  * ASSUMPTION: riven capacity drain is 18 at rank 8 unless the user enters another number (riven cards differ).
  */
 (function () {
@@ -57,7 +60,7 @@
   ];
   // Spliced traits (Riven Splicer): always positive, one per riven, value comes from the consumed traits' roll.
   const SPLICED = [
-    { key: 'ammoEff', label: 'Ammo Efficiency', unit: '%', base: RANGED(45), fx: null },
+    { key: 'ammoEff', label: 'Ammo Efficiency', unit: '%', base: RANGED(45), fx: null, note: 'capped at 75% from all sources since Hotfix 44.1.3' },
     { key: 'blast', label: 'Blast Damage', unit: '%', base: ALL(90), fx: { stat: 'element', element: 'blast' } },
     { key: 'corrosive', label: 'Corrosive Damage', unit: '%', base: ALL(90), fx: { stat: 'element', element: 'corrosive' } },
     { key: 'vsOrokin', label: 'Damage vs. Orokin', unit: 'x', base: ALL(45), fx: { stat: 'faction', faction: 'Orokin' } },
@@ -88,6 +91,12 @@
   };
 
   const MULT = { 2: { 0: [0.99, 0], 1: [1.2375, -0.495] }, 3: { 0: [0.75, 0], 1: [0.9375, -0.75] } };
+  // Hotfix 44.1.3 (2026-10-22): "All Rivens now use the same multiplier for their possible value ranges, the equivalent
+  // of 1.2 Disposition in the old system." https://www.warframe.com/en/patch-notes/pc/44-1-3
+  const DISPOSITION = 1.2;
+  const DISPO_RETIRED = '2026-10-22';
+  // Hotfix 44.1.3 caps Ammo Efficiency at 75% from all sources combined
+  const AMMO_EFF_CAP = 75;
   const ROLL_MIN = 0.9, ROLL_MAX = 1.1;
   const DEFAULT_DRAIN = 18;   // ASSUMPTION (see header)
   const MAX_RANK = 8;
@@ -112,7 +121,10 @@
 
   function counts(riven) {
     const st = (riven && riven.stats || []).filter(s => s && statDef(s.key));
-    return { pos: st.filter(s => !s.neg).length, neg: st.filter(s => s.neg).length, list: st };
+    const pos = st.filter(s => !s.neg).length, neg = st.filter(s => s.neg).length;
+    // right after a splice one row waits for the random trait the game added; the layout itself did not change
+    const lay = riven && riven.pending && riven.pending.layout;
+    return lay ? { pos: Math.max(pos, lay.pos), neg: Math.max(neg, lay.neg), list: st, pending: true } : { pos, neg, list: st };
   }
   function multipliers(nPos, nNeg) {
     const p = Math.min(3, Math.max(2, nPos || 2));
@@ -124,7 +136,7 @@
     const type = typeFor(weapon);
     const b = baseFor(def, type);
     if (b == null) return null;
-    const dispo = weapon && weapon.omega || 1;
+    const dispo = DISPOSITION;
     const [mp, mn] = multipliers(nPos, nNeg);
     const m = neg ? Math.abs(mn) : mp;
     if (!m) return null;
@@ -134,12 +146,66 @@
   }
   const valueAt = (r, pos01) => r.min + (r.max - r.min) * Math.max(0, Math.min(1, pos01));
 
+  // ----- the old per-weapon Disposition (before Hotfix 44.1.3), for converting old card values -----
+  // old: the parsed data/old-dispositions.json. Names in DE's list sometimes carry the weapon class in brackets
+  // ("Catchmoon (primary)") or differ slightly from the data names, so a few spellings are tried.
+  const OLD_ALIASES = { 'dual kamas prime': 'dual kama prime', 'korumm': 'korrum', 'vinquibus': 'vinquibus (rifle)' };
+  function oldDisposition(weapon, old) {
+    if (!weapon) return null;
+    const flat = {};
+    if (old && old.categories) for (const c in old.categories) for (const n in old.categories[c]) flat[n.toLowerCase()] = old.categories[c][n];
+    const n = String(weapon.name || '').toLowerCase();
+    const cls = weapon.category === 'Secondary' ? 'secondary' : weapon.category === 'Melee' ? 'melee' : 'primary';
+    for (const k of [n, `${n} (${cls})`, `${n} (rifle)`, OLD_ALIASES[n]]) if (k && flat[k] != null) return { value: flat[k], from: 'patch notes' };
+    // not in DE's list: fall back to the weapon data's own number (also from before the hotfix)
+    return weapon.omega ? { value: weapon.omega, from: 'weapon data' } : null;
+  }
+  // A value read from a riven card before Hotfix 44.1.3 -> the same roll today
+  const convertOld = (value, oldDispo) => oldDispo > 0 ? value * DISPOSITION / oldDispo : value;
+  function convertRiven(riven, oldDispo) {
+    const r = JSON.parse(JSON.stringify(riven || empty()));
+    r.stats = (r.stats || []).map(s => Object.assign(s, { value: +convertOld(Math.abs(+s.value || 0), oldDispo).toFixed(2) }));
+    r.era = 'v44.1.3';
+    return r;
+  }
+
+  // ----- Riven Splicing (wiki "Splicing", Update 44.1) -----
+  function recipesFor(weapon) {
+    const type = typeFor(weapon);
+    return RECIPES.all.concat(type === 'melee' ? RECIPES.melee : RECIPES.ranged).filter(([out, a, b]) => available(statDef(out), type) && available(statDef(a), type) && available(statDef(b), type));
+  }
+  // Recipes this riven can use now: both ingredients on it (either may be the negative), no spliced trait yet
+  function spliceOptions(riven, weapon) {
+    const c = counts(riven);
+    if (c.list.some(s => statDef(s.key).spliced)) return [];
+    return recipesFor(weapon).filter(([, a, b]) => c.list.some(s => s.key === a) && c.list.some(s => s.key === b));
+  }
+  // Apply a splice. The wiki: both traits are consumed, the spliced trait is always positive and "inherits the higher
+  // random value out of the consumed stats" (the true roll, also for a negative), and a random trait takes the freed
+  // place with the same polarity as the consumed traits. The random trait is unknown here, so its row is left empty
+  // (pending: true) for the user to fill in with what the game gave.
+  function splice(riven, weapon, recipe) {
+    const [out, a, b] = recipe;
+    const c = counts(riven);
+    const g = grade(riven, weapon, MAX_RANK).rows;
+    const u = Math.max(...[a, b].map(k => { const r = g.find(x => x.key === k && x.ok); return r ? r.pos : 0.5; }));
+    const consumed = c.list.filter(s => s.key === a || s.key === b);
+    const negConsumed = consumed.some(s => s.neg);
+    const keep = c.list.filter(s => s.key !== a && s.key !== b);
+    const rr = range(out, weapon, c.pos, c.neg, false, MAX_RANK);
+    const spliced = { key: out, value: rr ? +valueAt(rr, u).toFixed(2) : 0, neg: false };
+    const r = Object.assign({}, riven, { stats: [spliced].concat(keep) });
+    r.pending = { neg: negConsumed, layout: { pos: c.pos, neg: c.neg } };
+    return { riven: r, roll: u, pendingNegative: negConsumed };
+  }
+
   // Problems with the current stat layout (empty array = valid)
   function validate(riven, weapon) {
     const type = typeFor(weapon);
     const c = counts(riven);
     const out = [];
-    if (c.pos < 2) out.push('A riven has 2 or 3 positive stats.');
+    if (c.pending) out.push('Fill in the trait the splice added (empty row).');
+    else if (c.pos < 2) out.push('A riven has 2 or 3 positive stats.');
     if (c.pos > 3) out.push('A riven has at most 3 positive stats.');
     if (c.neg > 1) out.push('A riven has at most 1 negative stat.');
     const seen = new Set();
@@ -330,7 +396,8 @@
     return { weaponName: named, stats: stats.slice(0, 4), unmatched };
   }
 
-  WF.riven = { TYPES, TYPE_LABEL, STATS, SPLICED, RECIPES, MULT, NAME, MAX_RANK, DEFAULT_DRAIN, typeFor, statDef, labelFor, baseFor, available, range, valueAt,
+  WF.riven = { TYPES, TYPE_LABEL, STATS, SPLICED, RECIPES, MULT, NAME, MAX_RANK, DEFAULT_DRAIN, DISPOSITION, DISPO_RETIRED, AMMO_EFF_CAP,
+    oldDisposition, convertOld, convertRiven, recipesFor, spliceOptions, splice, typeFor, statDef, labelFor, baseFor, available, range, valueAt,
     counts, multipliers, validate, grade, letter, toEffects, notModeled, fmtValue, lines, synthMod, empty, fromLegacy, candidateKeys, combos, averageRiven, bestStatsJobs, rankScale,
     parseCardText, matchStat };
 })();

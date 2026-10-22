@@ -196,7 +196,7 @@
       ['Dmg', fmt(total)], ['Crit', pct(a.critChance) + ' x' + a.critMult], ['Status', pct(a.statusChance)],
       [w.category === 'Melee' ? 'Speed' : 'Rate', a.fireRate], w.category !== 'Melee' ? ['Multishot', w.multishot] : null,
       w.magazine ? ['Mag', w.magazine] : null, w.reload ? ['Reload', +(+w.reload).toFixed(2) + 's'] : null, ['MR', w.mastery],
-      w.disposition ? ['Riven', '&#9679;'.repeat(Math.round(w.disposition)) + (w.omega ? ' ' + w.omega + 'x' : '')] : null
+      w.disposition ? ['Riven', R.DISPOSITION + 'x'] : null
     ].filter(Boolean).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
     $('valenceRow').hidden = !S.isAdversaryWeapon(w.name);
     renderStance();
@@ -1038,6 +1038,8 @@
   if (window.WFFeatures) window.WFFeatures(window.WFUI);
   if (window.WFLayout) window.WFLayout(window.WFUI);
   if (window.WFRiven) window.WFRiven(window.WFUI);
+  if (window.WFRivenCraft) window.WFRivenCraft(window.WFUI);
+  if (window.WFImport) window.WFImport(window.WFUI);
   if (window.WFMarket) window.WFMarket(window.WFUI);
   if (window.WFTeshin) window.WFTeshin(window.WFUI);
   if (window.WFSim) window.WFSim(window.WFUI);

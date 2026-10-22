@@ -75,7 +75,7 @@
         ] },
         { tier: 'V', perks: [
           { name: 'Devouring Attrition', text: '50% chance for +2000% damage on non-critical hits.', modeled: false, effects: [] },
-          { name: "Reaper's Plenty", text: 'On Headshot: +40% Ammo Efficiency for 6s.', modeled: false, effects: [] },
+          { name: "Reaper's Plenty", text: 'On Headshot: +40% Ammo Efficiency for 6s. (Hotfix 44.1.3 lists it as an Infinite Ammo source, outside the new 75% Ammo Efficiency cap.)', modeled: false, effects: [] },
           { name: 'Overwhelming Attrition', text: 'Non-crit, non-status hits: +400% damage for 10s, stacks 3x.', modeled: false, effects: [] }
         ] }
       ]

@@ -21,7 +21,8 @@ window.WFRiven = function (UI) {
   const weapon = () => state.weapon;
   const slotIdx = () => UI.rivenIndex();
   const rank = () => { const i = slotIdx(); return i >= 0 && state.ranks[i] != null ? state.ranks[i] : (state.riven.rank != null ? state.riven.rank : R.MAX_RANK); };
-  const dots = d => '&#9679;'.repeat(Math.max(1, Math.min(5, d <= 0.69 ? 1 : d <= 0.89 ? 2 : d <= 1.1 ? 3 : d <= 1.3 ? 4 : 5))) + '&#9675;'.repeat(5 - Math.max(1, Math.min(5, d <= 0.69 ? 1 : d <= 0.89 ? 2 : d <= 1.1 ? 3 : d <= 1.3 ? 4 : 5)));
+  const OLD = () => window.WF_OLD_DISPO || null;   // data/old-dispositions.js (before Hotfix 44.1.3)
+  const oldDispo = w => R.oldDisposition(w, OLD());
   const fmtNum = (def, v) => def.unit === 'x' ? 'x' + (1 + v / 100).toFixed(2) : (v >= 100 ? v.toFixed(1) : v.toFixed(v >= 10 ? 1 : 2)) + (def.unit === '%' ? '%' : def.unit);
   const fmtNeg = (def, v) => def.unit === 'x' ? 'x' + (1 - v / 100).toFixed(2) : '-' + fmtNum(def, v);
 
@@ -97,11 +98,15 @@ window.WFRiven = function (UI) {
         $('rvSwitchW').onclick = () => { UI.apply(Object.assign({}, UI.collect(), { weapon: got.weaponName, mods: [], slotLayout: null, riven: [], rivenMod: { stats: got.stats } })); state.riven.stats = got.stats; render(); };
         return;
       }
-      importNote = `Imported ${got.stats.length} stat${got.stats.length > 1 ? 's' : ''}. Check them against your card${got.unmatched.length ? `; could not read: ${esc(got.unmatched.slice(0, 3).join(' | '))}` : ''}.`;
-      state.riven.stats = got.stats;
+      const od = oldDispo(weapon());
+      const conv = $('rvImportOld') && $('rvImportOld').checked && od;
+      importNote = `Imported ${got.stats.length} stat${got.stats.length > 1 ? 's' : ''}${conv ? ` and converted them from the old ${od.value} disposition` : ''}. Check them against your card${got.unmatched.length ? `; could not read: ${esc(got.unmatched.slice(0, 3).join(' | '))}` : ''}.`;
+      state.riven.stats = conv ? R.convertRiven({ stats: got.stats }, od.value).stats : got.stats;
+      state.riven.era = 'v44.1.3';
       changed(true);
     } catch (e) { msg('Import failed: ' + e.message); }
   }
+  UI.ocr = { getWorker, prepare, loadScript };
   panel.addEventListener('paste', e => {
     const it = [...(e.clipboardData || {}).items || []].find(x => x.type && x.type.startsWith('image/'));
     if (it) { e.preventDefault(); importImage(it.getAsFile()); }
@@ -117,7 +122,7 @@ window.WFRiven = function (UI) {
     const w = weapon();
     if (!w) { panel.innerHTML = '<p class="muted small">Choose a weapon first. Each riven belongs to one weapon.</p>'; return; }
     const type = R.typeFor(w);
-    const d = w.omega || 1;
+    const od = oldDispo(w);
     const i = slotIdx();
     const rs = rows();
     const c = R.counts(state.riven);
@@ -129,6 +134,7 @@ window.WFRiven = function (UI) {
     };
     const row = (s, idx) => {
       const neg = idx === 3;
+      const pendingHere = !s && c.pending && (neg ? state.riven.pending.neg : !state.riven.pending.neg) && (neg || idx === Math.min(2, c.list.filter(x => !x.neg).length));
       const def = s && R.statDef(s.key);
       const r = s ? R.range(s.key, w, Math.max(2, c.pos), c.neg, neg, R.MAX_RANK) : null;
       const posv = r && r.max > r.min ? ((Math.abs(s.value) - r.min) / (r.max - r.min)) : 0.5;
@@ -138,16 +144,15 @@ window.WFRiven = function (UI) {
         ${s ? `<input type="number" step="any" min="0" data-v="${idx}" value="${+Math.abs(s.value).toFixed(def.unit === '%' || def.unit === 'x' ? 2 : 3)}" aria-label="Value"><span class="rv-unit">${def.unit === 'x' ? '% (x)' : def.unit}</span>
           <input type="range" min="0" max="1000" data-s="${idx}" value="${Math.round(Math.max(0, Math.min(1, posv)) * 1000)}" aria-label="Roll within the possible range" ${r ? '' : 'disabled'}>
           <span class="rv-range muted small" data-r="${idx}">${r ? (neg ? `${fmtNeg(def, r.min)} to ${fmtNeg(def, r.max)}` : `${fmtNum(def, r.min)} to ${fmtNum(def, r.max)}`) : 'n/a'}</span>
-          <span class="rv-grade" data-g="${idx}"></span>` : '<span class="muted small rv-empty">' + (neg ? 'Optional. A negative makes the positives stronger.' : idx === 2 ? 'Optional third positive.' : 'Pick a stat.') + '</span>'}
+          <span class="rv-grade" data-g="${idx}"></span>` : '<span class="muted small rv-empty">' + (pendingHere ? '<b class="warn-t">Pick the trait the splice added.</b>' : neg ? 'Optional. A negative makes the positives stronger.' : idx === 2 ? 'Optional third positive.' : 'Pick a stat.') + '</span>'}
       </div>`;
     };
-    const splices = R.RECIPES.all.concat(type === 'melee' ? R.RECIPES.melee : R.RECIPES.ranged)
-      .filter(([, a, b]) => c.list.some(s => s.key === a) && c.list.some(s => s.key === b))
-      .map(([out, a, b]) => `${esc(R.labelFor(R.statDef(a), type))} + ${esc(R.labelFor(R.statDef(b), type))} &rarr; <b>${esc(R.labelFor(R.statDef(out), type))}</b>`);
+    const splices = R.spliceOptions(state.riven, w)
+      .map((rc, k) => `<button type="button" class="btn ghost sm" data-splice="${k}" title="Uses one Riven Splicer in game. Both traits are consumed, the spliced trait keeps the higher roll, and a random trait of the same polarity takes the free place.">${esc(R.labelFor(R.statDef(rc[1]), type))} + ${esc(R.labelFor(R.statDef(rc[2]), type))} &rarr; <b>${esc(R.labelFor(R.statDef(rc[0]), type))}</b></button>`);
     panel.innerHTML = `
       <div class="rv-head">
         <div><b>${esc(w.name)}</b> riven <span class="muted small">${esc(R.TYPE_LABEL[type])} stats</span><br>
-          <span class="muted small" title="Riven disposition (wiki: 0.5 to 1.55)">Disposition <b>${d}</b> <span class="rv-dots">${dots(d)}</span></span></div>
+          <span class="muted small" data-tip="rivenMult">Riven multiplier <b>${R.DISPOSITION}</b>, the same for every weapon since Hotfix 44.1.3${od ? ` (was ${od.value})` : ''}</span></div>
         <div class="rv-equip">${i >= 0 ? `<span class="small">In slot <b>${i + 1}</b></span> <button type="button" class="btn ghost sm" id="rvUnequip">Remove from slot</button>`
           : `<button type="button" class="btn sm" id="rvEquip">Put in a mod slot</button>`}</div>
       </div>
@@ -160,13 +165,15 @@ window.WFRiven = function (UI) {
         <button type="button" class="btn ghost sm" id="rvImportBtn">Import from screenshot</button>
         <input type="file" id="rvImportFile" accept="image/*" hidden>
         <span class="muted small">or paste a screenshot here (Ctrl+V). It is read on your device; nothing is uploaded.</span>
+        ${od && od.value !== R.DISPOSITION ? `<label class="check small" title="Rivens changed on 2026-10-22. Screenshots or trade listings from before then show the old numbers."><input type="checkbox" id="rvImportOld"> The screenshot is from before Oct 22, 2026</label>` : ''}
         <div id="rvImportMsg" class="small">${importNote}</div>
       </div>
       <p class="muted small">Type the numbers from your riven card (rank 8 values), or pick a stat and drag its slider through the possible range.</p>
       <div class="rv-rows">${rs.map(row).join('')}</div>
       <div id="rvMsgs"></div>
+      ${od && od.value !== R.DISPOSITION && c.list.length ? `<p class="small muted rv-old">Numbers from before Oct 22, 2026? <button type="button" class="linkbtn" id="rvConvert">Convert them</button> (x${R.DISPOSITION} / ${od.value}, the old disposition${od.from === 'weapon data' ? ' from the weapon data' : ''}).</p>` : ''}
       <div class="rv-grade-all" id="rvGradeAll"></div>
-      ${splices.length ? `<p class="small rv-splice"><span class="muted">Riven Splicer can combine:</span> ${splices.join(' &middot; ')}</p>` : ''}
+      ${splices.length ? `<div class="small rv-splice"><span class="muted">Riven Splicer can combine:</span> ${splices.join(' ')}</div>` : ''}
       <details class="rv-sec" id="rvBestBox" open>
         <summary>Roll scanner: best stats for this build</summary>
         <p class="muted small">Every 2- and 3-stat combination for your build and enemy (${esc(($('metric').selectedOptions[0] || {}).textContent || 'DPS')}).</p>
@@ -188,8 +195,8 @@ window.WFRiven = function (UI) {
         <p class="muted small" id="rvLibNote">${UI.getUser() ? 'Saved to your account.' : 'Saved in this browser. Sign in to keep them on every device.'}</p>
         <div id="rvLib"></div>
       </details>
-      <p class="muted small">Math: <a href="https://wiki.warframe.com/w/Riven_Mods" target="_blank" rel="noopener">WARFRAME Wiki, Riven Mods</a> (base values, disposition, stat-count multipliers, splicing).
-        Values below rank 8 are scaled like other mods, (rank + 1) / 9.</p>`;
+      <p class="muted small">Math: <a href="https://wiki.warframe.com/w/Riven_Mods" target="_blank" rel="noopener">WARFRAME Wiki, Riven Mods</a> (base values, stat-count multipliers, splicing; value = base &times; (rank + 1) &times; 1.2 &times; multiplier &times; roll).
+        <a href="https://www.warframe.com/en/patch-notes/pc/44-1-3" target="_blank" rel="noopener">Hotfix 44.1.3</a> set every riven to the old 1.2 disposition.</p>`;
     refreshGrades();
     renderLibrary();
   }
@@ -206,7 +213,7 @@ window.WFRiven = function (UI) {
       const q = Math.round(r.quality * 100);
       el.textContent = r.outside ? 'outside range' : q + '%';
       el.className = 'rv-grade ' + (r.outside ? 'bad' : q >= 75 ? 'good' : q >= 40 ? 'mid' : 'low');
-      el.title = r.outside ? 'This value cannot roll for this weapon with this many stats. Check the weapon, the stat count, the rank, or whether the disposition changed.'
+      el.title = r.outside ? 'This value cannot roll for this weapon with this many stats. Check the weapon, the stat count and the rank. Numbers from before Oct 22, 2026 used the old disposition: use "Convert them".'
         : `Roll ${r.roll.toFixed(3)} (possible 0.900 to 1.100). ${s.neg ? 'Smaller is better for a negative.' : 'Higher is better.'}`;
       const rr = panel.querySelector(`[data-r="${idx}"]`);
       const def = R.statDef(s.key);
@@ -231,6 +238,7 @@ window.WFRiven = function (UI) {
       const before = R.grade(state.riven, weapon(), R.MAX_RANK).rows;
       rs[idx] = key ? { key, value: 0, neg: idx === 3 } : null;
       setRows(rs);
+      if (state.riven.pending) { const cc = R.counts(Object.assign({}, state.riven, { pending: null })); const L = state.riven.pending.layout; if (cc.pos >= L.pos && cc.neg >= L.neg) delete state.riven.pending; }
       const c = R.counts(state.riven);
       rs.forEach((s, j) => {
         if (!s) return;
@@ -280,6 +288,17 @@ window.WFRiven = function (UI) {
     } else if (e.target.id === 'rvBest') bestStats();
     else if (e.target.id === 'rvImportBtn') $('rvImportFile').click();
     else if (e.target.id === 'rvSave') saveRiven();
+    else if (e.target.id === 'rvConvert') {
+      const od = oldDispo(weapon()); if (!od) return;
+      state.riven = Object.assign(state.riven, { stats: R.convertRiven(state.riven, od.value).stats, era: 'v44.1.3' });
+      UI.flashMsg(`Converted from the old ${od.value} disposition to ${R.DISPOSITION}.`); changed(true);
+    } else if (e.target.closest('[data-splice]')) {
+      const rc = R.spliceOptions(state.riven, weapon())[+e.target.closest('[data-splice]').dataset.splice]; if (!rc) return;
+      const out = R.splice(state.riven, weapon(), rc);
+      state.riven = out.riven;
+      UI.flashMsg(`Spliced into ${R.labelFor(R.statDef(rc[0]), R.typeFor(weapon()))} at a ${Math.round(out.roll * 100)}% roll. Now pick the ${out.pendingNegative ? 'negative' : 'positive'} trait the game added.`);
+      changed(true);
+    } else if (e.target.closest('[data-convert]')) convertSaved(e.target.closest('[data-convert]').dataset.convert);
     else if (e.target.closest('[data-use]')) useBest(+e.target.closest('[data-use]').dataset.use);
     else if (e.target.closest('[data-load]')) loadRiven(e.target.closest('[data-load]').dataset.load);
     else if (e.target.closest('[data-del]')) deleteRiven(e.target.closest('[data-del]').dataset.del);
@@ -355,11 +374,12 @@ window.WFRiven = function (UI) {
         const negTxt = !r.neg ? 'none' : opts.negative ? '-' + lbl(r.neg) : 'any harmless one';
         return `<tr><td>${r.keys.map(lbl).join(', ')}</td><td>${negTxt}</td><td>${val}${re}</td><td class="pos">${gain >= 0 ? '+' : ''}${gain.toFixed(Math.abs(gain) >= 10 ? 0 : 1)}%</td><td><button type="button" class="btn ghost sm" data-use="${i}">Use</button></td></tr>`;
       }).join('')}</table>
-      <p class="muted small">"Harmless" negatives here do not change damage in this model: ${harmless.map(lbl).join(', ') || 'none'}. Disposition ${w.omega || 1}, rank 8, every stat at ${Math.round(roll * 100)}% of its average roll.
+      <p class="muted small">"Harmless" negatives here do not change damage in this model: ${harmless.map(lbl).join(', ') || 'none'}. Riven multiplier ${R.DISPOSITION}, rank 8, every stat at ${Math.round(roll * 100)}% of its average roll.
         ${opts.factionKey ? '' : 'Faction stats are skipped because the current enemy faction has no matching riven stat.'}</p>`;
     };
     setTimeout(step, 10);
   }
+  UI.rivenBest = () => lastBest;
   function useBest(i) {
     const r = lastBest[i]; const w = weapon(); if (!r || !w) return;
     const { harmless } = R.candidateKeys(w, {});
@@ -383,15 +403,20 @@ window.WFRiven = function (UI) {
   function libFor(w) {
     if (UI.getUser() && cloud) {
       const pre = `${CLOUD_PREFIX}${w.name} :: `;
-      return cloud.filter(b => b.name.startsWith(pre)).map(b => ({ id: b.name, name: b.name.slice(pre.length), riven: b.data.rivenMod }));
+      return cloud.filter(b => b.name.startsWith(pre)).map(b => ({ id: b.name, name: b.name.slice(pre.length), riven: b.data.rivenMod, old: !(b.data.rivenMod && b.data.rivenMod.era) }));
     }
-    return (libLocal()[w.name] || []).map((x, i) => ({ id: String(i), name: x.name, riven: x.riven }));
+    // saved before Hotfix 44.1.3 (2026-10-22) = old disposition numbers
+    const cut = Date.parse(R.DISPO_RETIRED + 'T00:00:00Z');
+    return (libLocal()[w.name] || []).map((x, i) => ({ id: String(i), name: x.name, riven: x.riven, old: !(x.riven && x.riven.era) && (!x.savedAt || x.savedAt < cut) }));
   }
   async function renderLibrary() {
     const w = weapon(); const el = $('rvLib'); if (!w || !el) return;
     if (UI.getUser()) await loadCloud(false);
     const list = libFor(w);
-    el.innerHTML = list.length ? `<ul class="rv-lib">${list.map(x => `<li><span><b>${esc(x.name)}</b> <span class="muted small">${esc(R.lines(x.riven, w).join(', '))}</span></span>
+    const od = oldDispo(w);
+    const canConv = od && od.value !== R.DISPOSITION;
+    el.innerHTML = list.length ? `<ul class="rv-lib">${list.map(x => `<li><span><b>${esc(x.name)}</b> <span class="muted small">${esc(R.lines(x.riven, w).join(', '))}</span>
+        ${x.old && canConv ? `<br><span class="small warn-t">Saved before Oct 22, 2026 (old ${od.value} disposition).</span> <button type="button" class="linkbtn small" data-convert="${esc(x.id)}">Convert to today's values</button>` : ''}</span>
       <span><button type="button" class="btn ghost sm" data-load="${esc(x.id)}">Load</button> <button type="button" class="linkbtn small" data-del="${esc(x.id)}">delete</button></span></li>`).join('')}</ul>`
       : '<p class="muted small">No saved rivens for this weapon yet.</p>';
   }
@@ -399,7 +424,8 @@ window.WFRiven = function (UI) {
     const w = weapon(); if (!w) return;
     const name = ($('rvName').value || '').trim().replace(/::/g, ':').slice(0, 30) || R.lines(state.riven, w).map(l => l.split(' ').slice(1).join(' ')).join('/').slice(0, 30) || 'Riven';
     if (!R.counts(state.riven).list.length) { UI.flashMsg('Add some stats first.'); return; }
-    const copy = JSON.parse(JSON.stringify(state.riven));
+    const copy = Object.assign(JSON.parse(JSON.stringify(state.riven)), { era: state.riven.era || 'v44.1.3' });
+    delete copy.pending;
     if (UI.getUser()) {
       try { await UI.api('/builds/' + encodeURIComponent(`${CLOUD_PREFIX}${w.name} :: ${name}`), { method: 'PUT', body: JSON.stringify({ data: { weapon: w.name, rivenMod: copy } }) }); await loadCloud(true); }
       catch (e) { UI.flashMsg('Save failed: ' + e.message); return; }
@@ -420,6 +446,20 @@ window.WFRiven = function (UI) {
     state.riven = Object.assign(R.empty(), JSON.parse(JSON.stringify(x.riven)));
     if (slotIdx() < 0) { const free = state.mods.slice(0, UI.SLOT_COUNT).indexOf(null); if (free >= 0) UI.addMod(UI.RIVEN, free); }
     changed(true);
+  }
+  async function convertSaved(id) {
+    const w = weapon(); if (!w) return;
+    const od = oldDispo(w); const x = libFor(w).find(r => r.id === id); if (!x || !od) return;
+    const conv = R.convertRiven(x.riven, od.value);
+    if (UI.getUser() && cloud) {
+      try { await UI.api('/builds/' + encodeURIComponent(id), { method: 'PUT', body: JSON.stringify({ data: { weapon: w.name, rivenMod: conv } }) }); await loadCloud(true); }
+      catch (e) { UI.flashMsg('Could not update it: ' + e.message); return; }
+    } else {
+      const lib = libLocal(); const arr = lib[w.name] || []; if (!arr[+id]) return;
+      arr[+id] = Object.assign({}, arr[+id], { riven: conv, savedAt: Date.now() }); lib[w.name] = arr; store.set(LIB_KEY, lib);
+    }
+    UI.flashMsg(`"${x.name}" converted from the old ${od.value} disposition.`);
+    renderLibrary();
   }
   async function deleteRiven(id) {
     const w = weapon(); if (!w) return;

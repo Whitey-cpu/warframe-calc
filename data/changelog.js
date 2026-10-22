@@ -5,6 +5,28 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.15.0', date: '2026-10-22',
+    tldr: 'Rivens follow Hotfix 44.1.3, with a new crafting suite and a build importer that reads screenshots.',
+    sections: [
+      { title: 'Changed', items: [
+        'Riven dispositions are gone, as of Hotfix 44.1.3. Every riven now rolls with the same 1.2 multiplier, so riven ranges, grades and the roll scanner use 1.2 for every weapon. The Arsenal shows each weapon\'s old number for reference.',
+        'Riven numbers from before October 22 can be converted in one click, in the editor, when importing a screenshot, and in your saved rivens. The old values come from DE\'s list in the patch notes.',
+        'The Riven tab now uses the wiki\'s full riven formula, so lower riven ranks follow it exactly.'
+      ] },
+      { title: 'Added', items: [
+        'Riven crafting suite (Riven tab): pick the traits you want and see your chance per cycle, the average cycles and Kuva, and when half or 90% of players would have it. Each trait on your riven also gets a row for locking it.',
+        'Splicing planner: plays out "cycle, lock, splice, cycle" hundreds of times for each recipe and compares smart locking with never locking.',
+        'Riven Splicing in the editor: splice buttons apply the recipe, keep the higher roll, and leave the new random trait for you to fill in.',
+        'Build importer (Builds tab): read mods from a screenshot of the in-game mod screen or from single mod cards, or type a list like "Serration 10". You check each match, rank and slot before anything changes. Screenshots stay on your device.',
+        'How the math works: a new section on riven math and crafting odds.'
+      ] },
+      { title: 'Notes', items: [
+        'DE has not published the riven cycling odds. The suite uses community testing (each layout about 1 in 4, every trait equally likely), and you can change the layout odds.',
+        'Ammo Efficiency is now capped at 75% (Hotfix 44.1.3). The calculator does not model ammo use, so damage numbers do not change.'
+      ] }
+    ]
+  },
+  {
     version: '0.14.0', date: '2026-10-19',
     tldr: 'The Windows app now updates itself.',
     sections: [
