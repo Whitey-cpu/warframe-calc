@@ -2,8 +2,2289 @@
  "source": "https://www.warframe.com/en/patch-notes",
  "note": "Parsed from the official Warframe patch notes. TL;DR = DE section headings plus item counts; mentions = names from the calculator data found in the notes.",
  "parser": 2,
- "checkedAt": "2026-10-16T03:17:56.647Z",
+ "checkedAt": "2026-10-22T21:55:38.818Z",
  "releases": [
+  {
+   "slug": "44-1-3",
+   "version": "44.1.3",
+   "kind": "hotfix",
+   "title": "Iceblade of Narin: The Icebind: Hotfix 44.1.3",
+   "url": "https://www.warframe.com/en/patch-notes/pc/44-1-3",
+   "forum": "https://forums.warframe.com/topic/1529796-iceblade-of-narin-the-icebind-hotfix-4413/",
+   "date": "2026-10-22",
+   "dateSource": "WARFRAME Wiki",
+   "tldr": "Arsenal Retuning Inbox Message; Ammo Efficiency; Sources of Infinite Ammo; Changes to Sources of Ammo Efficiency. 18 fixes, 28 other changes.",
+   "fixes": 18,
+   "changes": 28,
+   "highlights": [
+    "Arsenal Retuning Inbox Message",
+    "Ammo Efficiency",
+    "Sources of Infinite Ammo",
+    "Changes to Sources of Ammo Efficiency",
+    "Recursive \"Explode on Death\"",
+    "Riven Mod"
+   ],
+   "mentions": [
+    {
+     "name": "Acid Shells",
+     "kind": "Mod",
+     "n": 6
+    },
+    {
+     "name": "Knell",
+     "kind": "Weapon",
+     "n": 3
+    },
+    {
+     "name": "Akmagnus Prime",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Athodai",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Boltor",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Braton",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Braton Prime",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Bronco",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Corufell",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Cyte-09",
+     "kind": "Warframe",
+     "n": 2
+    },
+    {
+     "name": "Dera",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Dual Toxocyst",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Grakata",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Kama",
+     "kind": "Weapon",
+     "n": 2
+    },
+    {
+     "name": "Kunai",
+     "kind": "Weapon",
+     "n": 2
+    }
+   ],
+   "parts": [
+    {
+     "title": "Iceblade of Narin: The Icebind: Hotfix 44.1.3",
+     "sections": [
+      {
+       "title": "Arsenal Retuning Inbox Message",
+       "items": [
+        {
+         "p": "This hotfix brings changes to Ammo Efficiency, Riven Mods, and hot-off-the-presses Acid Shell interactions, so all players who log in after today's update will receive the following (until December 31st 2026 at 11:59pm ET):"
+        },
+        "2 Built Forma + 100,000 Kuva",
+        "NOTE: To ensure all players receive the inbox as intended, it will be delivered at 3:30pm ET.",
+        {
+         "p": "Players who have installed a Riven Splicer in a Riven Mod prior to today's hotfix will also receive the following in a separate inbox as a thank you for being an early adopter:"
+        },
+        "1 Riven Splicer + 100,000 Kuva",
+        "NOTE: This inbox requires a script to run, which we will do shortly after the hotfix launches."
+       ]
+      },
+      {
+       "title": "Ammo Efficiency Changes",
+       "items": [
+        {
+         "p": "Our recent introduction of Ammo Efficiency traits to Riven mods via Riven Splicers has made this stat more accessible to players, and led to much discussion internally on how the availability of infinite ammo builds affects Warframe's game balance."
+        },
+        {
+         "p": "Warframe is about the power fantasy, and infinite ammo is the epitome of that. Shooting endlessly into hordes of enemies can feel incredible, and we want players to be able to experience that - sometimes. The recent introduction of Riven Splicers has changed that \"sometimes\" for infinite ammo into a much more guaranteed thing, which has brought around this the following changes:"
+        },
+        "Ammo Efficiency is now capped at 75%.",
+        {
+         "t": "For those unfamiliar with the Ammo Efficiency mechanic, this means only 1 in 4 shots will consume ammo.",
+         "d": 1
+        },
+        {
+         "t": "This applies to Ammo Efficiency increases from multiple sources - they will only increase the stat up to this cap.",
+         "d": 1
+        },
+        {
+         "t": "The Ammo Efficiency cap applies to all equipment that uses Ammo, including Necramechs and Amps.",
+         "d": 1
+        },
+        "Sources that intentionally gave 100% Ammo Efficiency (ex: Void Relic cracking buffs) have now been rephrased to indicate they give Infinite Ammo.",
+        "There are other Mods, Arcanes, and Incarnon Evolutions that come with their own edge-cases, which we'll explain in detail below."
+       ]
+      },
+      {
+       "title": "Sources of Infinite Ammo",
+       "items": [
+        {
+         "p": "These mechanics remain unchanged, but their buff descriptions have been updated to specify that they give Infinite Ammo"
+        },
+        "Void Relic Cracking Buffs",
+        "Akmagnus Prime and Magnus Prime unique trait: Chamber Cascade",
+        "Athodai (Prime) unique trait: Overdrive",
+        "Dual Toxocyst unique trait: Frenzy",
+        "Knell (Prime) unique trait: Death Knell",
+        "Perigale (Prime) unique trait: Gale Force",
+        "Vasto Incarnon evolution: Reaper's Plenty"
+       ]
+      },
+      {
+       "title": "Changes to Sources of Ammo Efficiency",
+       "items": [
+        "AX-52:",
+        {
+         "t": "Was: Hip-fired shots have +60% Ammo Efficiency.",
+         "d": 1
+        },
+        {
+         "t": "Now: Hip-fired shots have +75% Ammo Efficiency.",
+         "d": 1
+        },
+        "Eternal Logistics:",
+        {
+         "t": "Note: the following change is a minor buff to the Arcane as its max rank Ammo Efficiency value was just below the cap.",
+         "d": 1
+        },
+        {
+         "t": "Was: On Void Sling:+72% Amp Ammo Efficiency for 8s",
+         "d": 1
+        },
+        {
+         "t": "Now: On Void Sling: +75% Amp Ammo Efficiency for 8s",
+         "d": 1
+        },
+        "Arcane Pistoleer",
+        {
+         "t": "Was: On Pistol Weak Point Kill: 60% chance for +102% (+17% at Unranked) Ammo Efficiency for 12s",
+         "d": 1
+        },
+        {
+         "t": "Now: On Pistol Weak Point Kill: 60% (10% at Unranked) Chance for Infinite Ammo for 12s",
+         "d": 1
+        },
+        "Brain Storm Augment (Grakata)",
+        {
+         "t": "Was: On Headshot: +100% (25% at Unranked) Ammo Efficiency for 0.5s (0.125s at Unranked)",
+         "d": 1
+        },
+        {
+         "t": "Now: On Headshot: 40% (10% at Unranked) Chance for Infinite Ammo for 2s (0.5s at Unranked)",
+         "d": 1
+        },
+        "Skull Shots Augment (Viper)",
+        {
+         "t": "Was: On Headshot: 100% Ammo Efficiency (25% at Unranked) for 2.0s (0.5s at Unranked)",
+         "d": 1
+        },
+        {
+         "t": "Now: On Headshot: 40% Chance for Infinite Ammo (10% chance at Unranked) for 2.0s (0.5s at Unranked)",
+         "d": 1
+        },
+        "Incarnon Evolution \"Enough for Everyone\" (Bronco)",
+        {
+         "t": "Was: +80% Ammo efficiency when 6 enemies are within 6m.",
+         "d": 1
+        },
+        {
+         "t": "Now: +75% Ammo efficiency when 6 enemies are within 6m.",
+         "d": 1
+        },
+        "Incarnon Evolution \"Crimson Overture\" (Dera and Boltor)",
+        {
+         "t": "Was: On Kill: +20% Ammo Efficiency for 5 seconds. Stacks up to 4x.",
+         "d": 1
+        },
+        {
+         "t": "Now: On Kill: +25% Ammo Efficiency for 5 seconds. Stacks up to 3x.",
+         "d": 1
+        },
+        {
+         "t": "Note: the increase to Base Damage is unchanged.",
+         "d": 1
+        },
+        "Lyon's \"Flowing Slayer\" blessing in The Descendia",
+        {
+         "t": "Was: Gain +90% Ammo Efficiency while Sliding or Crouching, but receive -30% Ammo Efficiency otherwise.",
+         "d": 1
+        },
+        {
+         "t": "Now: Gain +75% Ammo Efficiency while Sliding or Crouching, but receive -25% Ammo Efficiency otherwise.",
+         "d": 1
+        },
+        {
+         "t": "Also fixed this Blessing not applying properly in-mission.",
+         "d": 1
+        }
+       ]
+      },
+      {
+       "title": "Recursive \"Explode on Death\" Changes",
+       "items": [
+        {
+         "p": "Acid Shells has been a hot topic of late - for those unaware, it's a Sobek Augment that causes enemies to explode on death and deals radial damage that scales with enemy health. Alone, it's powerful, but it was made even more so via a niche interaction with Elemental Ammo, most commonly used with Cyte-09 (but also seen with Grendel, Oraxia, and Saryn, among others). These Elemental Ammo upgrades could cause Acid Shells to recursively trigger - meaning the one-time death explosion from a shot could instead be triggered infinitely if there were enough enemies to sustain it."
+        },
+        {
+         "p": "This build type has been on our radar for a while, but we didn't feel it was the right time to address it. As developers, we've been pretty transparent about our threshold to \"nerf\" content; the Cyte-09 and Acid Shells build never felt dominant or disruptive enough to warrant a closer look, but over the past few weeks that has changed. Arbitrations, discussions about Ammo Efficiency, and the introduction of the Epoch Operation: Taubound have rapidly increased the popularity of this build, to the point where we feel we need to address it."
+        },
+        {
+         "p": "For the sake of consistency, we have reviewed all death detonation effects as part of the following changes, since this mechanic is not unique to Acid Shells:"
+        },
+        "Fixed status effects caused by Elemental Ammo on \"enemies explode on death\" effects being able to retrigger the death explosion effects for the following Mods:",
+        {
+         "t": "Note: these Mods will still benefit from increased damage and status effects gained from Elemental Ammo - they just won't retrigger the death effects infinitely.",
+         "d": 1
+        },
+        {
+         "t": "Acid Shells",
+         "d": 1
+        },
+        {
+         "t": "Amalgam Furax Body Count",
+         "d": 1
+        },
+        {
+         "t": "Vulcan Blitz",
+         "d": 1
+        },
+        {
+         "t": "Explosive Demise",
+         "d": 1
+        },
+        {
+         "t": "Combustion Beam",
+         "d": 1
+        },
+        {
+         "t": "Thermagnetic Shells",
+         "d": 1
+        },
+        {
+         "t": "Entropy Detonation",
+         "d": 1
+        },
+        "Reduced Acid Shells' explosion radius from 15m to 10m."
+       ]
+      },
+      {
+       "title": "Riven Mod Changes",
+       "items": [
+        {
+         "p": "First introduced alongside the launch of Rivens in 2016, Riven Dispositions were internal multipliers that guided how strong Rivens would be on individual weapons - ranging from 0.5 on popular weapons, up to 1.55 on those lesser-used."
+        },
+        {
+         "p": "The intent of these Dispositions was to incentivize players to use less powerful weapons, but ultimately we saw that investment was still focused on making powerful weapons more powerful. Incarnons were a more successful attempt at breathing life into older outdated weapons, and the overlapping of these systems only multiplied their power further."
+        },
+        {
+         "p": "With all that in mind, we are making the following change:"
+        },
+        "Removed Riven Dispositions.",
+        {
+         "t": "All Rivens now use the same multiplier for their possible value ranges, the equivalent of 1.2 Disposition in the old system.",
+         "d": 1
+        },
+        {
+         "t": "For more information on the history behind this decision, please review our Dev Workshop.",
+         "d": 1
+        },
+        "Restored the ability to trade Riven Mods.",
+        {
+         "p": "⮞ Rifle Disposition Changes"
+        },
+        {
+         "p": "Acceltra: 0.65->1.2"
+        },
+        {
+         "p": "Acceltra Prime: 0.55->1.2"
+        },
+        {
+         "p": "Aeolak: No changes"
+        },
+        {
+         "p": "Afentis: 1.05->1.2"
+        },
+        {
+         "p": "Afentis Prime: 0.65->1.2"
+        },
+        {
+         "p": "Alternox: No changes"
+        },
+        {
+         "p": "Alternox Prime: 0.95->1.2"
+        },
+        {
+         "p": "Ambassador: 1.15->1.2"
+        },
+        {
+         "p": "Amprex: 0.85->1.2"
+        },
+        {
+         "p": "Argonak: 1.25->1.2"
+        },
+        {
+         "p": "Attica: 1.42->1.2"
+        },
+        {
+         "p": "AX-52: 0.85->1.2"
+        },
+        {
+         "p": "Basmu: No changes"
+        },
+        {
+         "p": "Battacor: 1.1->1.2"
+        },
+        {
+         "p": "Baza: 1.05->1.2"
+        },
+        {
+         "p": "Baza Prime: 1->1.2"
+        },
+        {
+         "p": "Boltor: 1.3->1.2"
+        },
+        {
+         "p": "Telos Boltor: No changes"
+        },
+        {
+         "p": "Boltor Prime: No changes"
+        },
+        {
+         "p": "MK1-Braton: 1.35->1.2"
+        },
+        {
+         "p": "Braton: 1.35->1.2"
+        },
+        {
+         "p": "Braton Prime: 1.25->1.2"
+        },
+        {
+         "p": "Braton Vandal: 1.3->1.2"
+        },
+        {
+         "p": "Burston: 1.45->1.2"
+        },
+        {
+         "p": "Burston Prime: 1.35->1.2"
+        },
+        {
+         "p": "Buzlok: 1.45->1.2"
+        },
+        {
+         "p": "Catchmoon (primary): 1.1->1.2"
+        },
+        {
+         "p": "Cernos: 1.3->1.2"
+        },
+        {
+         "p": "Rakta Cernos: 1.25->1.2"
+        },
+        {
+         "p": "Cernos Prime: 1.25->1.2"
+        },
+        {
+         "p": "Cinta: 1.25->1.2"
+        },
+        {
+         "p": "Daikyu: 1.3->1.2"
+        },
+        {
+         "p": "Daikyu Prime: 1->1.2"
+        },
+        {
+         "p": "Dera: 1.4->1.2"
+        },
+        {
+         "p": "Dera Vandal: 1.35->1.2"
+        },
+        {
+         "p": "Dread: 1.3->1.2"
+        },
+        {
+         "p": "EFV-5 Jupiter: 1.05->1.2"
+        },
+        {
+         "p": "Enkaus: 0.8->1.2"
+        },
+        {
+         "p": "Evensong: No changes"
+        },
+        {
+         "p": "Ferrox: 1.25->1.2"
+        },
+        {
+         "p": "Tenet Ferrox: 1.15->1.2"
+        },
+        {
+         "p": "Fulmin: 1->1.2"
+        },
+        {
+         "p": "Fulmin Prime: 0.75->1.2"
+        },
+        {
+         "p": "Flux Rifle: 1.55->1.2"
+        },
+        {
+         "p": "Tenet Flux Rifle: No changes"
+        },
+        {
+         "p": "Gaze (primary): 1.1->1.2"
+        },
+        {
+         "p": "Glaxion: 1.3->1.2"
+        },
+        {
+         "p": "Glaxion Vandal: 1.25->1.2"
+        },
+        {
+         "p": "Tenet Glaxion: 0.65->1.2"
+        },
+        {
+         "p": "Gorgon: 1.4->1.2"
+        },
+        {
+         "p": "Gorgon Wraith: 1.35->1.2"
+        },
+        {
+         "p": "Prisma Gorgon: 1.3->1.2"
+        },
+        {
+         "p": "Gotva Prime: 0.85->1.2"
+        },
+        {
+         "p": "Grakata: 1.35->1.2"
+        },
+        {
+         "p": "Prisma Grakata: 1.3->1.2"
+        },
+        {
+         "p": "Grinlok: 1.3->1.2"
+        },
+        {
+         "p": "Prisma Grinlok: 1.25->1.2"
+        },
+        {
+         "p": "Haalvu: 0.6->1.2"
+        },
+        {
+         "p": "Harpak: 1.55->1.2"
+        },
+        {
+         "p": "Hema: 1.3->1.2"
+        },
+        {
+         "p": "Coda Hema: 1->1.2"
+        },
+        {
+         "p": "Higasa: 1.25->1.2"
+        },
+        {
+         "p": "Hind: 1.42->1.2"
+        },
+        {
+         "p": "Kuva Hind: 1.1->1.2"
+        },
+        {
+         "p": "Ignis: 0.7->1.2"
+        },
+        {
+         "p": "Ignis Wraith: 0.65->1.2"
+        },
+        {
+         "p": "Javlok: 1.3->1.2"
+        },
+        {
+         "p": "Karak: 1.35->1.2"
+        },
+        {
+         "p": "Karak Wraith: 1.28->1.2"
+        },
+        {
+         "p": "Kuva Karak: 1.05->1.2"
+        },
+        {
+         "p": "Lanka: 1.05->1.2"
+        },
+        {
+         "p": "Latron: 1.4->1.2"
+        },
+        {
+         "p": "Latron Prime: 1.3->1.2"
+        },
+        {
+         "p": "Latron Wraith: 1.35->1.2"
+        },
+        {
+         "p": "Lenz: 1.05->1.2"
+        },
+        {
+         "p": "Prisma Lenz: 1->1.2"
+        },
+        {
+         "p": "Miter: 1.5->1.2"
+        },
+        {
+         "p": "Mutalist Cernos: 1.35->1.2"
+        },
+        {
+         "p": "Mutalist Quanta: 1.5->1.2"
+        },
+        {
+         "p": "Nagantaka: 1.3->1.2"
+        },
+        {
+         "p": "Nagantaka Prime: 1.15->1.2"
+        },
+        {
+         "p": "Nataruk: 0.65->1.2"
+        },
+        {
+         "p": "Nunchasa: 0.5->1.2"
+        },
+        {
+         "p": "Ogris: 1.3->1.2"
+        },
+        {
+         "p": "Kuva Ogris: 0.7->1.2"
+        },
+        {
+         "p": "Opticor: 1.15->1.2"
+        },
+        {
+         "p": "Opticor Vandal: 1.1->1.2"
+        },
+        {
+         "p": "Panthera: 1.4->1.2"
+        },
+        {
+         "p": "Panthera Prime: 1.25->1.2"
+        },
+        {
+         "p": "Paracyst: 1.3->1.2"
+        },
+        {
+         "p": "MK1-Paris: 1.45->1.2"
+        },
+        {
+         "p": "Paris: 1.4->1.2"
+        },
+        {
+         "p": "Paris Prime: 1.35->1.2"
+        },
+        {
+         "p": "Penta: 1.35->1.2"
+        },
+        {
+         "p": "Carmine Penta: 1.3->1.2"
+        },
+        {
+         "p": "Secura Penta: 1.3->1.2"
+        },
+        {
+         "p": "Perigale: 1.15->1.2"
+        },
+        {
+         "p": "Perigale Prime: 0.8->1.2"
+        },
+        {
+         "p": "Phenmor: 0.6->1.2"
+        },
+        {
+         "p": "Proboscis Cernos: 0.9->1.2"
+        },
+        {
+         "p": "Purgator 1: No changes"
+        },
+        {
+         "p": "Quanta: 1.4->1.2"
+        },
+        {
+         "p": "Quanta Vandal: 1.4->1.2"
+        },
+        {
+         "p": "Tenet Quanta: 0.85->1.2"
+        },
+        {
+         "p": "Quartakk: 1.25->1.2"
+        },
+        {
+         "p": "Kuva Quartakk: 1.1->1.2"
+        },
+        {
+         "p": "Quellor: 1.15->1.2"
+        },
+        {
+         "p": "Rattleguts (primary): 1->1.2"
+        },
+        {
+         "p": "Reconifex: 1->1.2"
+        },
+        {
+         "p": "Rubico: 0.95->1.2"
+        },
+        {
+         "p": "Rubico Prime: 0.7->1.2"
+        },
+        {
+         "p": "Scourge: No changes"
+        },
+        {
+         "p": "Scourge Prime: 1.1->1.2"
+        },
+        {
+         "p": "Shedu: 0.75->1.2"
+        },
+        {
+         "p": "Simulor: 1.25->1.2"
+        },
+        {
+         "p": "Synoid Simulor: No changes"
+        },
+        {
+         "p": "Snipetron: 1.3->1.2"
+        },
+        {
+         "p": "Snipetron Vandal: 1.25->1.2"
+        },
+        {
+         "p": "Soma: 1.15->1.2"
+        },
+        {
+         "p": "Soma Prime: 1.1->1.2"
+        },
+        {
+         "p": "Sporelacer (primary): 1.15->1.2"
+        },
+        {
+         "p": "Sporothrix: 1.3->1.2"
+        },
+        {
+         "p": "Coda Sporothrix: 0.95->1.2"
+        },
+        {
+         "p": "Stahlta: 1.05->1.2"
+        },
+        {
+         "p": "Stradavar: 1.1->1.2"
+        },
+        {
+         "p": "Stradavar Prime: 1.1->1.2"
+        },
+        {
+         "p": "Supra: 1.1->1.2"
+        },
+        {
+         "p": "Supra Vandal: 1->1.2"
+        },
+        {
+         "p": "Sybaris: 1.3->1.2"
+        },
+        {
+         "p": "Dex Sybaris: 1.3->1.2"
+        },
+        {
+         "p": "Sybaris Prime: No changes"
+        },
+        {
+         "p": "Synapse: 1.31->1.2"
+        },
+        {
+         "p": "Coda Synapse: 0.9->1.2"
+        },
+        {
+         "p": "Tenet Envoy: 0.65->1.2"
+        },
+        {
+         "p": "Tetra: 1.5->1.2"
+        },
+        {
+         "p": "Prisma Tetra: 1.45->1.2"
+        },
+        {
+         "p": "Tenet Tetra: 1.25->1.2"
+        },
+        {
+         "p": "Tenora: 1.1->1.2"
+        },
+        {
+         "p": "Tenora Prime: 1.05->1.2"
+        },
+        {
+         "p": "Thornbak: No changes"
+        },
+        {
+         "p": "Tiberon: 1.1->1.2"
+        },
+        {
+         "p": "Tiberon Prime: 1->1.2"
+        },
+        {
+         "p": "Tombfinger (primary): 1->1.2"
+        },
+        {
+         "p": "Tonkor: 1.3->1.2"
+        },
+        {
+         "p": "Kuva Tonkor: 0.9->1.2"
+        },
+        {
+         "p": "Torid: 1.3->1.2"
+        },
+        {
+         "p": "Trumna: 0.85->1.2"
+        },
+        {
+         "p": "Trumna Prime: 0.65->1.2"
+        },
+        {
+         "p": "Vadarya Prime: 0.8->1.2"
+        },
+        {
+         "p": "Vectis: 1.15->1.2"
+        },
+        {
+         "p": "Vectis Prime: 1->1.2"
+        },
+        {
+         "p": "Veldt: 1.3->1.2"
+        },
+        {
+         "p": "Vermisplicer (primary): 0.9->1.2"
+        },
+        {
+         "p": "Vinquibus (rifle): 0.6->1.2"
+        },
+        {
+         "p": "Vulkar: 1.45->1.2"
+        },
+        {
+         "p": "Vulkar Wraith: 1.4->1.2"
+        },
+        {
+         "p": "Zarr: 1.15->1.2"
+        },
+        {
+         "p": "Kuva Zarr: 0.7->1.2"
+        },
+        {
+         "p": "Zenith: 1.1->1.2"
+        },
+        {
+         "p": "Zhuge: No changes"
+        },
+        {
+         "p": "Zhuge Prime: 1.15->1.2"
+        },
+        {
+         "p": "⮞ Shotgun Disposition Changes"
+        },
+        {
+         "p": "Arca Plasmor: 0.95->1.2"
+        },
+        {
+         "p": "Tenet Arca Plasmor: 0.6->1.2"
+        },
+        {
+         "p": "Astilla: 1.3->1.2"
+        },
+        {
+         "p": "Astilla Prime: No changes"
+        },
+        {
+         "p": "Boar: 1.45->1.2"
+        },
+        {
+         "p": "Boar Prime: 1.34->1.2"
+        },
+        {
+         "p": "Bubonico: 0.75->1.2"
+        },
+        {
+         "p": "Coda Bubonico: 0.6->1.2"
+        },
+        {
+         "p": "Cedo: 0.65->1.2"
+        },
+        {
+         "p": "Cedo Prime: 0.55->1.2"
+        },
+        {
+         "p": "Coda Bassocyst: 0.6->1.2"
+        },
+        {
+         "p": "Convectrix: 1.46->1.2"
+        },
+        {
+         "p": "Corinth: 1.15->1.2"
+        },
+        {
+         "p": "Corinth Prime: 1->1.2"
+        },
+        {
+         "p": "Drakgoon: 1.4->1.2"
+        },
+        {
+         "p": "Kuva Drakgoon: 1.15->1.2"
+        },
+        {
+         "p": "Exergis: 1.1->1.2"
+        },
+        {
+         "p": "Felarx: 0.6->1.2"
+        },
+        {
+         "p": "Hek: No changes"
+        },
+        {
+         "p": "Vaykor Hek: 1.15->1.2"
+        },
+        {
+         "p": "Kuva Hek: 1->1.2"
+        },
+        {
+         "p": "Kohm: 1.3->1.2"
+        },
+        {
+         "p": "Kuva Kohm: 0.9->1.2"
+        },
+        {
+         "p": "Phage: 1.46->1.2"
+        },
+        {
+         "p": "Phantasma: 1.1->1.2"
+        },
+        {
+         "p": "Phantasma Prime: 0.8->1.2"
+        },
+        {
+         "p": "Rauta: 1.1->1.2"
+        },
+        {
+         "p": "Sobek: 1.33->1.2"
+        },
+        {
+         "p": "Kuva Sobek: 0.8->1.2"
+        },
+        {
+         "p": "Steflos: 1.25->1.2"
+        },
+        {
+         "p": "Steflos Prime: 0.5->1.2"
+        },
+        {
+         "p": "MK1-Strun: 1.45->1.2"
+        },
+        {
+         "p": "Strun: 1.4->1.2"
+        },
+        {
+         "p": "Strun Wraith: 1.35->1.2"
+        },
+        {
+         "p": "Strun Prime: No changes"
+        },
+        {
+         "p": "Tigris: 1.1->1.2"
+        },
+        {
+         "p": "Sancti Tigris: 1->1.2"
+        },
+        {
+         "p": "Tigris Prime: 0.95->1.2"
+        },
+        {
+         "p": "⮞ Secondary Disposition Changes"
+        },
+        {
+         "p": "Acrid: 1.33->1.2"
+        },
+        {
+         "p": "Aegrit: 1->1.2"
+        },
+        {
+         "p": "Afuris: 1.45->1.2"
+        },
+        {
+         "p": "Dex Furis: 1.39->1.2"
+        },
+        {
+         "p": "Afuris Prime: 1.1->1.2"
+        },
+        {
+         "p": "Akarius: 1.05->1.2"
+        },
+        {
+         "p": "Akarius Prime: 0.65->1.2"
+        },
+        {
+         "p": "Akbolto: 1.3->1.2"
+        },
+        {
+         "p": "Telos Akbolto: 1.25->1.2"
+        },
+        {
+         "p": "Akbolto Prime: No changes"
+        },
+        {
+         "p": "Akbronco: 1.35->1.2"
+        },
+        {
+         "p": "Akbronco Prime: 1.3->1.2"
+        },
+        {
+         "p": "Akjagara: 1.1->1.2"
+        },
+        {
+         "p": "Akjagara Prime: 1->1.2"
+        },
+        {
+         "p": "Aklato: 1.52->1.2"
+        },
+        {
+         "p": "Aklex: 1.05->1.2"
+        },
+        {
+         "p": "Aklex Prime: 0.95->1.2"
+        },
+        {
+         "p": "Akmagnus: 1.35->1.2"
+        },
+        {
+         "p": "Akmagnus Prime: 1.1->1.2"
+        },
+        {
+         "p": "Aksomati: 1.25->1.2"
+        },
+        {
+         "p": "Aksomati Prime: 1.1->1.2"
+        },
+        {
+         "p": "Aksondol: 0.5->1.2"
+        },
+        {
+         "p": "Akstiletto: 0.95->1.2"
+        },
+        {
+         "p": "Akstiletto Prime: 0.85->1.2"
+        },
+        {
+         "p": "Akvasto: 1.25->1.2"
+        },
+        {
+         "p": "Akvasto Prime: No changes"
+        },
+        {
+         "p": "Akzani: 1.52->1.2"
+        },
+        {
+         "p": "Angstrum: 1.35->1.2"
+        },
+        {
+         "p": "Prisma Angstrum: 1.3->1.2"
+        },
+        {
+         "p": "Arca Scisco: 1.1->1.2"
+        },
+        {
+         "p": "Athodai: 1.05->1.2"
+        },
+        {
+         "p": "Athodai Prime: 0.65->1.2"
+        },
+        {
+         "p": "Atomos: 0.95->1.2"
+        },
+        {
+         "p": "Azima: 1.25->1.2"
+        },
+        {
+         "p": "Ballistica: 1.25->1.2"
+        },
+        {
+         "p": "Rakta Ballistica: No changes"
+        },
+        {
+         "p": "Ballistica Prime: No changes"
+        },
+        {
+         "p": "Bolto: 1.51->1.2"
+        },
+        {
+         "p": "Brakk: 1.25->1.2"
+        },
+        {
+         "p": "Kuva Brakk: 0.95->1.2"
+        },
+        {
+         "p": "Bronco: 1.45->1.2"
+        },
+        {
+         "p": "Bronco Prime: 1.4->1.2"
+        },
+        {
+         "p": "Cantare: 1.05->1.2"
+        },
+        {
+         "p": "Castanas: 1.4->1.2"
+        },
+        {
+         "p": "Sancti Castanas: 1.35->1.2"
+        },
+        {
+         "p": "Catabolyst: No changes"
+        },
+        {
+         "p": "Coda Catabolyst: 0.7->1.2"
+        },
+        {
+         "p": "Catchmoon (secondary): 0.75->1.2"
+        },
+        {
+         "p": "Cestra: 1.52->1.2"
+        },
+        {
+         "p": "Cyanex: 1->1.2"
+        },
+        {
+         "p": "Cycron: No changes"
+        },
+        {
+         "p": "Tenet Cycron: 0.7->1.2"
+        },
+        {
+         "p": "Despair: 1.3->1.2"
+        },
+        {
+         "p": "Detron: 1.15->1.2"
+        },
+        {
+         "p": "Mara Detron: 1.15->1.2"
+        },
+        {
+         "p": "Tenet Detron: 1->1.2"
+        },
+        {
+         "p": "Dual Cestra: 1.35->1.2"
+        },
+        {
+         "p": "Secura Dual Cestra: 1.3->1.2"
+        },
+        {
+         "p": "Dual Coda Torxica: 0.55->1.2"
+        },
+        {
+         "p": "Dual Toxocyst: 1.35->1.2"
+        },
+        {
+         "p": "EFV-8 Mars: 1.05->1.2"
+        },
+        {
+         "p": "Embolist: 1.4->1.2"
+        },
+        {
+         "p": "Epitaph: 0.6->1.2"
+        },
+        {
+         "p": "Epitaph Prime: 0.55->1.2"
+        },
+        {
+         "p": "Euphona Prime: 0.95->1.2"
+        },
+        {
+         "p": "Furis: 1.35->1.2"
+        },
+        {
+         "p": "Fusilai: 1.35->1.2"
+        },
+        {
+         "p": "Gammacor:1.15->1.2"
+        },
+        {
+         "p": "Synoid Gammacor: 1.1->1.2"
+        },
+        {
+         "p": "Gaze (secondary): 1.05->1.2"
+        },
+        {
+         "p": "Grimoire: 0.6->1.2"
+        },
+        {
+         "p": "Hikou: 1.3->1.2"
+        },
+        {
+         "p": "Hikou Prime: 1.25->1.2"
+        },
+        {
+         "p": "Hystrix: No changes"
+        },
+        {
+         "p": "Hystrix Prime: 1.05->1.2"
+        },
+        {
+         "p": "Knell: 1.25->1.2"
+        },
+        {
+         "p": "Knell Prime: 0.85->1.2"
+        },
+        {
+         "p": "Kohmak: 1.35->1.2"
+        },
+        {
+         "p": "Kompressa: 1.15->1.2"
+        },
+        {
+         "p": "Kompressa Prime: 0.6->1.2"
+        },
+        {
+         "p": "Kraken: 1.53->1.2"
+        },
+        {
+         "p": "Kuva Kraken: 1.1->1.2"
+        },
+        {
+         "p": "Kulstar: 1.3->1.2"
+        },
+        {
+         "p": "MK1-Kunai: 1.51->1.2"
+        },
+        {
+         "p": "Kunai: 1.51->1.2"
+        },
+        {
+         "p": "Kuva Twin Stubbas: 1->1.2"
+        },
+        {
+         "p": "Laetum: 0.5->1.2"
+        },
+        {
+         "p": "Lato: 1.4->1.2"
+        },
+        {
+         "p": "Lato Prime: 1.35->1.2"
+        },
+        {
+         "p": "Lato Vandal: 1.35->1.2"
+        },
+        {
+         "p": "Lex: 1.25->1.2"
+        },
+        {
+         "p": "Lex Prime: No changes"
+        },
+        {
+         "p": "Magnus: 1.53->1.2"
+        },
+        {
+         "p": "Magnus Prime: 1.25->1.2"
+        },
+        {
+         "p": "Marelok: No changes"
+        },
+        {
+         "p": "Vaykor Marelok: 1.1->1.2"
+        },
+        {
+         "p": "Nukor: 1.45->1.2"
+        },
+        {
+         "p": "Kuva Nukor: 0.5->1.2"
+        },
+        {
+         "p": "Ocucor: No changes"
+        },
+        {
+         "p": "Onos: 0.85->1.2"
+        },
+        {
+         "p": "Pandero: No changes"
+        },
+        {
+         "p": "Pandero Prime: 1.1->1.2"
+        },
+        {
+         "p": "Plinx: No changes"
+        },
+        {
+         "p": "Tenet Plinx: 0.75->1.2"
+        },
+        {
+         "p": "Pox: No changes"
+        },
+        {
+         "p": "Coda Pox: 1.05->1.2"
+        },
+        {
+         "p": "Pyrana: 0.95->1.2"
+        },
+        {
+         "p": "Pyrana Prime: 0.65->1.2"
+        },
+        {
+         "p": "Quatz: No changes"
+        },
+        {
+         "p": "Rattleguts (secondary): 1->1.2"
+        },
+        {
+         "p": "Riot-848: 1->1.2"
+        },
+        {
+         "p": "Sagek Prime: 0.9->1.2"
+        },
+        {
+         "p": "Scyotid: 0.75->1.2"
+        },
+        {
+         "p": "Seer: 1.5->1.2"
+        },
+        {
+         "p": "Kuva Seer: 1.1->1.2"
+        },
+        {
+         "p": "Sepulcrum: 1.1->1.2"
+        },
+        {
+         "p": "Sicarus: No changes"
+        },
+        {
+         "p": "Sicarus Prime: 1.15->1.2"
+        },
+        {
+         "p": "Sonicor: 1.15->1.2"
+        },
+        {
+         "p": "Spectra: 1.49->1.2"
+        },
+        {
+         "p": "Spectra Vandal: 1.45->1.2"
+        },
+        {
+         "p": "Spira: 1.35->1.2"
+        },
+        {
+         "p": "Spira Prime: 1.25->1.2"
+        },
+        {
+         "p": "Sporelacer (secondary): 0.6->1.2"
+        },
+        {
+         "p": "Staticor: 0.9->1.2"
+        },
+        {
+         "p": "Stubba: 1.35->1.2"
+        },
+        {
+         "p": "Stug: 1.48->1.2"
+        },
+        {
+         "p": "Talons: 1.44->1.2"
+        },
+        {
+         "p": "Tenet Diplos: 0.8->1.2"
+        },
+        {
+         "p": "Tenet Spirex: 1.05->1.2"
+        },
+        {
+         "p": "Tombfinger (secondary): 0.9->1.2"
+        },
+        {
+         "p": "Twin Gremlins: No changes"
+        },
+        {
+         "p": "Prisma Twin Gremlins: 1.15->1.2"
+        },
+        {
+         "p": "Twin Kohmak: 1.25->1.2"
+        },
+        {
+         "p": "Twin Rogga: 1.3->1.2"
+        },
+        {
+         "p": "Twin Vipers: 1.45->1.2"
+        },
+        {
+         "p": "Twin Vipers Wraith: 1.41->1.2"
+        },
+        {
+         "p": "Tysis: 1.45->1.2"
+        },
+        {
+         "p": "Coda Tysis: 1->1.2"
+        },
+        {
+         "p": "Vasto 1.4->1.2"
+        },
+        {
+         "p": "Vasto Prime: 1.35->1.2"
+        },
+        {
+         "p": "Velox: 1.25->1.2"
+        },
+        {
+         "p": "Velox Prime: 0.85->1.2"
+        },
+        {
+         "p": "Vermisplicer (secondary): 1.15->1.2"
+        },
+        {
+         "p": "Vesper 77: 0.8->1.2"
+        },
+        {
+         "p": "Viper: 1.45->1.2"
+        },
+        {
+         "p": "Viper Wraith: 1.4->1.2"
+        },
+        {
+         "p": "Zakti: 1.25->1.2"
+        },
+        {
+         "p": "Zakti Prime: 1.1->1.2"
+        },
+        {
+         "p": "Zylok: 1.25->1.2"
+        },
+        {
+         "p": "Zylok Prime: 0.95->1.2"
+        },
+        {
+         "p": "Zymos: No changes"
+        },
+        {
+         "p": "⮞ Melee Disposition Changes"
+        },
+        {
+         "p": "Ack & Brunt: 1.35-1.2"
+        },
+        {
+         "p": "Amanata: 0.85->1.2"
+        },
+        {
+         "p": "Amphis: 1.5->1.2"
+        },
+        {
+         "p": "Anku: 1.46->1.2"
+        },
+        {
+         "p": "Ankyros: 1.5->1.2"
+        },
+        {
+         "p": "Ankyros Prime: 1.45->1.2"
+        },
+        {
+         "p": "Arca Titron: 1.3->1.2"
+        },
+        {
+         "p": "Argo & Vel: 1.15->1.2"
+        },
+        {
+         "p": "Arum Spinosa: 1.25->1.2"
+        },
+        {
+         "p": "Atterax: 1.15->1.2"
+        },
+        {
+         "p": "Azothane: 1.1->1.2"
+        },
+        {
+         "p": "Balla: 0.8->1.2"
+        },
+        {
+         "p": "MK1-Bo: 1.4->1.2"
+        },
+        {
+         "p": "Bo: 1.35->1.2"
+        },
+        {
+         "p": "Bo Prime: 1.35->1.2"
+        },
+        {
+         "p": "Boltace: 1.25->1.2"
+        },
+        {
+         "p": "Telos Boltace: 1.1->1.2"
+        },
+        {
+         "p": "Broken Scepter: 1.4->1.2"
+        },
+        {
+         "p": "Broken War: 1.15->1.2"
+        },
+        {
+         "p": "Cadus: 1.29->1.2"
+        },
+        {
+         "p": "Cassowar: 1.35->1.2"
+        },
+        {
+         "p": "Caustacyst: 1.3->1.2"
+        },
+        {
+         "p": "Coda Caustacyst: 0.85->1.2"
+        },
+        {
+         "p": "Ceramic Dagger: 1.43->1.2"
+        },
+        {
+         "p": "Cerata: 1.25->1.2"
+        },
+        {
+         "p": "Cobra & Crane: 1.35->1.2"
+        },
+        {
+         "p": "Cobra & Crane Prime: No changes"
+        },
+        {
+         "p": "Coda Motovore: 0.8->1.2"
+        },
+        {
+         "p": "Corufell: 1.05->1.2"
+        },
+        {
+         "p": "Corufell Prime: 0.5->1.2"
+        },
+        {
+         "p": "Cronus: 1.48->1.2"
+        },
+        {
+         "p": "Cyath: 1.05->1.2"
+        },
+        {
+         "p": "Dakra Prime: 1.1->1.2"
+        },
+        {
+         "p": "Dark Dagger: 1.1->1.2"
+        },
+        {
+         "p": "Rakta Dark Dagger: 1->1.2"
+        },
+        {
+         "p": "Dark Split-Sword: 1.3->1.2"
+        },
+        {
+         "p": "Dark Sword: 1.48->1.2"
+        },
+        {
+         "p": "Dehtat: 1.25->1.2"
+        },
+        {
+         "p": "Destreza: 1.25->1.2"
+        },
+        {
+         "p": "Destreza Prime: 1.14->1.2"
+        },
+        {
+         "p": "Dex Dakra: 1.35->1.2"
+        },
+        {
+         "p": "Dokrahm: 0.75->1.2"
+        },
+        {
+         "p": "Dorrclave: 1.1->1.2"
+        },
+        {
+         "p": "Dragon Nikana: 1.15->1.2"
+        },
+        {
+         "p": "Dual Cleavers: No changes"
+        },
+        {
+         "p": "Prisma Dual Cleavers: 1.1->1.2"
+        },
+        {
+         "p": "Dual Ether: 1.45->1.2"
+        },
+        {
+         "p": "Dual Heat Swords: 1.44->1.2"
+        },
+        {
+         "p": "Dual Ichor: 1.25->1.2"
+        },
+        {
+         "p": "Dual Kamas: 1.35->1.2"
+        },
+        {
+         "p": "Dual Kama Prime: 1.25->1.2"
+        },
+        {
+         "p": "Dual Keres: 1.1->1.2"
+        },
+        {
+         "p": "Dual Keres Prime: 0.8->1.2"
+        },
+        {
+         "p": "Dual Raza: 1.4->1.2"
+        },
+        {
+         "p": "Dual Skana: 1.48->1.2"
+        },
+        {
+         "p": "Dual Viciss: 0.8->1.2"
+        },
+        {
+         "p": "Dual Zoren: 1.44->1.2"
+        },
+        {
+         "p": "Dual Zoren Prime: 0.95->1.2"
+        },
+        {
+         "p": "Edun: 1.15->1.2"
+        },
+        {
+         "p": "Ekhein: No changes"
+        },
+        {
+         "p": "Endura: 1.4->1.2"
+        },
+        {
+         "p": "Ether Daggers: 1.49->1.2"
+        },
+        {
+         "p": "Ether Reaper: 1.45->1.2"
+        },
+        {
+         "p": "Ether Sword: 1.44->1.2"
+        },
+        {
+         "p": "Falcor: 1.3->1.2"
+        },
+        {
+         "p": "Fang: 1.36->1.2"
+        },
+        {
+         "p": "Fang Prime: 1.3->1.2"
+        },
+        {
+         "p": "Fragor: No changes"
+        },
+        {
+         "p": "Fragor Prime: 1.05->1.2"
+        },
+        {
+         "p": "Mk1-Furax: 1.45->1.2"
+        },
+        {
+         "p": "Furax: 1.38->1.2"
+        },
+        {
+         "p": "Furax Wraith: 1.15->1.2"
+        },
+        {
+         "p": "Galariak Prime: 0.9->1.2"
+        },
+        {
+         "p": "Galatine: 1.05->1.2"
+        },
+        {
+         "p": "Galatine Prime: 0.9->1.2"
+        },
+        {
+         "p": "Galvacord: 1.35->1.2"
+        },
+        {
+         "p": "Gazal Machete: 1.4->1.2"
+        },
+        {
+         "p": "Ghoulsaw: 1.25->1.2"
+        },
+        {
+         "p": "Kuva Ghoulsaw: 0.8->1.2"
+        },
+        {
+         "p": "Glaive: 1.3->1.2"
+        },
+        {
+         "p": "Glaive Prime: 0.7->1.2"
+        },
+        {
+         "p": "Gram: 1.44->1.2"
+        },
+        {
+         "p": "Gram Prime: 0.8->1.2"
+        },
+        {
+         "p": "Guandao: 1.05->1.2"
+        },
+        {
+         "p": "Guandao Prime: 0.7->1.2"
+        },
+        {
+         "p": "Gunsen: 1.35->1.2"
+        },
+        {
+         "p": "Gunsen Prime: 1->1.2"
+        },
+        {
+         "p": "Halikar: 1.44->1.2"
+        },
+        {
+         "p": "Halikar Wraith: No changes"
+        },
+        {
+         "p": "Harmony: 0.6->1.2"
+        },
+        {
+         "p": "Hate: 1.1->1.2"
+        },
+        {
+         "p": "Heat Dagger: 1.44->1.2"
+        },
+        {
+         "p": "Heat Sword: 1.48->1.2"
+        },
+        {
+         "p": "Heliocor: 1.35->1.2"
+        },
+        {
+         "p": "Synoid Heliocor: 1.35->1.2"
+        },
+        {
+         "p": "Hespar: 1.05->1.2"
+        },
+        {
+         "p": "Hirudo: 1.15->1.2"
+        },
+        {
+         "p": "Coda Hirudo: 0.75->1.2"
+        },
+        {
+         "p": "Innodem: 0.65->1.2"
+        },
+        {
+         "p": "Jat Kittag: 1.35->1.2"
+        },
+        {
+         "p": "Jat Kusar: No changes"
+        },
+        {
+         "p": "Jaw Sword: 1.4->1.2"
+        },
+        {
+         "p": "Kama: 1.47->1.2"
+        },
+        {
+         "p": "Karyst: 1.35->1.2"
+        },
+        {
+         "p": "Karyst Prime: 1.15->1.2"
+        },
+        {
+         "p": "Keratinos: 1.05->1.2"
+        },
+        {
+         "p": "Kesheg: 1.35->1.2"
+        },
+        {
+         "p": "Kestrel: 1.45->1.2"
+        },
+        {
+         "p": "Kestrel Prime: 0.85->1.2"
+        },
+        {
+         "p": "Kogake: 1.46->1.2"
+        },
+        {
+         "p": "Kogake Prime: 1.4->1.2"
+        },
+        {
+         "p": "Korrudo: 1.35->1.2"
+        },
+        {
+         "p": "Korrum: 1.1->1.2"
+        },
+        {
+         "p": "Kreska: 1.35->1.2"
+        },
+        {
+         "p": "Krohkur: 1.35->1.2"
+        },
+        {
+         "p": "Kronen: 1.43->1.2"
+        },
+        {
+         "p": "Kronen Prime: 0.7->1.2"
+        },
+        {
+         "p": "Kronsh: 1.3->1.2"
+        },
+        {
+         "p": "Kuva Shildeg: 0.85->1.2"
+        },
+        {
+         "p": "Lacera: 1.31->1.2"
+        },
+        {
+         "p": "Ceti Lacera: No changes"
+        },
+        {
+         "p": "Lecta: 1.25->1.2"
+        },
+        {
+         "p": "Secura Lecta: No changes"
+        },
+        {
+         "p": "Lesion: 0.85->1.2"
+        },
+        {
+         "p": "Machete: 1.45->1.2"
+        },
+        {
+         "p": "Machete Wraith: 1.4->1.2"
+        },
+        {
+         "p": "Prisma Machete: 1.45->1.2"
+        },
+        {
+         "p": "Magistar: 1.35->1.2"
+        },
+        {
+         "p": "Sancti Magistar: 1.25->1.2"
+        },
+        {
+         "p": "Masseter: 1.25->1.2"
+        },
+        {
+         "p": "Masseter Prime: 1->1.2"
+        },
+        {
+         "p": "Mewan: 1.15->1.2"
+        },
+        {
+         "p": "Mios: 1.3->1.2"
+        },
+        {
+         "p": "Mire: 1.3->1.2"
+        },
+        {
+         "p": "Coda Mire: 0.75->1.2"
+        },
+        {
+         "p": "Nami Skyla: 1.3->1.2"
+        },
+        {
+         "p": "Nami Skyla Prime: 1->1.2"
+        },
+        {
+         "p": "Nami Solo: 1.43->1.2"
+        },
+        {
+         "p": "Nepheri: 0.95->1.2"
+        },
+        {
+         "p": "Nikana: 0.95->1.2"
+        },
+        {
+         "p": "Dex Nikana: 1.1->1.2"
+        },
+        {
+         "p": "Nikana Prime: 0.6->1.2"
+        },
+        {
+         "p": "Ninkondi: 1.41->1.2"
+        },
+        {
+         "p": "Ninkondi Prime: 1.1->1.2"
+        },
+        {
+         "p": "Obex: 1.3->1.2"
+        },
+        {
+         "p": "Prisma Obex: 1.25->1.2"
+        },
+        {
+         "p": "Ohma: 1.25->1.2"
+        },
+        {
+         "p": "Prisma Ohma: 0.95->1.2"
+        },
+        {
+         "p": "Okina: 1.4->1.2"
+        },
+        {
+         "p": "Okina Prime: 0.7->1.2"
+        },
+        {
+         "p": "Ooltha: 1.3->1.2"
+        },
+        {
+         "p": "Orthos: 1->1.2"
+        },
+        {
+         "p": "Orthos Prime: 0.7->1.2"
+        },
+        {
+         "p": "Orvius: 1.35->1.2"
+        },
+        {
+         "p": "Pangolin Sword: 1.47->1.2"
+        },
+        {
+         "p": "Pangolin Prime: 1.05->1.2"
+        },
+        {
+         "p": "Paracesis: 0.65->1.2"
+        },
+        {
+         "p": "Pathocyst: 1.35->1.2"
+        },
+        {
+         "p": "Coda Pathocyst: 0.65->1.2"
+        },
+        {
+         "p": "Pennant: 0.95->1.2"
+        },
+        {
+         "p": "Plague Keewar: 0.9->1.2"
+        },
+        {
+         "p": "Plague Kripath: 0.65->1.2"
+        },
+        {
+         "p": "Plasma Sword: 1.48->1.2"
+        },
+        {
+         "p": "Praedos: 0.6->1.2"
+        },
+        {
+         "p": "Pride: 0.7->1.2"
+        },
+        {
+         "p": "Prova: 1.4->1.2"
+        },
+        {
+         "p": "Prova Vandal: 1.35->1.2"
+        },
+        {
+         "p": "Pulmonars: No changes"
+        },
+        {
+         "p": "Pupacyst: 1.35->1.2"
+        },
+        {
+         "p": "Quassus: 1.15->1.2"
+        },
+        {
+         "p": "Quassus Prime: 0.9->1.2"
+        },
+        {
+         "p": "Rabvee: 1.3->1.2"
+        },
+        {
+         "p": "Reaper Prime: 0.8->1.2"
+        },
+        {
+         "p": "Redeemer: 1.05->1.2"
+        },
+        {
+         "p": "Redeemer Prime: 0.65->1.2"
+        },
+        {
+         "p": "Ripkas: 1.3->1.2"
+        },
+        {
+         "p": "Rumblejack: No changes"
+        },
+        {
+         "p": "Ruvox: 0.9->1.2"
+        },
+        {
+         "p": "Sampotes: 1->1.2"
+        },
+        {
+         "p": "Sarofang: 1.15->1.2"
+        },
+        {
+         "p": "Sarofang Prime: 0.75->1.2"
+        },
+        {
+         "p": "Sarpa: No changes"
+        },
+        {
+         "p": "Scindo: 1.35->1.2"
+        },
+        {
+         "p": "Scindo Prime: 1.3->1.2"
+        },
+        {
+         "p": "Scoliac: 1.3->1.2"
+        },
+        {
+         "p": "Sepfahn: 0.7->1.2"
+        },
+        {
+         "p": "Serro: 1.38->1.2"
+        },
+        {
+         "p": "Shaku: 1.35->1.2"
+        },
+        {
+         "p": "Sheev: 1.35->1.2"
+        },
+        {
+         "p": "Sibear: 1.35->1.2"
+        },
+        {
+         "p": "Sigma & Octantis: 1.1->1.2"
+        },
+        {
+         "p": "Silva & Aegis: 1.15->1.2"
+        },
+        {
+         "p": "Silva & Aegis Prime: 1.05->1.2"
+        },
+        {
+         "p": "Skana: 1.3->1.2"
+        },
+        {
+         "p": "Skana Prime: No changes"
+        },
+        {
+         "p": "Prisma Skana: No changes"
+        },
+        {
+         "p": "Skiajati: 0.9->1.2"
+        },
+        {
+         "p": "Slaytra: 1.05->1.2"
+        },
+        {
+         "p": "Spinnerex: 0.85->1.2"
+        },
+        {
+         "p": "Stropha: 0.65->1.2"
+        },
+        {
+         "p": "Sun & Moon: 0.8->1.2"
+        },
+        {
+         "p": "Syam: 0.75->1.2"
+        },
+        {
+         "p": "Sydon: 1.35->1.2"
+        },
+        {
+         "p": "Vaykor Sydon: 1.3->1.2"
+        },
+        {
+         "p": "Tak & Lug: 1.05->1.2"
+        },
+        {
+         "p": "Tatsu: 1.05->1.2"
+        },
+        {
+         "p": "Tatsu Prime: 0.9->1.2"
+        },
+        {
+         "p": "Tekko: 1.4->1.2"
+        },
+        {
+         "p": "Tekko Prime: 1.3->1.2"
+        },
+        {
+         "p": "Tenet Agendus: 0.9->1.2"
+        },
+        {
+         "p": "Tenet Exec: 0.8->1.2"
+        },
+        {
+         "p": "Tenet Grigori: 0.95->1.2"
+        },
+        {
+         "p": "Tenet Livia: 0.95->1.2"
+        },
+        {
+         "p": "Thalys: 0.65->1.2"
+        },
+        {
+         "p": "Tipedo: 1.31->1.2"
+        },
+        {
+         "p": "Tipedo Prime: 1.25->1.2"
+        },
+        {
+         "p": "Tonbo: 1.38->1.2"
+        },
+        {
+         "p": "Tonkkatt: 0.95->1.2"
+        },
+        {
+         "p": "Twin Basolk: 1.3->1.2"
+        },
+        {
+         "p": "Twin Krohkur: No changes"
+        },
+        {
+         "p": "Vastilok: 0.9->1.2"
+        },
+        {
+         "p": "Venato: 1.3->1.2"
+        },
+        {
+         "p": "Venato Prime: 0.65->1.2"
+        },
+        {
+         "p": "Venka: 1.1->1.2"
+        },
+        {
+         "p": "Venka Prime: 0.85->1.2"
+        },
+        {
+         "p": "Verdilac: 1.1->1.2"
+        },
+        {
+         "p": "Vericres: 1.15->1.2"
+        },
+        {
+         "p": "Vinquibus (Melee): 0.7->1.2"
+        },
+        {
+         "p": "Vitrica: 1.1->1.2"
+        },
+        {
+         "p": "Volnus: 1.4->1.2"
+        },
+        {
+         "p": "Volnus Prime: 1.3->1.2"
+        },
+        {
+         "p": "War: 1.05->1.2"
+        },
+        {
+         "p": "War Prime: 0.65->1.2"
+        },
+        {
+         "p": "Wolf Sledge: 1.25->1.2"
+        },
+        {
+         "p": "Wrath: 0.7->1.2"
+        },
+        {
+         "p": "Xoris: 0.65->1.2"
+        },
+        {
+         "p": "Zenistar: 1.15->1.2"
+        },
+        {
+         "p": "⮞ Archgun Disposition Changes"
+        },
+        {
+         "p": "Arbucep: 0.7->1.2"
+        },
+        {
+         "p": "Cortege: 1->1.2"
+        },
+        {
+         "p": "Corvas: No changes"
+        },
+        {
+         "p": "Corvas Prime: 1->1.2"
+        },
+        {
+         "p": "Dual Decurion: 1.3->1.2"
+        },
+        {
+         "p": "Prisma Dual Decurions: 1.25->1.2"
+        },
+        {
+         "p": "Cyngas: 1.3->1.2"
+        },
+        {
+         "p": "Fluctus: 1.3->1.2"
+        },
+        {
+         "p": "Grattler: 1.1->1.2"
+        },
+        {
+         "p": "Kuva Grattler: 0.7->1.2"
+        },
+        {
+         "p": "Imperator: 1.1->1.2"
+        },
+        {
+         "p": "Imperator Vandal: 0.95->1.2"
+        },
+        {
+         "p": "Kuva Ayanga: 0.95->1.2"
+        },
+        {
+         "p": "Larkspur: 1.05->1.2"
+        },
+        {
+         "p": "Larkspur Prime: 0.8->1.2"
+        },
+        {
+         "p": "Mandonel: 1.1->1.2"
+        },
+        {
+         "p": "Mausolon: 0.5->1.2"
+        },
+        {
+         "p": "Morgha: 1->1.2"
+        },
+        {
+         "p": "Phaedra: 1.25->1.2"
+        },
+        {
+         "p": "Velocitus: 1.1->1.2"
+        },
+        {
+         "p": "⮞ Companion Weapon Disposition Changes"
+        },
+        {
+         "p": "Akaten: 1->1.2"
+        },
+        {
+         "p": "Artax: 1->1.2"
+        },
+        {
+         "p": "Batoten: 1->1.2"
+        },
+        {
+         "p": "Burst Laser: 1.45->1.2"
+        },
+        {
+         "p": "Prisma Burst Laser: 1.45->1.2"
+        },
+        {
+         "p": "Burst Laser Prime: 1.45->1.2"
+        },
+        {
+         "p": "Cryotra: 1->1.2"
+        },
+        {
+         "p": "Deconstructor: 1.25->1.2"
+        },
+        {
+         "p": "Deconstructor Prime: 1.25->1.2"
+        },
+        {
+         "p": "Deth Machine Rifle: 1.46->1.2"
+        },
+        {
+         "p": "Deth Machine Rifle Prime: 1.46->1.2"
+        },
+        {
+         "p": "Helstrum: 1->1.2"
+        },
+        {
+         "p": "Lacerten: 1->1.2"
+        },
+        {
+         "p": "Laser Rifle: 1.21->1.2"
+        },
+        {
+         "p": "Prime Laser Rifle: 1.21->1.2"
+        },
+        {
+         "p": "Multron: 1->1.2"
+        },
+        {
+         "p": "Stinger 1.32->1.2"
+        },
+        {
+         "p": "Sweeper: 1->1.2"
+        },
+        {
+         "p": "Sweeper Prime: 1->1.2"
+        },
+        {
+         "p": "Tazicor: 1->1.2"
+        },
+        {
+         "p": "Verglas: 1.3->1.2"
+        },
+        {
+         "p": "Verglas Prime: 1.3->1.2"
+        },
+        {
+         "p": "Vulcax: 1->1.2"
+        },
+        {
+         "p": "Vulklok: 1.25->1.2"
+        }
+       ]
+      },
+      {
+       "title": "General Additions & Changes",
+       "items": [
+        "Added the new Axi C13 Relic to mission drop tables to address the Braton Prime Receiver unintentionally being vaulted.",
+        "The search function in the Peely Pix menu now also searches Peely Pix descriptions.",
+        "Credit Bundles now have a multiple purchase option (notably for the Credit Bundles in Praghasa's wares)."
+       ]
+      },
+      {
+       "title": "Fixes",
+       "items": [
+        "Fixed casting the Void of the Lotus ability with specific controller inputs causing players to experience extreme slow mode in the Lua quest.",
+        "Fixed the Vessel's Gaze dealing no damage if the ability was used before a specific segment in the Vessel quest.",
+        "Fixed being unable to chatlink Riven Splicers.",
+        "Fixed the Security Bypass terminal waypoint disappearing once Yareli mounts Merulina.",
+        "Fixed performance issues caused by Yareli casting Jade Stars while on Merulina.",
+        "Fixed the gas clouds spawned by Toxic Amphors dealing damage to players.",
+        "Fixed the Adarza and Smeeta Kavats missing their hair tufts.",
+        "Fixed the Lotus' Epoch Operation: Taubound inbox message not specifying that Praghasa is found on Eris.",
+        "Fixed upgrading Boreal's Hatred sometimes displaying incorrect stats if certain Numerical Separator settings were applied.",
+        "Fixed subtitles for a certain character during the Lua quest not indicating they are a foe.",
+        "Fixed rare cases of players not receiving the Vessel quest key upon completion of the Lua quest in the Prologue to Tau series.",
+        {
+         "t": "A small number of players were affected by this issue, and should see the missing quest key in their inventories.",
+         "d": 1
+        },
+        "Fixed the End of Mission cinematic zooming in too closely to the squad in The Icebind.",
+        "Fixed being unable to use Fast Travel while in the hallway leading to the Dark Refractory in the Sanctum Anatomica.",
+        "Fixed ambient music not stopping when returning to the Mountain Pass in The War Within quest."
+       ]
+      },
+      {
+       "title": "Script Error Fixes",
+       "items": [
+        {
+         "p": "Script errors mean that something went wrong when the game client was executing a script, which can have various outcomes. Usually it means the related content didn't function properly under specific circumstances - often we don't actually know what the error outcome was, so we list it as a Script Error fix to indicate it was addressing an unintended behaviour."
+        },
+        "Fixed a script error related to Market search sorting.",
+        "Fixed a script error caused by the electric traps in the Kuva Fortress tileset.",
+        "Fixed a script error related to the Belfri Ephemera.",
+        {
+         "p": "For a list of known issues that are on our radar, visit our dedicated thread: https://forums.warframe.com/topic/1523875-known-issues-iceblade-of-narin"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
   {
    "slug": "44-1-2",
    "version": "44.1.2",
@@ -6737,98 +9018,6 @@
         "Fixed a script error related to unmanned Dargyns in the Plains of Eidolon.",
         "Fixed a script error related to Nidus' Link.",
         "Fixed a script error related to Protea's Dispensary.",
-        {
-         "p": "For list of known issues that are on our radar, visit our dedicated thread: https://forums.warframe.com/topic/1509550-known-issues-jade-shadows-constellations/"
-        }
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "slug": "43-0-6",
-   "version": "43.0.6",
-   "kind": "hotfix",
-   "title": "Jade Shadows: Constellations: Hotfix 43.0.6",
-   "url": "https://www.warframe.com/en/patch-notes/pc/43-0-6",
-   "forum": "https://forums.warframe.com/topic/1514654-jade-shadows-constellations-hotfix-4306/",
-   "date": "2026-06-30",
-   "dateSource": "WARFRAME Wiki",
-   "tldr": "Steel Essence Acquisition in Steel Path Railjack; PC Exclusive. 13 fixes, 3 other changes.",
-   "fixes": 13,
-   "changes": 3,
-   "highlights": [
-    "Steel Essence Acquisition in Steel Path Railjack",
-    "PC Exclusive"
-   ],
-   "mentions": [
-    {
-     "name": "Jade",
-     "kind": "Warframe",
-     "n": 2
-    },
-    {
-     "name": "Obex",
-     "kind": "Weapon",
-     "n": 1
-    },
-    {
-     "name": "Sirius & Orion",
-     "kind": "Warframe",
-     "n": 1
-    }
-   ],
-   "parts": [
-    {
-     "title": "Jade Shadows: Constellations: Hotfix 43.0.6",
-     "sections": [
-      {
-       "title": "Steel Essence Acquisition in Steel Path Railjack",
-       "items": [
-        "Steel Path Railjack missions now reward 2 Steel Essence upon mission completion.",
-        {
-         "t": "Removed Steel Essence from Eximus drop tables in Steel Path Railjack missions.",
-         "d": 1
-        },
-        {
-         "t": "With the introduction of Steel Path Railjack, we added Steel Essence to Eximus drop tables since Acolytes cannot reliably spawn in Railjack missions. This system unfortunately did not meet our goals: space-only \"casual\" Railjack missions saw little in terms of Steel Essence acquisition, while savvy players were able to acquire significant amounts of Steel Essence in endless Railjack missions with the right amplified setup. Our aim is to serve all Railjack players, so we're changing our approach with this hotfix!",
-         "d": 1
-        }
-       ]
-      },
-      {
-       "title": "Top Fixes",
-       "items": [
-        "Fixed Sirius & Orion's attacks no longer triggering Jade Stars.",
-        {
-         "t": "Also reduced the SFX of Sirius' Jade Stars.",
-         "d": 1
-        },
-        "Fixed Combat Discipline not triggering when equipped on Sirius.",
-        "Fixed Sirius's Coronal Ejection only dealing one Heat Status effect regardless of its modded Status Chance.",
-        "Fixed the Obex Incarnon \"Rapid Conclusion\" Evolution treating Mercy and Finisher kills separately, causing stacks to reset from eligible kills.",
-        "Fixed enemies flying out of the map in Archwing Interception missions, causing players to not be able to complete the mission."
-       ]
-      },
-      {
-       "title": "PC Exclusive Changes and Fixes",
-       "items": [
-        "Improved handling of shader corruption.",
-        "Improved defenses against drawing with broken shaders.",
-        "Fixed the launcher's mute button not saving preferences on future game launches."
-       ]
-      },
-      {
-       "title": "Fixes",
-       "items": [
-        "Fixed the Mawbound Director not dealing any damage in The Kuva Wytch mission.",
-        "Fixed cases of borrowed Railjacks not being at full health at the start of Uranus Proxima missions.",
-        "Fixed the Scoria's Angel mission being progression stopped if players enter the Ramsled with a dead squadmate.",
-        "Fixed Clients rejoining into space if a host migration occurred right after boarding the Scoria Angel in its Uranus Proxima mission.",
-        "Fixed a script error in Uranus Proxima missions.",
-        "Fixed a script error in the Arsenal.",
-        "Fixed a script error related to the KIM system.",
         {
          "p": "For list of known issues that are on our radar, visit our dedicated thread: https://forums.warframe.com/topic/1509550-known-issues-jade-shadows-constellations/"
         }
