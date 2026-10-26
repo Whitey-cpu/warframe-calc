@@ -1,15 +1,15 @@
 {
- "builtAt": "2026-10-19T16:35:18.326Z",
- "dataVersion": "1.1276.26",
+ "builtAt": "2026-10-26T16:18:09.931Z",
+ "dataVersion": "1.1276.36",
  "gameBuild": {
-  "latestHotfix": "44.1.2",
+  "latestHotfix": "44.1.3",
   "latestUpdate": {
    "number": "44.1.0",
    "name": "Iceblade of Narin: The Icebind",
    "date": "Oct 7, 2026"
   },
   "source": "https://www.warframe.com/en/patch-notes",
-  "checkedAt": "2026-10-19T16:31:14.912Z"
+  "checkedAt": "2026-10-26T16:10:57.297Z"
  },
  "scenario": {
   "unit": "Heavy Gunner",
@@ -22,7 +22,7 @@
   "metric": "Sustained DPS",
   "mods": "quick optimizer (beam 4), no riven, no Warframe buffs"
  },
- "note": "Ranked by this site's damage math only. Sleepers = riven disposition 1.3 or higher (DE assigns these to the least-used weapons, per the WARFRAME Wiki) that still rank high here.",
+ "note": "Ranked only by the damage math here. Sleepers = weapons DE rated 1.3 or higher in its last riven disposition list before retiring dispositions in Hotfix 44.1.3 (2026-10-22). DE gave high dispositions to the least-used weapons, per the WARFRAME Wiki, so these were rarely used yet still rank high here.",
  "categories": {
   "Primary": {
    "count": 0,

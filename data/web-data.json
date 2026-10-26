@@ -1,14 +1,14 @@
 {
- "scrapedAt": "2026-10-19T16:31:15.175Z",
+ "scrapedAt": "2026-10-26T16:10:57.623Z",
  "build": {
-  "latestHotfix": "44.1.2",
+  "latestHotfix": "44.1.3",
   "latestUpdate": {
    "number": "44.1.0",
    "name": "Iceblade of Narin: The Icebind",
    "date": "Oct 7, 2026"
   },
   "source": "https://www.warframe.com/en/patch-notes",
-  "checkedAt": "2026-10-19T16:31:14.912Z"
+  "checkedAt": "2026-10-26T16:10:57.297Z"
  },
  "incarnon": {
   "weapons": [
@@ -831,7 +831,7 @@
      "Boltor Prime"
     ],
     "source": "https://wiki.warframe.com/w/Boltor_Incarnon_Genesis",
-    "lastEdited": "2026-09-29T21:43:59Z",
+    "lastEdited": "2026-10-22T19:31:22Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -866,12 +866,12 @@
         "name": "Crimson Overture",
         "text": [
          "Increase Base Damage by +X.",
-         "On Kill: Increase Base Damage by +2 and +20% Ammo Efficiency for 5 seconds. Stacks up to Yx"
+         "On Kill: +25% Ammo Efficiency for 5s. Stacks up to 3x."
         ],
         "values": {
-         "Boltor": "X = 12 Y = 4",
-         "Telos Boltor": "X = 0 Y = 3",
-         "Boltor Prime": "X = 0 Y = 3"
+         "Boltor": "X = 12",
+         "Telos Boltor": "X = 0",
+         "Boltor Prime": "X = 0"
         },
         "notes": ""
        }
@@ -1099,7 +1099,7 @@
      "Bronco Prime"
     ],
     "source": "https://wiki.warframe.com/w/Bronco_Incarnon_Genesis",
-    "lastEdited": "2026-09-29T21:52:01Z",
+    "lastEdited": "2026-10-22T19:27:17Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -1178,7 +1178,7 @@
        {
         "name": "Enough for Everyone",
         "text": [
-         "+80% Ammo efficiency when 6 enemies are within 6m."
+         "+75% Ammo efficiency when 6 enemies are within 6m."
         ],
         "values": {},
         "notes": ""
@@ -1529,7 +1529,7 @@
      "Dera Vandal"
     ],
     "source": "https://wiki.warframe.com/w/Dera_Incarnon_Genesis",
-    "lastEdited": "2026-09-29T21:45:13Z",
+    "lastEdited": "2026-10-22T19:29:06Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -1551,7 +1551,7 @@
         "name": "Crimson Overture",
         "text": [
          "Increase Base Damage by +X.",
-         "On Kill: +20% Ammo Efficiency for 5s. Stacks up to 4x."
+         "On Kill: +25% Ammo Efficiency for 5s. Stacks up to 3x."
         ],
         "values": {
          "Dera": "X = 8",
@@ -4169,7 +4169,7 @@
      "Okina Prime"
     ],
     "source": "https://wiki.warframe.com/w/Okina_Incarnon_Genesis",
-    "lastEdited": "2026-08-11T05:10:36Z",
+    "lastEdited": "2026-10-20T16:07:35Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -5338,7 +5338,7 @@
      "Soma Prime"
     ],
     "source": "https://wiki.warframe.com/w/Soma_Incarnon_Genesis",
-    "lastEdited": "2026-09-29T21:47:14Z",
+    "lastEdited": "2026-10-23T14:44:34Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -5404,7 +5404,7 @@
         "notes": ""
        }
       ],
-      "challengeAfter": "Kill 10 enemies within 8 seconds 10 times"
+      "challengeAfter": "Kill 10 enemies within 8 seconds 10 times in one mission"
      },
      "EVO4": {
       "perks": [
@@ -6063,7 +6063,7 @@
      "Vasto Prime"
     ],
     "source": "https://wiki.warframe.com/w/Vasto_Incarnon_Genesis",
-    "lastEdited": "2026-09-29T21:55:39Z",
+    "lastEdited": "2026-10-22T19:49:47Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -6166,7 +6166,7 @@
        {
         "name": "Reaper's Plenty",
         "text": [
-         "On Headshot: +100% Ammo Efficiency for 2s."
+         "On Headshot: Infinite Ammo for 2s."
         ],
         "values": {},
         "notes": "Does not apply to Incarnon Form."
@@ -6183,7 +6183,7 @@
      "Vectis Prime"
     ],
     "source": "https://wiki.warframe.com/w/Vectis_Incarnon_Genesis",
-    "lastEdited": "2026-10-15T14:04:53Z",
+    "lastEdited": "2026-10-19T22:10:21Z",
     "tiers": {
      "EVO1": {
       "perks": [
@@ -6285,7 +6285,7 @@
          "Increase Base Status Chance by 30% of current Critical Chance, up to 40%"
         ],
         "values": {},
-        "notes": "Maximum Base Status Chance increase is gained at 134% Critical Chance, requiring +345% critical chance to reach. | Critical chance from Primary Acuity does not work, however Galvanized Scope does."
+        "notes": "Maximum Base Status Chance increase is gained at 134% total Critical Chance, requiring +345% Critical Chance to reach. | Critical chance from Primary Acuity does not work, however Galvanized Scope does."
        }
       ]
      }
@@ -25595,7 +25595,7 @@
    },
    {
     "page": "https://wiki.warframe.com/w/Module:Weapons/data/melee",
-    "lastEdited": "2026-09-26T06:53:18Z"
+    "lastEdited": "2026-10-22T19:15:30Z"
    }
   ]
  }
