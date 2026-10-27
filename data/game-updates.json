@@ -2,8 +2,161 @@
  "source": "https://www.warframe.com/en/patch-notes",
  "note": "Parsed from the official Warframe patch notes. TL;DR = DE section headings plus item counts; mentions = names from the calculator data found in the notes.",
  "parser": 2,
- "checkedAt": "2026-10-22T21:55:38.818Z",
+ "checkedAt": "2026-10-27T20:14:43.012Z",
  "releases": [
+  {
+   "slug": "44-1-4",
+   "version": "44.1.4",
+   "kind": "hotfix",
+   "title": "Iceblade of Narin: The Icebind: Hotfix 44.1.4",
+   "url": "https://www.warframe.com/en/patch-notes/pc/44-1-4",
+   "forum": "https://forums.warframe.com/topic/1530579-iceblade-of-narin-the-icebind-hotfix-4414/",
+   "date": "2026-10-27",
+   "dateSource": "patch notes",
+   "tldr": "21 fixes, 3 other changes.",
+   "fixes": 21,
+   "changes": 3,
+   "highlights": [],
+   "mentions": [
+    {
+     "name": "Amanata Pressure",
+     "kind": "Mod",
+     "n": 2
+    },
+    {
+     "name": "Nidus",
+     "kind": "Warframe",
+     "n": 2
+    },
+    {
+     "name": "Valkyr",
+     "kind": "Warframe",
+     "n": 2
+    },
+    {
+     "name": "Caliban Prime",
+     "kind": "Warframe",
+     "n": 1
+    },
+    {
+     "name": "Citrine Prime",
+     "kind": "Warframe",
+     "n": 1
+    },
+    {
+     "name": "Nami Skyla Prime",
+     "kind": "Weapon",
+     "n": 1
+    },
+    {
+     "name": "Sirius & Orion",
+     "kind": "Warframe",
+     "n": 1
+    },
+    {
+     "name": "Vasto",
+     "kind": "Weapon",
+     "n": 1
+    },
+    {
+     "name": "Viper",
+     "kind": "Weapon",
+     "n": 1
+    }
+   ],
+   "parts": [
+    {
+     "title": "Iceblade of Narin: The Icebind: Hotfix 44.1.4",
+     "sections": [
+      {
+       "title": "Changes",
+       "items": [
+        "Reduced the Nami Skyla Prime Blade's Ducat value from 100 to 65 as a result of its varied rarity from Void Relics.",
+        "The Skull Shots Augment (Viper) can now retrigger its buff while it is currently active.",
+        "Added the option \"Make Spawn Room\" to the following Dojo rooms (at room console)",
+        {
+         "t": "Duviri Cave",
+         "d": 1
+        },
+        {
+         "t": "Earth Forest Chamber",
+         "d": 1
+        },
+        {
+         "t": "Galleon Chamber",
+         "d": 1
+        },
+        {
+         "t": "Infested Chamber",
+         "d": 1
+        },
+        {
+         "t": "Kuva Asteroid",
+         "d": 1
+        },
+        {
+         "t": "Orokin Tower Chamber",
+         "d": 1
+        },
+        {
+         "t": "Ostron Cove",
+         "d": 1
+        },
+        {
+         "t": "Starlight Market",
+         "d": 1
+        },
+        {
+         "t": "Uranus Chamber",
+         "d": 1
+        }
+       ]
+      },
+      {
+       "title": "Fixes",
+       "items": [
+        "Fixed cases of The Icebind Mobile Defense missions not properly extracting due to a specific tile in the Grineer Asteroid tileset.",
+        "Fixed players who have not unlocked Eris being unable to see or play the Epoch Operation: Taubound Alerts.",
+        "Fixed Amanata Pressure not applying to Heavy Slam Attacks.",
+        {
+         "t": "Also fixed Amanata Pressure only affecting one enemy per Heavy Attack.",
+         "d": 1
+        },
+        "Fixed an Incarnon's reticle turning blue before its transformation into an Incarnon is complete, sometimes leading players to interrupt transformation prematurely.",
+        "Fixed the Vasto Incarnon's \"Reaper's Plenty\" evolution missing its hud buff icon when triggered.",
+        "Fixed a case of Sirius & Orion losing function if you swapped between a Son at a specific moment when travelling through a Sanctuary Onslaught portal.",
+        "Fixed extracting from Zariman missions during Last Gasp potentially breaking active abilities in future missions started from Chrysalith",
+        "Fixed loud SFX playing if players used Front Artillery while the Railjack was boosting with the \"Fire Manual Trigger Weapons Continuously\" toggled on.",
+        "Fixed pickups being able to spawn in an inaccessible area in a specific Lua tile.",
+        "Fixed various shoulder armor offset issues for Caliban Prime.",
+        "Fixed offset issues for the Spritsail Prime Shoulder Guards on Citrine Prime.",
+        "Fixed a crash related to Voice Chat.",
+        "Fixed a missing \"+\" in Energized Munition's description.",
+        "Fixed Rusalka's hair appearing too brown in The Hex quest.",
+        "Fixed a rare case of Nidus' Parasitic Vitality being able to kill Nidus or crash the game.",
+        "Fixed Teshin missing animations during a specific segment of The New War quest.",
+        "Fixed Valkyr's Warcry hud buff icon remaining active after being Valkyr is Nullified (via a Nullifier bubble, etc.)."
+       ]
+      },
+      {
+       "title": "Script Error Fixes",
+       "items": [
+        {
+         "p": "Script errors mean that something went wrong when the game client was executing a script, which can have various outcomes. Usually it means the related content didn't function properly under specific circumstances - often we don't actually know what the error outcome was, so we list it as a Script Error fix to indicate it was addressing an unintended behaviour."
+        },
+        "Fixed a script error related to transmissions, notably those from Vena.",
+        "Fixed a script error in the input binding menu.",
+        "Fixed a script error related to the Dark Refractory screen.",
+        "Fixed a script error related to \"explode on kill\" effects.",
+        {
+         "p": "For a list of known issues that are on our radar, visit our dedicated thread: https://forums.warframe.com/topic/1523875-known-issues-iceblade-of-narin/"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
   {
    "slug": "44-1-3",
    "version": "44.1.3",
@@ -8746,278 +8899,6 @@
        "title": "Additions",
        "items": [
         "Added Vessel customization to all Dry Docks (including those in Dojos).",
-        {
-         "p": "For list of known issues that are on our radar, visit our dedicated thread: https://forums.warframe.com/topic/1509550-known-issues-jade-shadows-constellations/"
-        }
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "slug": "43-0-7",
-   "version": "43.0.7",
-   "kind": "hotfix",
-   "title": "Mesa Heirloom: Hotfix 43.0.7",
-   "url": "https://www.warframe.com/en/patch-notes/pc/43-0-7",
-   "forum": "https://forums.warframe.com/topic/1516048-mesa-heirloom-hotfix-4307/",
-   "date": "2026-07-11",
-   "dateSource": "patch notes",
-   "tldr": "Mesa Heirloom Skin; Mesa Heirloom Duster; Mesa Heirloom Signa; Mesa Heirloom Regulators Skin. 56 fixes.",
-   "fixes": 56,
-   "changes": 0,
-   "highlights": [
-    "Mesa Heirloom Skin",
-    "Mesa Heirloom Duster",
-    "Mesa Heirloom Signa",
-    "Mesa Heirloom Regulators Skin",
-    "Mesa Heirloom Color Palette",
-    "Mesa Heirloom Sigil",
-    "Mesa Heirloom Glyph",
-    "Mesa Heirloom Prex Card",
-    "Sirius & Orion",
-    "Uranus Proxima"
-   ],
-   "mentions": [
-    {
-     "name": "Sirius & Orion",
-     "kind": "Warframe",
-     "n": 12
-    },
-    {
-     "name": "Mesa",
-     "kind": "Warframe",
-     "n": 7
-    },
-    {
-     "name": "Destreza",
-     "kind": "Weapon",
-     "n": 2
-    },
-    {
-     "name": "Jade",
-     "kind": "Warframe",
-     "n": 2
-    },
-    {
-     "name": "Protea",
-     "kind": "Warframe",
-     "n": 2
-    },
-    {
-     "name": "Sevagoth",
-     "kind": "Warframe",
-     "n": 2
-    },
-    {
-     "name": "Excalibur Umbra",
-     "kind": "Warframe",
-     "n": 1
-    },
-    {
-     "name": "Inaros",
-     "kind": "Warframe",
-     "n": 1
-    },
-    {
-     "name": "Nidus",
-     "kind": "Warframe",
-     "n": 1
-    },
-    {
-     "name": "Nokko",
-     "kind": "Warframe",
-     "n": 1
-    },
-    {
-     "name": "Obex",
-     "kind": "Weapon",
-     "n": 1
-    },
-    {
-     "name": "Primary Compression",
-     "kind": "Arcane",
-     "n": 1
-    },
-    {
-     "name": "Tenet Envoy",
-     "kind": "Weapon",
-     "n": 1
-    },
-    {
-     "name": "Voruna",
-     "kind": "Warframe",
-     "n": 1
-    }
-   ],
-   "parts": [
-    {
-     "title": "Mesa Heirloom: Hotfix 43.0.7",
-     "sections": [
-      {
-       "title": "",
-       "items": [
-        {
-         "p": "MESA HEIRLOOM COLLECTION"
-        },
-        {
-         "p": "LAUNCHES ON ALL PLATFORMS @ 11 A.M. ET"
-        },
-        {
-         "p": "Saunter into the fray and send outlaws to their graves with the Mesa Heirloom Collection. Let her Regulators echo a ballad beneath the high-noon sun."
-        }
-       ]
-      },
-      {
-       "title": "Mesa Heirloom Skin",
-       "items": [
-        {
-         "p": "The legendary gunslinger. The notorious heartbreaker. Better call the undertaker, 'cause Mesa Heirloom just sauntered into town."
-        }
-       ]
-      },
-      {
-       "title": "Mesa Heirloom Duster",
-       "items": [
-        {
-         "p": "Mesa Heirloom's signature duster."
-        },
-        {
-         "p": "You may also set the Auxiliary attachment option to None to remove the duster."
-        }
-       ]
-      },
-      {
-       "title": "Mesa Heirloom Signa",
-       "items": [
-        {
-         "p": "Mesa Heirloom's signature Signa reveals a dazzling hidden side to the vagabond enforcer."
-        }
-       ]
-      },
-      {
-       "title": "Mesa Heirloom Regulators Skin",
-       "items": [
-        {
-         "p": "Mesa Heirloom's signature Regulators."
-        }
-       ]
-      },
-      {
-       "title": "Mesa Heirloom Color Palette",
-       "items": [
-        {
-         "p": "A rodeo of colors honoring Mesa's legacy."
-        }
-       ]
-      },
-      {
-       "title": "Mesa Heirloom Sigil",
-       "items": [
-        {
-         "p": "Mesa Heirloom's sigil warns outlaws their time has come."
-        }
-       ]
-      },
-      {
-       "title": "Mesa Heirloom Glyph",
-       "items": [
-        {
-         "p": "These guns don't miss."
-        }
-       ]
-      },
-      {
-       "title": "Mesa Heirloom Prex Card",
-       "items": [
-        {
-         "p": "The notorious gunslinger."
-        }
-       ]
-      },
-      {
-       "title": "Top Fixes",
-       "items": [
-        "Fixed cases of Clients desyncing during Sirius & Orion's Celestial Clash, which could cause Clients to be ineligible for Relic Rewards in Void Fissures, and other effects.",
-        "Fixed cases of Clients teleporting to previous locations during Sirius & Orion's Celestial Clash.",
-        "Fixed Primary Compression not reducing explosive range and increasing damage for the Tenet Envoy while aiming down sights.",
-        "Fixed dying as the Secondary Son resulting in Sirius & Orion having no Secondary Weapon after reviving.",
-        "Fixed cases of players in a special state (Last Gasp, Protea's Temporal Anchor, Sevagoth's Shadow, etc.) not being teleported by objective countdown timers in Uranus Proxima missions.",
-        {
-         "t": "Known issue: This issue still occurs for Inaros in his special death state.",
-         "d": 1
-        },
-        "Fixed instances of players getting stuck in mission load until restart.",
-        "Improved handling of crashes caused by running out of memory.",
-        "Fixed the Imperator Vandal receiving a duplicate entry in player Profiles.",
-        "Fixed the Secondary Son of Sirius & Orion being able to bypass weapon restrictions in Sortie missions."
-       ]
-      },
-      {
-       "title": "Sirius & Orion Fixes",
-       "items": [
-        "Fixed the Mausolon not consuming ammo when equipped by the Secondary Son.",
-        "Fixed the Secondary Son being able to enter a Warframe-restricted area, and therefore a cinematic in the Angels of the Zariman quest.",
-        "Fixed swapping to Sirius & Orion from a Warframe with an Exalted weapon resulting in that Exalted Weapon's icon appearing next to the Secondary Son's name in the Arsenal.",
-        "Fixed Sirius & Orion being tiny in the Jordan Golem Assassinate extraction cinematic if you extracted as the Secondary Son.",
-        "Fixed cases of Sirius & Orion getting kicked out immediately after entering Points of Interest in Railjack missions.",
-        "Fixed the Vehicles tab not properly displaying in the Base of Operation's Arsenal if it was swapped to from Orion.",
-        {
-         "t": "Known Issue: this still occurs when accessing the Arsenal in different Hubs.",
-         "d": 1
-        },
-        "Fixed the Secondary Son appearing in a cinematic during The Old Peace quest.",
-        "Fixed a certain cinematic fading out to a permanent black screen in The Old Peace quest if Sirius & Orion are equipped.",
-        "Fixed minor diorama issues in Sirius & Orion's Ability screens.",
-        "Fixed Sirius & Orion having the incorrect Scythes equipped during a segment in the Jade Shadows: Constellations quest.",
-        "Fixed various chest armor offset issues on Sirius & Orion.",
-        "Fixing a script error for Sirius & Orion when casting Well of Life."
-       ]
-      },
-      {
-       "title": "Uranus Proxima Fixes",
-       "items": [
-        "Fixed the Vena or Ryoku's fight not starting if a squadmate is dead upon entering the Boss Fight room in Uranus Proxima missions.",
-        "Fixed cases of fog being incredibly bright on low-spec machines in Uranus Proxima missions.",
-        "Fixed cases of the Vault's door remaining open during the Mawbound Director fight, resulting in players being able to get stuck outside the room.",
-        "Fixed players being locked outside of the Sister fight in The Kuva Wytch missions if they died before it was triggered and revived after it had started.",
-        "Fixed cases of the Megacoil powercell counter not updating in the second stage of the Ryoku fight.",
-        "Fixed Necramechs not being disabled after Host Migration in Uranus Proxima missions.",
-        "Fixed Uranus Proxima missions not ending if players run out of revives or the Railjack suffers a catastrophic failure (that is not repaired in time).",
-        "Fixed Vena missing a hacking animation in Scoria's Angel missions.",
-        "Fixed borrowed Railjack using a player's equipped Tactical Mods after a Host Migration.",
-        "Fixed a case of Excalibur Umbra falling out of the map if they entered the Ramsled while in Transference during Scoria's Angel missions.",
-        "Fixed cases of waypoints not appearing for Clients in the \"Destroy Captured Ice Blocks\" objective in The Kuva Wytch mission.",
-        "Fixed Ryoku missing his smoke VFX upon disappearing in The Kuva Wytch mission.",
-        "Fixed a lighting issue in The Kuva Wytch.",
-        "Fixed Sisters using Transmissions that were not context appropriate in Uranus Proxima missions.",
-        "Fixed performance issues caused by Bladeswarm enemies.",
-        "Fixed a script error related to an enemy ability in Uranus Proxima missions.",
-        "Fixed a crash for Clients at the end of the Ramsled section of the Scoria's Angel mission."
-       ]
-      },
-      {
-       "title": "Fixes",
-       "items": [
-        "Fixed the Base Damage added from the Destreza Incarnon's Evolution I and II not being reflected in the Arsenal stats. (This was a UI-only issue).",
-        "Fixed toggling \"Hide Equipped' in the Mods menu of the Trading screen resulting in the menu resetting to the All tab.",
-        "Fixed a progression stop in The Old Peace quest if you kill enemies too quickly during a certain segment.",
-        "Fixed the Glast Gambit quest becoming progression stopped if a specific situation happened while the Warframe was in a special state (ex: Nokko's Reroot, Sevagoth's Shadow, etc.).",
-        "Fixed sending a Protoframe a birthday message from the 1999 Calendar bringing players to the Hex KIM screen instead of the Protoframe who is celebrating their birthday.",
-        "Fixed Radiation Barrels spawning in the Corpus Ship tileset following its remaster.",
-        "Fixed the Obex and Destreza's Incarnon dioramas being too zoomed in.",
-        "Fixed an infinite mission countdown occurring after using the \"Visit Maroo\" option in the Ayatan Treasures screen while already in Maroo's Bazaar.",
-        "Fixed Latrox Une and Jarkar Lar's introductory transmissions not playing in-mission.",
-        "Fixed the ghostly Drifter disappearing after changing your Drifter's appearance in The New War quest.",
-        "Fixed players not seeing all newly-unlocked events and nodes until relog after completing the Vor's Prize quest.",
-        "Fixed offset issues with the Daurus Prime armor set on Voruna's Voidshell skin.",
-        "Fixed leaking VFX on a Jade idle animation.",
-        "Fixed a script error related to Mystic Bond.",
-        "Fixed a script error related to Transference.",
-        "Fixed a script error related to unmanned Dargyns in the Plains of Eidolon.",
-        "Fixed a script error related to Nidus' Link.",
-        "Fixed a script error related to Protea's Dispensary.",
         {
          "p": "For list of known issues that are on our radar, visit our dedicated thread: https://forums.warframe.com/topic/1509550-known-issues-jade-shadows-constellations/"
         }
