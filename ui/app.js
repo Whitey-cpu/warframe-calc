@@ -83,7 +83,8 @@
   function modCard(m, opts = {}) {
     const fx = esc(modFx(m));
     return `<div class="mod ${rarityClass(m.rarity)}${m.riven ? ' riven' : ''} ${opts.cls || ''}" draggable="true" data-mod="${esc(m.name)}" title="${fx}${m.unparsed.length ? '\n(part of this mod is not modeled)' : ''}">
-      <div class="mod-top"><span class="drain">${modDrain(m, opts.rank)}</span>${opts.own ? `<button type="button" class="own${owned.has(m.name) ? ' on' : ''}" data-own="${esc(m.name)}" aria-pressed="${owned.has(m.name)}" title="${owned.has(m.name) ? 'You own this mod' : 'Mark as owned'}">&#9733;</button>` : ''}${m.polarity ? `<span class="pol">${esc(m.polarity.slice(0, 3))}</span>` : ''}</div>
+      ${opts.addable ? `<button type="button" class="mod-add" data-add="${esc(m.name)}" aria-label="Add ${esc(m.name)}">Add</button>` : ''}
+      <div class="mod-top"><span class="drain">${modDrain(m, opts.rank)}</span>${opts.own ? `<button type="button" class="own${owned.has(m.name) ? ' on' : ''}" data-own="${esc(m.name)}" aria-pressed="${owned.has(m.name)}" aria-label="Owned: ${esc(m.name)}" title="${owned.has(m.name) ? 'You own this mod' : 'Mark as owned'}">&#9733;</button>` : ''}${m.polarity ? `<span class="pol">${esc(m.polarity.slice(0, 3))}</span>` : ''}</div>
       <div class="mod-img">${img(m.image, m.name)}<span class="ph">${initials(m.name)}</span></div>
       <div class="mod-name">${esc(m.name)}</div>
       <div class="mod-fx">${fx}${m.unparsed.length ? ' <span class="nm">*</span>' : ''}</div>
@@ -274,7 +275,7 @@
       const rank = m ? slotRank(i, m) : null;
       const rankCtl = m && m.maxRank > 0 ? `<div class="rank" data-rankslot="${i}"><button type="button" data-rank="-1" aria-label="Lower rank">&minus;</button><span>R${rank}/${m.maxRank}</span><button type="button" data-rank="1" aria-label="Raise rank">+</button></div>` : '';
       const extra = `${rankCtl}<span class="slot-val" data-val="${i}"></span>`;
-      return `<div class="slot${ex ? ' exilus' : ''}${warnings.has(n) ? ' warn' : ''}" data-slot="${i}" tabindex="0" aria-label="${ex ? 'Exilus slot' : 'Mod slot ' + (i + 1)}">
+      return `<div class="slot${ex ? ' exilus' : ''}${warnings.has(n) ? ' warn' : ''}" data-slot="${i}" tabindex="0" role="group" aria-label="${ex ? 'Exilus slot' : 'Mod slot ' + (i + 1)}">
         <span class="slot-n">${ex ? 'Exilus' : i + 1}</span>${polBtn}${tools}
         ${m ? modCard(m, { rank, slotExtra: extra }) : `<span>${ex ? 'Exilus slot' : 'Empty'}</span>`}</div>`;
     }).join('');
@@ -404,9 +405,9 @@
     let list = compatMods.filter(m => modInCat(m, modCat) && (!rar || m.rarity === rar) &&
       (!q || m.name.toLowerCase().includes(q) || modFx(m).toLowerCase().includes(q)));
     list.sort((a, b) => sort === 'drain' ? modDrain(b) - modDrain(a) : sort === 'rarity' ? (RANK[b.rarity] || 0) - (RANK[a.rarity] || 0) || a.name.localeCompare(b.name) : a.name.localeCompare(b.name));
-    $('modCount').textContent = `${list.length} of ${compatMods.length} mods for ${state.weapon.name}. Click to add, or drag onto a slot.`;
+    $('modCount').textContent = `${list.length} of ${compatMods.length} mods for ${state.weapon.name}. Click or press Enter to add, or drag onto a slot.`;
     const showRiven = (modCat === 'all' || modCat === 'other') && (!q || 'riven mod'.includes(q) || q.includes('riven'));
-    $('modGrid').innerHTML = (showRiven ? modCard(R.synthMod(state.riven, state.weapon), { cls: 'riven-pick' }) : '') + list.map(m => modCard(m, { own: true })).join('');
+    $('modGrid').innerHTML = (showRiven ? modCard(R.synthMod(state.riven, state.weapon), { cls: 'riven-pick', addable: true }) : '') + list.map(m => modCard(m, { own: true, addable: true })).join('');
     markUsed();
   }
   function markUsed() {
@@ -421,7 +422,11 @@
   $('modGrid').addEventListener('click', e => {
     const own = e.target.closest('[data-own]');
     if (own) { e.stopPropagation(); toggleOwned(own.dataset.own); return; }
-    const c = e.target.closest('.mod'); if (c) addMod(c.dataset.mod);
+    const c = e.target.closest('.mod'); if (!c) return;
+    addMod(c.dataset.mod);
+    // a click with detail 0 came from the keyboard (Enter or Space on the card's Add button): say where the mod went
+    const at = state.mods.indexOf(c.dataset.mod);
+    if (e.detail === 0 && at >= 0) flashMsg(`Added ${c.dataset.mod} to ${at === SLOT_COUNT ? 'the exilus slot' : 'slot ' + (at + 1)}.`);
   });
   ['modSearch', 'modRarity', 'modSort'].forEach(id => $(id).addEventListener('input', renderModBrowser));
 
