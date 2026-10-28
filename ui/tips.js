@@ -80,13 +80,15 @@ window.WFTips = function (UI) {
     btn.setAttribute('aria-describedby', 'tipbox');
   }
   function hide() { box.hidden = true; if (owner) owner.removeAttribute('aria-describedby'); owner = null; }
-  const qBtn = key => `<button type="button" class="tip-q" data-key="${esc(key)}" aria-label="What is this?">?</button>`;
+  // the button names the control it explains, e.g. "What is kill rate?"; the key is the fallback
+  const qBtn = (key, name) => `<button type="button" class="tip-q" data-key="${esc(key)}" aria-label="What is ${esc(name || key.replace(/([A-Z])/g, ' $1').toLowerCase())}?">?</button>`;
   function decorate(scope) {
     (scope || document).querySelectorAll('[data-tip]').forEach(el => {
       if (el.querySelector(':scope > .tip-q') || !TIPS[el.dataset.tip]) return;
       // put the ? right after the label text, before any input
       const input = el.querySelector('input, select');
-      const tmp = document.createElement('span'); tmp.innerHTML = qBtn(el.dataset.tip);
+      const labelText = [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join(' ').replace(/\s+/g, ' ').trim();
+      const tmp = document.createElement('span'); tmp.innerHTML = qBtn(el.dataset.tip, labelText);
       const q = tmp.firstChild;
       if (input && input.parentNode === el && el.classList.contains('check')) el.appendChild(q);
       else if (input && input.parentNode === el && el.firstChild && el.firstChild.nodeType === 3) {
