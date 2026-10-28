@@ -135,6 +135,9 @@ details > summary { cursor: pointer; color: var(--muted); font-size: .82rem; mar
 .mod.r-legendary { --rc: var(--r-legendary); }
 .mod.riven { --rc: var(--r-riven); }
 .mod:hover { border-color: var(--rc); box-shadow: 0 0 0 1px var(--rc), 0 6px 18px rgb(0 0 0 / .35); }
+/* keyboard add: a visually hidden button inside each browser card; the card shows the focus ring */
+.mod-add { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.mod:has(.mod-add:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 .mod.used { opacity: .4; }
 .mod.blocked { filter: grayscale(.8); opacity: .5; }
 .mod-top { display: flex; justify-content: space-between; align-items: center; font-size: .7rem; color: var(--muted); }
@@ -182,7 +185,7 @@ dialog::backdrop { background: rgb(0 0 0 / .6); backdrop-filter: blur(3px); }
 .card .cmeta { font-size: .72rem; color: var(--muted); }
 .badge { display: inline-block; font-size: .62rem; padding: 0 5px; border-radius: 4px; border: 1px solid var(--border); margin: 0 2px; text-transform: uppercase; letter-spacing: .04em; }
 .badge.prime { color: var(--r-rare); border-color: color-mix(in srgb, var(--r-rare) 50%, transparent); }
-.badge.inc { color: #7fd8ff; border-color: #2d5f75; }
+.badge.inc { color: light-dark(#0b5d8f, #7fd8ff); border-color: #2d5f75; }
 
 /* ---------- frame abilities ---------- */
 .abil-list { display: grid; gap: 6px; margin-bottom: 6px; }
@@ -319,7 +322,7 @@ details.lb > summary::after { content: ' \25BE'; color: var(--muted); }
 .acct-twitch label { display: flex; flex-direction: row; gap: 6px; align-items: center; margin: 0; }
 .acct-twitch label input { width: auto; margin: 0; }
 .acct-twitch .linkbtn { justify-self: start; }
-.btn.liked { color: #ff6b8a; border-color: #ff6b8a; }
+.btn.liked { color: light-dark(#b0234f, #ff6b8a); border-color: light-dark(#b0234f, #ff6b8a); }
 @media (max-width: 480px) { .pub { grid-template-columns: 1fr auto auto; } .pub-img { display: none; } }
 .slot .slot-n { left: 30px; }
 .extra-attacks { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin: -4px 0 6px; }
@@ -631,7 +634,7 @@ dialog#changelogDialog[open] { display: grid; grid-template-rows: auto auto 1fr;
 
 /* ---------------- Riven tab ---------------- */
 .rv-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
-.rv-dots { color: var(--r-riven); letter-spacing: 1px; }
+.rv-dots { color: light-dark(#6b3fb8, var(--r-riven)); letter-spacing: 1px; }
 .rv-settings { margin-bottom: 4px; }
 .rv-rows { display: grid; gap: 6px; margin: 6px 0; }
 .rv-row { display: grid; grid-template-columns: 18px 92px 36px minmax(0, 1fr) auto; grid-template-areas: "sign sel sel sel grade" ". val unit range range" ". sl sl sl sl"; gap: 4px 6px; align-items: center; padding: 6px 8px; border: 1px solid var(--border); border-left: 3px solid var(--r-riven); border-radius: 8px; }
@@ -651,7 +654,7 @@ dialog#changelogDialog[open] { display: grid; grid-template-rows: auto auto 1fr;
 .rv-grade.low { color: var(--muted); }
 .rv-grade.bad { color: var(--warn); border-color: var(--warn); }
 .rv-grade-all { margin: 6px 0; }
-.rv-letter { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 6px; background: var(--r-riven); color: #fff; }
+.rv-letter { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 6px; background: light-dark(#6b3fb8, var(--r-riven)); color: light-dark(#fff, #1b1405); }
 .rv-splice { margin: 4px 0 8px; }
 .rv-sec { border-top: 1px solid var(--border); padding-top: 6px; margin-top: 8px; }
 .rv-sec > summary { font-weight: 650; cursor: pointer; }
