@@ -2,20 +2,20 @@
  "source": "https://www.warframe.com/en/patch-notes",
  "note": "Parsed from the official Warframe patch notes. TL;DR = DE section headings plus item counts; mentions = names from the calculator data found in the notes.",
  "parser": 2,
- "checkedAt": "2026-10-27T20:14:43.012Z",
+ "checkedAt": "2026-10-28T18:29:46.080Z",
  "releases": [
   {
    "slug": "44-1-4",
    "version": "44.1.4",
    "kind": "hotfix",
-   "title": "Iceblade of Narin: The Icebind: Hotfix 44.1.4",
+   "title": "Iceblade of Narin: The Icebind: Hotfix 44.1.4.1",
    "url": "https://www.warframe.com/en/patch-notes/pc/44-1-4",
    "forum": "https://forums.warframe.com/topic/1530579-iceblade-of-narin-the-icebind-hotfix-4414/",
-   "date": "2026-10-27",
+   "date": "2026-10-28",
    "dateSource": "patch notes",
-   "tldr": "21 fixes, 3 other changes.",
-   "fixes": 21,
-   "changes": 3,
+   "tldr": "22 fixes, 4 other changes.",
+   "fixes": 22,
+   "changes": 4,
    "highlights": [],
    "mentions": [
     {
@@ -49,6 +49,11 @@
      "n": 1
     },
     {
+     "name": "Saryn",
+     "kind": "Warframe",
+     "n": 1
+    },
+    {
      "name": "Sirius & Orion",
      "kind": "Warframe",
      "n": 1
@@ -65,6 +70,18 @@
     }
    ],
    "parts": [
+    {
+     "title": "Iceblade of Narin: The Icebind: Hotfix 44.1.4.1",
+     "sections": [
+      {
+       "title": "Changes & Fixes",
+       "items": [
+        "Removed the Dismantle Demolishers modifier from Cavia Bounties, as it was causing Rogue Necramechs to be permanently invulnerable.",
+        "Fixed broken textures on the Saryn Velanosa Helmet."
+       ]
+      }
+     ]
+    },
     {
      "title": "Iceblade of Narin: The Icebind: Hotfix 44.1.4",
      "sections": [
