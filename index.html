@@ -291,8 +291,8 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
         <summary><h2>Weapon leaderboard</h2></summary>
         <p class="muted small">Ranks weapons by DPS against the enemy and buffs you set. "Quick-optimize" builds a fresh mod set per weapon (slower); otherwise each weapon is unmodded.</p>
         <div class="row">
-          <select id="lbCat"><option value="Primary">Primary</option><option value="Secondary">Secondary</option><option value="Melee">Melee</option></select>
-          <select id="lbMetric"><option value="sustainedTotal">Sustained DPS</option><option value="burstTotal">Burst DPS</option><option value="perShotVsEnemy">Damage per shot</option><option value="groupSustained">Group DPS</option></select>
+          <select id="lbCat" aria-label="Weapon category"><option value="Primary">Primary</option><option value="Secondary">Secondary</option><option value="Melee">Melee</option></select>
+          <select id="lbMetric" aria-label="Rank by"><option value="sustainedTotal">Sustained DPS</option><option value="burstTotal">Burst DPS</option><option value="perShotVsEnemy">Damage per shot</option><option value="groupSustained">Group DPS</option></select>
           <label class="check small"><input type="checkbox" id="lbOpt" checked> Quick-optimize</label>
           <label class="check small"><input type="checkbox" id="lbPrimeOnly"> Prime/Incarnon only</label>
           <button type="button" class="btn sm" id="lbRun">Rank weapons</button>
@@ -308,7 +308,7 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
       <h2 class="pane-title">Builds</h2>
       <p class="muted small" id="cloudNote"></p>
       <div class="row">
-        <input id="buildName" placeholder="Build name">
+        <input id="buildName" placeholder="Build name" aria-label="Build name">
         <button type="button" id="saveBuild" class="btn sm">Save</button>
       </div>
       <div class="row">
@@ -326,14 +326,14 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
         <button type="button" id="copyJson" class="btn ghost sm">Copy build JSON</button>
         <button type="button" id="pasteJson" class="btn ghost sm">Load from JSON</button>
       </div>
-      <textarea id="jsonBox" rows="4" spellcheck="false" placeholder="Build JSON (paste here to load, or share with Claude)"></textarea>
+      <textarea id="jsonBox" rows="4" spellcheck="false" aria-label="Build JSON" placeholder="Build JSON (paste here to load, or share with Claude)"></textarea>
       <section id="importPanel" class="imp"></section>
       <section id="publicPanel" hidden>
         <h2>Community builds</h2>
         <p class="muted small">Builds people chose to publish. Publish yours with the share button and "Make public".</p>
         <div class="row">
-          <input type="search" id="pubSearch" placeholder="Filter by weapon">
-          <select id="pubSort"><option value="top">Most liked</option><option value="new">Newest</option></select>
+          <input type="search" id="pubSearch" placeholder="Filter by weapon" aria-label="Filter community builds by weapon">
+          <select id="pubSort" aria-label="Sort community builds"><option value="top">Most liked</option><option value="new">Newest</option></select>
         </div>
         <div id="pubList" class="pub-list"></div>
       </section>
@@ -360,7 +360,7 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
   <section class="browser" id="browser" data-mview="mods" aria-label="Mod browser">
     <div class="browser-bar">
       <button type="button" class="btn ghost sm only-mobile" id="closeBrowser">Done</button>
-      <input type="search" id="modSearch" placeholder="Search mods (name or effect)" autocomplete="off">
+      <input type="search" id="modSearch" placeholder="Search mods (name or effect)" aria-label="Search mods" autocomplete="off">
       <select id="modRarity" aria-label="Rarity">
         <option value="">All rarities</option><option>Common</option><option>Uncommon</option><option>Rare</option><option>Legendary</option>
       </select>
@@ -384,7 +384,7 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
 <dialog id="picker">
   <form method="dialog" class="picker-head">
     <h2 id="pickerTitle">Choose</h2>
-    <input type="search" id="pickerSearch" placeholder="Search" autocomplete="off">
+    <input type="search" id="pickerSearch" placeholder="Search" aria-label="Search choices" autocomplete="off">
     <button class="btn ghost sm" value="close" aria-label="Close">Close</button>
   </form>
   <div class="chips" id="pickerChips"></div>
@@ -444,32 +444,32 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
   Not affiliated with or endorsed by Digital Extremes. Warframe and all related names and images are trademarks and property of Digital Extremes Ltd.
 </footer>
 
-<script src="data/game-data.js"></script>
-<script src="src/static.js"></script>
-<script src="src/parser.js"></script>
-<script src="src/engine.js"></script>
-<script src="src/optimizer.js"></script>
-<script src="src/enemy.js"></script>
-<script src="src/capacity.js"></script>
-<script src="src/incarnon.js"></script>
-<script src="data/old-dispositions.js"></script>
-<script src="src/riven.js"></script>
-<script src="src/riven-odds.js"></script>
-<script src="src/modmatch.js"></script>
-<script src="src/teshin.js"></script>
-<script src="src/sim.js"></script>
-<script src="data/changelog.js"></script>
-<script src="ui/news.js"></script>
-<script src="ui/changelog.js"></script>
-<script src="ui/background.js"></script>
-<script src="ui/layout.js"></script>
-<script src="ui/riven.js"></script>
-<script src="ui/riven-craft.js"></script>
-<script src="ui/import.js"></script>
-<script src="ui/teshin.js"></script>
-<script src="ui/features.js"></script>
-<script src="ui/tips.js"></script>
-<script src="ui/sim.js"></script>
-<script src="ui/app.js"></script>
+<script defer src="data/game-data.js"></script>
+<script defer src="src/static.js"></script>
+<script defer src="src/parser.js"></script>
+<script defer src="src/engine.js"></script>
+<script defer src="src/optimizer.js"></script>
+<script defer src="src/enemy.js"></script>
+<script defer src="src/capacity.js"></script>
+<script defer src="src/incarnon.js"></script>
+<script defer src="data/old-dispositions.js"></script>
+<script defer src="src/riven.js"></script>
+<script defer src="src/riven-odds.js"></script>
+<script defer src="src/modmatch.js"></script>
+<script defer src="src/teshin.js"></script>
+<script defer src="src/sim.js"></script>
+<script defer src="data/changelog.js"></script>
+<script defer src="ui/news.js"></script>
+<script defer src="ui/changelog.js"></script>
+<script defer src="ui/background.js"></script>
+<script defer src="ui/layout.js"></script>
+<script defer src="ui/riven.js"></script>
+<script defer src="ui/riven-craft.js"></script>
+<script defer src="ui/import.js"></script>
+<script defer src="ui/teshin.js"></script>
+<script defer src="ui/features.js"></script>
+<script defer src="ui/tips.js"></script>
+<script defer src="ui/sim.js"></script>
+<script defer src="ui/app.js"></script>
 </body>
 </html>
