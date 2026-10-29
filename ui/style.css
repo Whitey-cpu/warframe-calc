@@ -257,6 +257,10 @@ footer { padding: 8px 16px 24px; max-width: 1700px; margin: 0 auto; }
 .banner { max-width: 1700px; margin: 12px auto 0; padding: 10px 14px; border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--border));
   background: color-mix(in srgb, var(--accent) 10%, var(--panel)); border-radius: 10px; font-size: .82rem; display: block; }
 .banner .btn { margin-left: 8px; }
+.banner-more { display: inline-block; vertical-align: baseline; }
+.banner-more summary { display: inline; cursor: pointer; color: var(--accent); }
+.banner-more p { margin: 6px 0 0; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+.more-row { display: flex; justify-content: center; padding: 10px 0 4px; }
 @media (max-width: 1730px) { .banner { margin: 12px 16px 0; } }
 
 /* ---------- capacity ---------- */

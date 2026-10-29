@@ -78,7 +78,9 @@ window.WFFeatures = function (UI) {
     ].filter(Boolean);
     if (!parts.length) return;
     const el = $('patchBanner');
-    el.innerHTML = `<b>Game data updated</b> to ${esc(D.meta.version)} (from ${esc(D.meta.previousVersion || '?')}). ${parts.join(' &middot; ')}
+    // the list of changed items sits behind "What changed" so the notice stays one short line
+    el.innerHTML = `<b>Game data updated</b> to ${esc(D.meta.version)} (from ${esc(D.meta.previousVersion || '?')}).
+      <details class="banner-more"><summary>What changed</summary><p>${parts.join('<br>')}</p></details>
       <a href="https://www.warframe.com/en/patch-notes" target="_blank" rel="noopener">Patch notes</a>
       <button type="button" class="btn ghost sm" id="bannerClose">Dismiss</button>`;
     el.hidden = false;
