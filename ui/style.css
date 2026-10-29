@@ -627,6 +627,13 @@ dialog#bgDialog[open] { display: grid; grid-template-rows: auto auto auto 1fr au
 .valence-row { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; }
 .valence-row label { margin: 0; }
 .valence-row input { width: 5.5em; }
+.valence-hint { flex-basis: 100%; margin: 0; font-size: .8rem; }
+.valence-fuse { flex-basis: 100%; margin: 4px 0 0; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; background: color-mix(in srgb, var(--panel) 88%, transparent); }
+.valence-fuse > summary { cursor: pointer; font-size: .82rem; color: var(--muted); }
+.valence-fuse[open] > summary { color: var(--text); margin-bottom: 4px; }
+.valence-fuse-row { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; margin: 6px 0; }
+.valence-fuse-row input { width: 5.5em; }
+.valence-fuse-out { font-variant-numeric: tabular-nums; font-weight: 600; align-self: center; min-width: 6em; }
 #passiveNote { margin: 2px 0 0; flex-basis: 100%; }
 
 

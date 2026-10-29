@@ -116,9 +116,31 @@ try { document.documentElement.dataset.browser = localStorage.getItem('wfcalc.br
         </div>
         <div id="extraAttacks" class="extra-attacks" data-adv></div>
         <div id="valenceRow" class="valence-row" hidden>
-          <label title="Kuva, Tenet and Coda weapons carry 25-60% of base damage as one extra damage type (the Valence bonus), set by the Progenitor or Valence Fusion.">Valence bonus
-            <select id="valenceEl"><option value="">None</option><option value="impact">Impact</option><option value="heat">Heat</option><option value="cold">Cold</option><option value="electricity">Electricity</option><option value="toxin">Toxin</option><option value="magnetic">Magnetic</option><option value="radiation">Radiation</option></select></label>
-          <label>% <input type="number" id="valencePct" min="25" max="60" step="0.1" value="60"></label>
+          <label title="Kuva, Tenet, Coda and Dual Coda weapons carry 25–60% of base damage as one extra damage type (the Valence / progenitor bonus). It counts as base damage for elemental mods and as an innate primary for HCET combining (after mod slots). Sources: wiki Kuva Weapons, Valence Fusion.">Valence
+            <select id="valenceEl" aria-label="Valence damage type">
+              <option value="">None</option>
+              <option value="impact">Impact</option>
+              <option value="heat">Heat</option>
+              <option value="cold">Cold</option>
+              <option value="electricity">Electricity</option>
+              <option value="toxin">Toxin</option>
+              <option value="magnetic">Magnetic</option>
+              <option value="radiation">Radiation</option>
+            </select>
+          </label>
+          <label title="Bonus as a percent of the attack's unmodded base damage (25–60).">% <input type="number" id="valencePct" min="25" max="60" step="0.1" value="60" aria-label="Valence percent"></label>
+          <span id="valenceHint" class="valence-hint muted small" hidden></span>
+          <details class="valence-fuse" id="valenceFuseBox">
+            <summary>Valence Fusion helper</summary>
+            <p class="muted small">Fuse two copies of this weapon: <code>min(1.1 × max(A, B), 60%)</code>, floor to 0.1%, then ≥58% → 60%. <a href="https://wiki.warframe.com/w/Valence_Fusion" target="_blank" rel="noopener">wiki</a></p>
+            <div class="valence-fuse-row">
+              <label>Keep % <input type="number" id="valenceFuseA" min="25" max="60" step="0.1" value="40" aria-label="Recipient valence percent"></label>
+              <label>Donor % <input type="number" id="valenceFuseB" min="25" max="60" step="0.1" value="52.8" aria-label="Donor valence percent"></label>
+              <span id="valenceFuseOut" class="valence-fuse-out" aria-live="polite"></span>
+              <button type="button" class="btn ghost" id="valenceFuseApply">Use result</button>
+            </div>
+            <p class="muted small" id="valenceProgenitorHint">Progenitor element follows the Warframe that created the Lich/Sister (Impact Baruuk/Rhino…, Heat Ember…, Cold Frost…, Electricity Volt…, Toxin Saryn…, Magnetic Mag…, Radiation Loki…). Coda shop rolls are random. <a href="https://wiki.warframe.com/w/Progenitor" target="_blank" rel="noopener">Progenitor table</a></p>
+          </details>
         </div>
         <p id="passiveNote" class="muted small" hidden></p>
         <details id="weaponNotesFull" class="muted small data-notes-full" hidden></details>

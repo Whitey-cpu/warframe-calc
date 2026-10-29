@@ -373,6 +373,9 @@
       dmg: 0, direct: 0, phys: { impact: 0, puncture: 0, slash: 0 },
       cc: 0, ccFlat: 0, cd: 0, cdFlat: 0, sc: 0, ms: 0, fr: 0, mag: 0, reload: 0,
       statusDuration: 0, statusDamage: 0, headshot: 0, weakPoint: 0, faction: 0,
+      // Vulnerability (e.g. Dual Coda Torxica spores): faction-like double-dip on DoTs, but a separate
+      // multiplier from Bane/Roar (wiki: multiplicative with faction mods). Source: Dual_Coda_Torxica.
+      vulnerability: 0,
       slashOnCrit: 0, separate: [], voidExtra: 0,
       // flat changes to the weapon's BASE stats (Incarnon evolutions, e.g. "+12 base damage per pellet")
       baseDmgFlat: 0, baseCCFlat: 0, baseCDFlat: 0, baseSCFlat: 0, baseMSFlat: 0, baseMagFlat: 0,
@@ -476,6 +479,7 @@
           // riven faction stats (Damage vs. Orokin / Scaldra / Techrot) for factions without a Bane mod
           else if (eff.faction && factionInfo.rivenKey && eff.faction.toLowerCase() === factionInfo.rivenKey.toLowerCase()) P.faction += v;
           break;
+        case 'vulnerability': P.vulnerability += v; break;
         default: break;
       }
     }
@@ -516,13 +520,20 @@
       baseTotal += P.baseDmgFlat;
       notes.push('ASSUMPTION: flat base damage bonuses are split across damage types in proportion to the base damage.');
     }
-    // Valence bonus (Kuva / Tenet / Coda): extra base damage of one type, a share of the attack's base damage
+    // Valence bonus (Kuva / Tenet / Coda / Dual Coda): extra base damage of one type, a share of the attack's
+    // unmodded base. Counts as innate for HCET (after mod slots). Sources: wiki Kuva_Weapons, Valence_Fusion,
+    // Dual_Coda_Torxica (progenitor / shop bonus is base damage; elemental mods scale from the raised base).
     const val = build.valence;
-    if (val && val.element && val.pct > 0 && baseTotal > 0) {
-      const extra = baseTotal * Math.min(0.6, val.pct);
-      base[val.element] = (base[val.element] || 0) + extra;
-      baseTotal += extra;
-      if (!S.isAdversaryWeapon(weapon.name)) notes.push(`Valence bonus set on ${weapon.name}, which is not a Kuva, Tenet or Coda weapon.`);
+    if (val && val.element && baseTotal > 0) {
+      const pct = S.normalizeValencePct(val.pct);
+      if (pct > 0) {
+        if (!S.VALENCE_TYPES.includes(val.element)) notes.push(`Valence element "${val.element}" is not one of Impact/Heat/Cold/Electricity/Toxin/Magnetic/Radiation.`);
+        const extra = baseTotal * pct;
+        base[val.element] = (base[val.element] || 0) + extra;
+        baseTotal += extra;
+        notes.push(`Valence ${val.element} +${Math.round(pct * 1000) / 10}% of base (+${Math.round(extra * 100) / 100} damage), applied as base damage.`);
+        if (!S.isAdversaryWeapon(weapon.name)) notes.push(`Valence bonus set on ${weapon.name}, which is not a Kuva, Tenet or Coda weapon.`);
+      }
     }
     if (stance && stance.phys) {
       // "Physical Damage = Base Physical x (1 + Stance Physical Bonus) x (1 + Modded Physical Bonus) x Combo Damage Multiplier"
@@ -655,6 +666,9 @@
 
     // enemy
     const factionMult = 1 + P.faction;
+    // Vulnerability is multiplicative with faction (wiki Dual_Coda_Torxica spores), and double-dips on DoTs the same way.
+    const vulnMult = 1 + P.vulnerability;
+    if (P.vulnerability) notes.push(`Damage vulnerability x${Math.round(vulnMult * 100) / 100} (multiplicative with faction; applied twice to status DoTs).`);
     const typeMod = t => {
       if (factionInfo.vuln.includes(t)) return S.VULN;
       if (factionInfo.resist.includes(t)) return S.RESIST;
@@ -682,12 +696,12 @@
       vsTyped[k] = Math.max(v * tm * am, floorDmg);
       vsTotalNonCrit += vsTyped[k];
     }
-    vsTotalNonCrit *= factionMult * viral;
+    vsTotalNonCrit *= factionMult * vulnMult * viral;
 
     // Xata's Whisper style extra Void instance
     let voidPerHit = 0;
     if (P.voidExtra) {
-      voidPerHit = P.voidExtra * hitTotal * factionMult * factionMult * typeMod('void') * armorDM * viral;
+      voidPerHit = P.voidExtra * hitTotal * factionMult * factionMult * vulnMult * vulnMult * typeMod('void') * armorDM * viral;
       notes.push("ASSUMPTION: Xata's Whisper Void instance = % of weapon hit damage, with faction applied twice (wiki says it double-dips).");
     }
 
@@ -705,10 +719,10 @@
       shieldPart += v * (k === 'true' ? 1 : typeMod(k));
       ogPart += v * (k === 'true' ? 1 : typeMod(k)) * (k === 'void' ? 1.5 : 1);
     }
-    const voidRaw = P.voidExtra ? P.voidExtra * hitTotal * factionMult : 0;
-    const perShotShield = (shieldPart * factionMult * magnetic + voidRaw * factionMult * typeMod('void') * magnetic) * critBodyHeadAvg * ms;
-    const perShotToxinThroughShield = toxinPart * factionMult * critBodyHeadAvg * ms;
-    const perShotOverguard = (ogPart * factionMult * magnetic + voidRaw * factionMult * typeMod('void') * 1.5 * magnetic) * critBodyHeadAvg * ms;
+    const voidRaw = P.voidExtra ? P.voidExtra * hitTotal * factionMult * vulnMult : 0;
+    const perShotShield = (shieldPart * factionMult * vulnMult * magnetic + voidRaw * factionMult * vulnMult * typeMod('void') * magnetic) * critBodyHeadAvg * ms;
+    const perShotToxinThroughShield = toxinPart * factionMult * vulnMult * critBodyHeadAvg * ms;
+    const perShotOverguard = (ogPart * factionMult * vulnMult * magnetic + voidRaw * factionMult * vulnMult * typeMod('void') * 1.5 * magnetic) * critBodyHeadAvg * ms;
 
     // ---------- rate of fire ----------
     const baseFR = ov.fireRate != null ? ov.fireRate : (atk.fireRate || weapon.fireRate);
@@ -766,7 +780,7 @@
       const procs = (procWeights[t] || 0) * procsPerShot + (t === 'slash' ? extraSlashPerShot : 0);
       if (!procs) continue;
       const elemFactor = (t === 'slash' || d.noElementBonus) ? 1 : (1 + pureElementBonus(t));
-      const tick = baseTotal * dotDmgMult * d.pct * factionMult * factionMult * (1 + P.statusDamage + (P.statusDamageType[t] || 0)) * elemFactor * critBodyHeadAvg;
+      const tick = baseTotal * dotDmgMult * d.pct * factionMult * factionMult * vulnMult * vulnMult * (1 + P.statusDamage + (P.statusDamageType[t] || 0)) * elemFactor * critBodyHeadAvg;
       const dur = d.duration * (1 + P.statusDuration);
       let ticks = d.fixedTicks || (Math.floor(dur - d.delay) + 1 - (d.lastTickNoDamage ? 1 : 0));
       const fullTicks = ticks;
@@ -789,7 +803,7 @@
       dotGroupPerShot += perProc * procs * (d.aoe ? targets : 1);
       if (t === 'blast' && targets > 1) {
         // ASSUMPTION: stacks reset after the 10-stack burst, so one burst per 10 Blast procs
-        const burst = S.BLAST_BURST * baseTotal * dotDmgMult * factionMult * factionMult * (1 + P.statusDamage) * critBodyHeadAvg * typeMod('blast') * armorDM * viral;
+        const burst = S.BLAST_BURST * baseTotal * dotDmgMult * factionMult * factionMult * vulnMult * vulnMult * (1 + P.statusDamage) * critBodyHeadAvg * typeMod('blast') * armorDM * viral;
         dotGroupPerShot += burst * (procs / 10) * (targets - 1);
       }
     }
@@ -820,7 +834,7 @@
         baseTotal, quantizationScale: scale, damagePool: P.dmg, directPool: P.direct, hitTotal: round(hitTotal), vsNonCrit: round(vsTotalNonCrit + voidPerHit), critAvg: round(critBodyHeadAvg), falloff: round(fall),
         critChance: cc, critMultiplier: cd, statusChance: sc, multishot: ms,
         fireRate: fr, effectiveFireRate: effFR, magazine: mag, reload,
-        factionMultiplier: factionMult, separateMultiplier: sepMult,
+        factionMultiplier: factionMult, vulnerabilityMultiplier: vulnMult, separateMultiplier: sepMult,
         headshotMultiplier: headMult, avgCritBody: critBody, avgCritHead: critHead, critChanceHead: ccHead, headshotRate: hsRate, slashOnCrit: P.slashOnCrit,
         headcrit, critMultiplierHead: cdHead,
         heavyEfficiency: Math.min(0.9, P.heavyEff), initialCombo: P.initialCombo,

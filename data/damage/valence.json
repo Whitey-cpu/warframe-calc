@@ -1,0 +1,170 @@
+{
+  "meta": {
+    "purpose": "Adversary Valence / progenitor bonus reference for agents.",
+    "sources": [
+      "https://wiki.warframe.com/w/Kuva_Weapons",
+      "https://wiki.warframe.com/w/Valence_Fusion",
+      "https://wiki.warframe.com/w/Progenitor",
+      "https://wiki.warframe.com/w/Dual_Coda_Torxica"
+    ]
+  },
+  "types": [
+    "impact",
+    "heat",
+    "cold",
+    "electricity",
+    "toxin",
+    "magnetic",
+    "radiation"
+  ],
+  "percentRange": {
+    "min": 25,
+    "max": 60,
+    "unit": "percent of unmodded attack base"
+  },
+  "fusion": {
+    "formula": "min(1.1 * max(bonusA, bonusB), 60)",
+    "floorTo": "0.1 percent points",
+    "snap": "if floored result >= 58 then 60",
+    "exampleWiki": {
+      "a": 40,
+      "b": 52,
+      "result": 57.2
+    },
+    "perfectFrom": 52.8
+  },
+  "progenitors": {
+    "impact": [
+      "Baruuk",
+      "Dante",
+      "Gauss",
+      "Grendel",
+      "Rhino",
+      "Sevagoth",
+      "Sirius & Orion",
+      "Wukong",
+      "Zephyr"
+    ],
+    "heat": [
+      "Chroma",
+      "Ember",
+      "Inaros",
+      "Jade",
+      "Kullervo",
+      "Nezha",
+      "Protea",
+      "Temple",
+      "Uriel",
+      "Vauban",
+      "Wisp"
+    ],
+    "cold": [
+      "Frost",
+      "Gara",
+      "Hildryn",
+      "Koumei",
+      "Narin",
+      "Revenant",
+      "Styanax",
+      "Titania",
+      "Trinity"
+    ],
+    "electricity": [
+      "Banshee",
+      "Caliban",
+      "Excalibur",
+      "Follie",
+      "Gyre",
+      "Limbo",
+      "Nova",
+      "Valkyr",
+      "Volt"
+    ],
+    "toxin": [
+      "Atlas",
+      "Dagath",
+      "Ivara",
+      "Khora",
+      "Nekros",
+      "Nidus",
+      "Nokko",
+      "Oberon",
+      "Oraxia",
+      "Saryn"
+    ],
+    "magnetic": [
+      "Citrine",
+      "Cyte-09",
+      "Harrow",
+      "Hydroid",
+      "Lavos",
+      "Mag",
+      "Mesa",
+      "Xaku",
+      "Yareli"
+    ],
+    "radiation": [
+      "Ash",
+      "Equinox",
+      "Garuda",
+      "Loki",
+      "Mirage",
+      "Nyx",
+      "Octavia",
+      "Qorvex",
+      "Voruna"
+    ]
+  },
+  "adversaryNameTest": "/^(?:Dual )?Coda |^Kuva |^Tenet /",
+  "weapons": [
+    "Coda Bassocyst",
+    "Coda Bubonico",
+    "Coda Catabolyst",
+    "Coda Caustacyst",
+    "Coda Hema",
+    "Coda Hirudo",
+    "Coda Mire",
+    "Coda Motovore",
+    "Coda Pathocyst",
+    "Coda Pox",
+    "Coda Sporothrix",
+    "Coda Synapse",
+    "Coda Tysis",
+    "Dual Coda Torxica",
+    "Kuva Brakk",
+    "Kuva Bramma",
+    "Kuva Chakkhurr",
+    "Kuva Drakgoon",
+    "Kuva Ghoulsaw",
+    "Kuva Hek",
+    "Kuva Hind",
+    "Kuva Karak",
+    "Kuva Kohm",
+    "Kuva Kraken",
+    "Kuva Nukor",
+    "Kuva Ogris",
+    "Kuva Quartakk",
+    "Kuva Seer",
+    "Kuva Shildeg",
+    "Kuva Sobek",
+    "Kuva Tonkor",
+    "Kuva Twin Stubbas",
+    "Kuva Zarr",
+    "Tenet Agendus",
+    "Tenet Arca Plasmor",
+    "Tenet Cycron",
+    "Tenet Detron",
+    "Tenet Diplos",
+    "Tenet Envoy",
+    "Tenet Exec",
+    "Tenet Ferrox",
+    "Tenet Flux Rifle",
+    "Tenet Glaxion",
+    "Tenet Grigori",
+    "Tenet Livia",
+    "Tenet Plinx",
+    "Tenet Quanta",
+    "Tenet Spirex",
+    "Tenet Tetra"
+  ]
+}

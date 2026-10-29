@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "purpose": "Minimal schema for CLI/UI build objects passed to WF.engine.calculate.",
+    "engine": "src/engine.js"
+  },
+  "required": [
+    "weapon"
+  ],
+  "properties": {
+    "weapon": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Weapon name"
+        },
+        {
+          "type": "object",
+          "description": "Inline weapon"
+        }
+      ]
+    },
+    "attack": {
+      "description": "Attack index or name"
+    },
+    "mods": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "rank": {
+                "type": "number"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "arcanes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "valence": {
+      "type": "object",
+      "properties": {
+        "element": {
+          "enum": [
+            "impact",
+            "heat",
+            "cold",
+            "electricity",
+            "toxin",
+            "magnetic",
+            "radiation"
+          ]
+        },
+        "pct": {
+          "description": "0.25–0.60 or 25–60; engine normalizes"
+        }
+      }
+    },
+    "incarnon": {
+      "type": "object",
+      "description": "{ II, III, IV: perk name }"
+    },
+    "buffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "customBuffs": {
+      "type": "array"
+    },
+    "riven": {
+      "type": "array",
+      "description": "Effect objects {stat,value,element?}"
+    },
+    "enemy": {
+      "type": "object"
+    },
+    "conditions": {
+      "type": "object"
+    },
+    "overrides": {
+      "type": "object"
+    },
+    "stance": {
+      "type": "object"
+    },
+    "shards": {
+      "type": "array"
+    },
+    "weaponPassive": {
+      "type": "boolean",
+      "description": "false disables WEAPON_PASSIVES for this weapon"
+    },
+    "extraAttacks": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    }
+  }
+}

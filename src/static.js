@@ -124,12 +124,68 @@
         { stat: 'damage', value: 1.0, cond: { trigger: 'On Mercy Kill', maxStacks: 1 }, raw: '+100% Damage for 20s' },
         { stat: 'multishot', value: 1.0, cond: { trigger: 'On Mercy Kill', maxStacks: 1 }, raw: '+100% Multishot for 20s' }
       ]
+    },
+    // Spores: 50% Damage Vulnerability to Dual Coda Torxica damage only. Behaves like a faction bonus for DoT
+    // double-dipping, but multiplies with (does not add to) Bane-style faction mods.
+    // Source: https://wiki.warframe.com/w/Dual_Coda_Torxica
+    'Dual Coda Torxica': {
+      name: 'Spore Damage Vulnerability', source: 'https://wiki.warframe.com/w/Dual_Coda_Torxica',
+      text: 'Kills spread spores that inflict Cold and +50% Damage Vulnerability to Dual Coda Torxica damage for 20s (faction-like double-dip on status; multiplicative with Bane mods).',
+      effects: [
+        { stat: 'vulnerability', value: 0.5, cond: { trigger: 'On Spore', maxStacks: 1 }, raw: '+50% Damage Vulnerability (spores)' }
+      ]
     }
   };
-  // Adversary weapons (Kuva, Tenet, Coda) carry a Valence bonus: 25-60% of base damage as one extra damage type,
-  // applied as base damage (elemental mods scale from it). Source: https://wiki.warframe.com/w/Kuva_Weapons (Elemental Bonus)
+  // Adversary weapons (Kuva, Tenet, Coda — including Dual Coda Torxica) carry a Valence bonus: 25-60% of base
+  // damage as one extra damage type, applied as base damage (elemental mods scale from it).
+  // Sources: https://wiki.warframe.com/w/Kuva_Weapons (Elemental Bonus),
+  // https://wiki.warframe.com/w/Valence_Fusion, https://wiki.warframe.com/w/Dual_Coda_Torxica
   S.VALENCE_TYPES = ['impact', 'heat', 'cold', 'electricity', 'toxin', 'magnetic', 'radiation'];
-  S.isAdversaryWeapon = name => /^(Kuva|Tenet|Coda) /.test(name || '');
+  S.VALENCE_MIN = 0.25;
+  S.VALENCE_MAX = 0.60;
+  S.VALENCE_FUSE_MULT = 1.1;
+  // After floor-to-0.1%, values at or above this snap to 60% (Update 36.0).
+  S.VALENCE_SNAP_TO_MAX = 0.58;
+  // Name patterns: "Kuva X", "Tenet X", "Coda X", and "Dual Coda Torxica" (akimbo prefix before Coda).
+  S.isAdversaryWeapon = name => /^(?:Dual )?Coda |^Kuva |^Tenet /.test(name || '');
+  // Normalize a valence percent: accepts 0.25–0.60 or 25–60. Clamps to [0, 60%].
+  S.normalizeValencePct = function (pct) {
+    let p = Number(pct);
+    if (!Number.isFinite(p) || p <= 0) return 0;
+    if (p > 1) p = p / 100;
+    return Math.min(S.VALENCE_MAX, Math.max(0, p));
+  };
+  // Valence Fusion for adversary weapons (wiki Valence_Fusion § Adversary Weapons):
+  // Final = min(1.1 × max(a, b), 60%), floored to one decimal place of a percent, then ≥58% → 60%.
+  // Inputs accept fractions (0.25–0.60) or percent points (25–60); output is a fraction.
+  S.valenceFusion = function (a, b) {
+    const x = S.normalizeValencePct(a), y = S.normalizeValencePct(b);
+    const rawPct = Math.min(S.VALENCE_FUSE_MULT * Math.max(x, y) * 100, S.VALENCE_MAX * 100);
+    // Floor to one decimal place of a percent (wiki: "rounding the result down to the first decimal place").
+    const flooredPct = Math.floor(rawPct * 10 + 1e-9) / 10;
+    if (flooredPct >= S.VALENCE_SNAP_TO_MAX * 100 - 1e-9) return S.VALENCE_MAX;
+    // One decimal place of a percent → at most three fraction digits (avoids 0.5720000000000001).
+    return Math.round(flooredPct * 10) / 1000;
+  };
+  // Progenitor Warframe → valence element. Primed/Umbra share the base frame's element.
+  // Source: https://wiki.warframe.com/w/Progenitor (Module:Warframes/data)
+  S.PROGENITOR_ELEMENTS = {
+    impact: ['Baruuk', 'Dante', 'Gauss', 'Grendel', 'Rhino', 'Sevagoth', 'Sirius & Orion', 'Wukong', 'Zephyr'],
+    heat: ['Chroma', 'Ember', 'Inaros', 'Jade', 'Kullervo', 'Nezha', 'Protea', 'Temple', 'Uriel', 'Vauban', 'Wisp'],
+    cold: ['Frost', 'Gara', 'Hildryn', 'Koumei', 'Narin', 'Revenant', 'Styanax', 'Titania', 'Trinity'],
+    electricity: ['Banshee', 'Caliban', 'Excalibur', 'Follie', 'Gyre', 'Limbo', 'Nova', 'Valkyr', 'Volt'],
+    toxin: ['Atlas', 'Dagath', 'Ivara', 'Khora', 'Nekros', 'Nidus', 'Nokko', 'Oberon', 'Oraxia', 'Saryn'],
+    magnetic: ['Citrine', 'Cyte-09', 'Harrow', 'Hydroid', 'Lavos', 'Mag', 'Mesa', 'Xaku', 'Yareli'],
+    radiation: ['Ash', 'Equinox', 'Garuda', 'Loki', 'Mirage', 'Nyx', 'Octavia', 'Qorvex', 'Voruna']
+  };
+  S.progenitorElement = function (frameName) {
+    if (!frameName) return null;
+    const base = String(frameName).replace(/ Prime$| Umbra$/, '');
+    for (const [el, frames] of Object.entries(S.PROGENITOR_ELEMENTS)) {
+      if (frames.some(f => f.toLowerCase() === base.toLowerCase())) return el;
+    }
+    return null;
+  };
   S.BLAST_BURST = 3.0; // 10 Blast stacks: 300% of base damage to nearby enemies, excluding the target
   S.COLD_CD = { first: 0.1, perExtra: 0.05, max: 0.5 };
 
