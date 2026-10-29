@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "purpose": "Damage-calc formulas only. Every entry cites a wiki/DE source. Engine: src/engine.js.",
+    "gameDataVersion": "1.1276.36",
+    "sources": {
+      "damageCalc": "https://wiki.warframe.com/w/Damage_calculation",
+      "quantization": "https://wiki.warframe.com/w/Quantization",
+      "crit": "https://wiki.warframe.com/w/Critical_Hit",
+      "status": "https://wiki.warframe.com/w/Status_Effect",
+      "dot": "https://wiki.warframe.com/w/Damage_over_Time",
+      "armor": "https://wiki.warframe.com/w/Armor",
+      "valenceFusion": "https://wiki.warframe.com/w/Valence_Fusion",
+      "kuvaWeapons": "https://wiki.warframe.com/w/Kuva_Weapons",
+      "progenitor": "https://wiki.warframe.com/w/Progenitor",
+      "dualCodaTorxica": "https://wiki.warframe.com/w/Dual_Coda_Torxica",
+      "elemental": "https://wiki.warframe.com/w/Elemental_Damage"
+    }
+  },
+  "quantization": {
+    "source": "https://wiki.warframe.com/w/Quantization",
+    "note": "Update 40.0 changed scale from 1/16 to 1/32 of unmodded base (including Valence).",
+    "scale": "baseTotal / 32",
+    "quantize": "sign(x) * floor(|x| / scale + 0.5) * scale",
+    "damageMods": "Multiply final quantized values; they do not change scale (wiki Damage/Calculation)."
+  },
+  "arsenalTotal": {
+    "source": "https://wiki.warframe.com/w/Damage_calculation",
+    "formula": "base * (1 + elemental% + physDist_i * physBonus_i) * (1 + damage%) * multishot",
+    "note": "Arsenal screen omits faction, falloff, and quantization."
+  },
+  "crit": {
+    "source": "https://wiki.warframe.com/w/Critical_Hit",
+    "expectedMultiplier": " (1 - f) * (1 + t*(CD-1)) + f * (1 + (t+1)*(CD-1)) where t=floor(CC), f=CC-t",
+    "headcrit": "Doubles weapon base crit multiplier; relative crit-damage bonuses still apply. Flat crit-damage bonuses are not doubled.",
+    "headcritFlag": "Not every head: Corpus humanoids, most Murmur/Techrot default off (Enemy_Body_Parts)."
+  },
+  "armor": {
+    "source": "https://wiki.warframe.com/w/Armor",
+    "atOrBelow2700": "damageTaken = 1 - 0.9 * sqrt(armor / 2700)",
+    "above2700": "damageTaken = 300 / (armor + 300)",
+    "minPerType": 1
+  },
+  "factionAndDots": {
+    "source": [
+      "https://wiki.warframe.com/w/Damage_calculation",
+      "https://wiki.warframe.com/w/Damage_over_Time",
+      "https://wiki.warframe.com/w/Status_Effect"
+    ],
+    "direct": "hit * (1 + faction) * viral * vulnerability",
+    "statusDot": "tick * (1 + faction)^2 * vulnerability^2 * (1 + statusDamage) * elementFactor",
+    "note": "Vulnerability (Torxica spores) is multiplicative with Bane/Roar, not additive (Dual_Coda_Torxica)."
+  },
+  "elements": {
+    "source": [
+      "https://wiki.warframe.com/w/Elemental_Damage",
+      "https://wiki.warframe.com/w/Dual_Coda_Torxica"
+    ],
+    "combos": {
+      "cold+heat": "blast",
+      "electricity+heat": "radiation",
+      "heat+toxin": "gas",
+      "cold+electricity": "magnetic",
+      "cold+toxin": "viral",
+      "electricity+toxin": "corrosive"
+    },
+    "order": "Mod slots top-left→bottom-right, then innate/Valence primaries in HCET: heat, cold, electricity, toxin",
+    "hcet": [
+      "heat",
+      "cold",
+      "electricity",
+      "toxin"
+    ]
+  },
+  "valence": {
+    "source": [
+      "https://wiki.warframe.com/w/Kuva_Weapons",
+      "https://wiki.warframe.com/w/Valence_Fusion",
+      "https://wiki.warframe.com/w/Progenitor",
+      "https://wiki.warframe.com/w/Dual_Coda_Torxica"
+    ],
+    "types": [
+      "impact",
+      "heat",
+      "cold",
+      "electricity",
+      "toxin",
+      "magnetic",
+      "radiation"
+    ],
+    "range": [
+      0.25,
+      0.6
+    ],
+    "appliesAs": "base damage (raises baseTotal before elemental % and quantization scale)",
+    "fusion": "min(1.1 * max(a,b), 60%), floor to 0.1 percent points, then >=58% → 60%",
+    "nameMatch": "^(?:Dual )?Coda |^Kuva |^Tenet "
+  }
+}

@@ -187,6 +187,40 @@ if (data.incarnon) {
   eq('Primary Deadhead On Weak Point Kill stacks count with conditionals on (0% headshots)', dh.stats.damagePool - noDh.stats.damagePool > 3.5, true);
   const merc = E.calculate({ weapon: 'Coda Bassocyst', mods: [], conditions: { assumeMax: true, selfStatus: false } }, data);
   eq('Coda Bassocyst Mercy Kill buff: +100% multishot', merc.stats.multishot, 2);
+  // Dual Coda Torxica is an adversary weapon despite the "Dual" prefix (wiki Dual_Coda_Torxica)
+  const S = WF.STATIC;
+  eq('Dual Coda Torxica is an adversary weapon', S.isAdversaryWeapon('Dual Coda Torxica'), true);
+  eq('Soma Prime is not an adversary weapon', S.isAdversaryWeapon('Soma Prime'), false);
+  // Valence Fusion formula (wiki Valence_Fusion): min(1.1 x max, 60), floor to 0.1%, >=58% -> 60%
+  eq('Valence Fusion 40% + 52% = 57.2%', S.valenceFusion(0.4, 0.52), 0.572, 1e-12);
+  eq('Valence Fusion 40% + 52.8% snaps to 60%', S.valenceFusion(40, 52.8), 0.6, 1e-12);
+  eq('Valence Fusion 25% + 25% = 27.5%', S.valenceFusion(25, 25), 0.275, 1e-12);
+  eq('Valence Fusion 58% alone snaps to 60%', S.valenceFusion(0.58, 0.25), 0.6, 1e-12);
+  eq('Progenitor Ember Prime -> Heat', S.progenitorElement('Ember Prime') === 'heat', true);
+  // pct: 60 (percent points) must not be treated as 60x base — normalizeValencePct / engine clamp
+  const brakk = E.findWeapon(data, 'Kuva Brakk');
+  const brakkBase = Object.values(brakk.attacks[0].damage).reduce((a, b) => a + b, 0);
+  const brakkV = E.calculate({ weapon: 'Kuva Brakk', valence: { element: 'heat', pct: 60 }, conditions: { assumeMax: false, selfStatus: false } }, data);
+  eq('Valence pct 60 means 60%, not 6000%', brakkV.stats.baseTotal, brakkBase * 1.6, 1e-9);
+  // Dual Coda Torxica spore vulnerability: +50%, multiplicative with faction, double-dips DoTs (wiki)
+  const sporeOff = E.calculate({ weapon: 'Dual Coda Torxica', mods: [], valence: { element: 'magnetic', pct: 0.6 }, conditions: { assumeMax: false, selfStatus: false }, enemy: { armor: 0 } }, data);
+  const sporeOn = E.calculate({ weapon: 'Dual Coda Torxica', mods: [], valence: { element: 'magnetic', pct: 0.6 }, conditions: { assumeMax: true, selfStatus: false }, enemy: { armor: 0 } }, data);
+  eq('Torxica spores: +50% vulnerability when conditionals on', sporeOn.stats.vulnerabilityMultiplier, 1.5, 1e-9);
+  eq('Torxica spores off when conditionals off', sporeOff.stats.vulnerabilityMultiplier, 1, 1e-9);
+  const sporeBane = E.calculate({
+    weapon: 'Dual Coda Torxica', mods: [], valence: { element: 'magnetic', pct: 0.6 },
+    customBuffs: [{ kind: 'faction', value: 0.55 }],
+    conditions: { assumeMax: true, selfStatus: false }, enemy: { faction: 'None (neutral)', armor: 0 }
+  }, data);
+  // (1 + 0.55) * 1.5 = 2.325 vs additive would be 2.05
+  eq('Torxica spores multiply with faction (not add)', sporeBane.perShotVsEnemy / sporeOn.perShotVsEnemy, 1.55, 1e-6);
+  // HCET: innate Electricity (Agendus) + Heat valence + Cold mod -> Blast + Electricity (wiki Dual_Coda_Torxica table)
+  const ag = E.calculate({ weapon: 'Tenet Agendus', valence: { element: 'heat', pct: 0.6 }, mods: ['North Wind'], conditions: { assumeMax: false, selfStatus: false } }, data);
+  eq('HCET: Agendus Heat valence + Cold mod -> Blast present', ag.elements.includes('blast') ? 1 : 0, 1);
+  eq('HCET: Agendus keeps innate Electricity', ag.elements.includes('electricity') || (ag.arsenal.types.electricity > 0) ? 1 : 0, 1);
+  // Glaxion innate Cold + Toxin valence + Heat mod -> Blast + Toxin
+  const gl = E.calculate({ weapon: 'Tenet Glaxion', valence: { element: 'toxin', pct: 0.6 }, mods: ['Hellfire'], conditions: { assumeMax: false, selfStatus: false } }, data);
+  eq('HCET: Glaxion Toxin valence + Heat -> Blast + Toxin', gl.elements.slice().sort().join() === 'blast,toxin', true);
 }
 
 // 22. Change log: newest entry matches package.json, every entry has a TL;DR

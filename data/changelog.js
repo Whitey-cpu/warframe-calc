@@ -5,6 +5,23 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.16.0', date: '2026-10-29',
+    tldr: 'Valence Fusion helper and Dual Coda support, Torxica spore vulnerability, tighter damage math notes, and compact AI damage data.',
+    sections: [
+      { title: 'Added', items: [
+        'Valence Fusion helper on adversary weapons: plug in two percents and get the wiki result (1.1× max, floor to 0.1%, ≥58% → 60%).',
+        'Dual Coda Torxica counts as an adversary weapon for Valence (it was missed by the old name check).',
+        'Dual Coda Torxica Spore Damage Vulnerability (+50%, multiplicative with faction, double-dips status) under Conditional buffs.',
+        'Progenitor element table and Valence percent normalization (25–60 or 0.25–0.60).',
+        'Compact damage-calc data under data/damage/ for agents (formulas, constants, slim weapons).'
+      ] },
+      { title: 'Changed', items: [
+        'Valence UI shows the extra base damage on the current attack and links the Fusion / Progenitor wiki pages.',
+        'Service worker cache bumped to wfcalc-v29.'
+      ] }
+    ]
+  },
+  {
     version: '0.15.1', date: '2026-10-29',
     tldr: 'Quieter first view: collapsed mod browser, Weapon → Mods → Results path, thinner chrome.',
     sections: [

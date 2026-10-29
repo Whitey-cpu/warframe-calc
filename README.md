@@ -21,8 +21,9 @@ In the UI, **Copy build JSON** gives you a build you can paste to Claude or feed
 
 ## What it models
 
-- Mods by slot order, element combination (HCET rules, innate elements merge or go last), quantization (1/32 of base)
-- Base damage pool (Serration, Galvanized, arcane damage stacks, Vex Armor), separate multipliers (Eclipse), faction pool (Bane, Roar), extra Void (Xata's Whisper)
+- Mods by slot order, element combination (HCET rules, innate/Valence primaries after mod slots), quantization (1/32 of base)
+- Valence bonus on Kuva / Tenet / Coda / Dual Coda weapons (25–60% of base as Impact/Heat/Cold/Electricity/Toxin/Magnetic/Radiation), plus a Valence Fusion helper (`min(1.1×max, 60%)`, floor to 0.1%, ≥58%→60%)
+- Base damage pool (Serration, Galvanized, arcane damage stacks, Vex Armor), separate multipliers (Eclipse), faction pool (Bane, Roar), vulnerability (Torxica spores, multiplicative with faction), extra Void (Xata's Whisper)
 - Crit tiers (orange/red), flat crit (Arcane Avenger etc.), critical headshots (base crit multiplier x2, only on heads with that flag: `S.HEADCRIT_BY_FACTION`), weak point and headshot bonuses
 - Status chance and proc weighting; Slash/Heat/Toxin/Electricity/Gas DoTs (faction applied twice), Heat refresh, Blast fuse and 10-stack burst
 - Statuses you apply yourself (Viral, Corrosive, Magnetic, Puncture, Cold, Heat strip) build up over the fight and feed back into damage
@@ -170,5 +171,6 @@ src/optimizer.js       Build search
 scripts/sync-data.js   Data download/build
 scripts/scrape-patches.js, scripts/patch-notes.js   Game updates feed (data/game-updates.json/.js)
 data/                  Generated game data (game-data.json for CLI, game-data.js for UI), changelog.js
+data/damage/           Compact agent-oriented damage views (formulas, constants, slim weapons); `npm run damage-data`
 examples/, test/       Sample builds, wiki-based tests
 ```

@@ -4,12 +4,30 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
-- **UX declutter**: One quieter first view — collapsed mod browser, Weapon → Mods → Results path, thinner chrome.
+- **v0.16.0**: Valence Fusion helper, Dual Coda Torxica valence + spore vulnerability, compact AI damage data.
+- **v0.15.1**: Quieter first view — collapsed mod browser, Weapon → Mods → Results path, thinner chrome.
 - **v0.15.0**: Rivens follow Hotfix 44.1.3, with a new crafting suite and a build importer that reads screenshots.
 - **v0.14.0**: The Windows app now updates itself.
 - **v0.13.1**: More accurate critical headshots, Heat damage and armor, with a Critical headshots setting on the Enemy tab.
 
-## UX declutter (unreleased)
+## v0.16.0 (2026-10-29)
+
+**TL;DR:** Valence Fusion helper and Dual Coda support, Torxica spore vulnerability, and compact AI damage data.
+
+### Added
+
+- Valence Fusion helper on adversary weapons: plug in two percents and get the wiki result (`1.1 × max`, floor to 0.1%, ≥58% → 60%). Sources: [Valence Fusion](https://wiki.warframe.com/w/Valence_Fusion), [Kuva Weapons](https://wiki.warframe.com/w/Kuva_Weapons).
+- Dual Coda Torxica counts as an adversary weapon for Valence (name check now includes the Dual prefix).
+- Dual Coda Torxica Spore Damage Vulnerability (+50%, multiplicative with faction mods, double-dips status) under Conditional buffs. Source: [Dual Coda Torxica](https://wiki.warframe.com/w/Dual_Coda_Torxica).
+- Progenitor element table and safer Valence percent parsing (25–60 or 0.25–0.60).
+- Compact damage-calc views under `data/damage/` for agents (`formulas.json`, `constants.json`, slim/adversary weapons).
+
+### Changed
+
+- Valence UI shows the extra base damage on the current attack and links Fusion / Progenitor wiki pages.
+- Service worker cache bumped to wfcalc-v29.
+
+## v0.15.1 (2026-10-29)
 
 **TL;DR:** The arsenal view shows less at once. Pick a weapon, open mods when you need them, then check results.
 

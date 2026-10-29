@@ -1,0 +1,456 @@
+{
+  "meta": {
+    "purpose": "Hand-maintained combat constants used by the engine. Edit src/static.js; rebuild this file.",
+    "sources": {
+      "damageCalc": "https://wiki.warframe.com/w/Damage_calculation",
+      "quantization": "https://wiki.warframe.com/w/Quantization",
+      "crit": "https://wiki.warframe.com/w/Critical_Hit",
+      "status": "https://wiki.warframe.com/w/Status_Effect",
+      "dot": "https://wiki.warframe.com/w/Damage_over_Time",
+      "data": "https://www.npmjs.com/package/@wfcd/items"
+    }
+  },
+  "physical": [
+    "impact",
+    "puncture",
+    "slash"
+  ],
+  "primaryElements": [
+    "heat",
+    "cold",
+    "electricity",
+    "toxin"
+  ],
+  "secondaryElements": [
+    "blast",
+    "radiation",
+    "gas",
+    "magnetic",
+    "viral",
+    "corrosive"
+  ],
+  "combos": {
+    "cold+heat": "blast",
+    "electricity+heat": "radiation",
+    "heat+toxin": "gas",
+    "cold+electricity": "magnetic",
+    "cold+toxin": "viral",
+    "electricity+toxin": "corrosive"
+  },
+  "hcet": [
+    "heat",
+    "cold",
+    "electricity",
+    "toxin"
+  ],
+  "vuln": 1.5,
+  "resist": 0.5,
+  "factions": {
+    "None (neutral)": {
+      "vuln": [],
+      "resist": [],
+      "baneKey": null
+    },
+    "Grineer": {
+      "vuln": [
+        "impact",
+        "corrosive"
+      ],
+      "resist": [],
+      "baneKey": "Grineer"
+    },
+    "Kuva Grineer": {
+      "vuln": [
+        "impact",
+        "corrosive"
+      ],
+      "resist": [
+        "heat"
+      ],
+      "baneKey": "Grineer"
+    },
+    "Corpus": {
+      "vuln": [
+        "puncture",
+        "magnetic"
+      ],
+      "resist": [],
+      "baneKey": "Corpus"
+    },
+    "Corpus Amalgam": {
+      "vuln": [
+        "electricity",
+        "magnetic"
+      ],
+      "resist": [
+        "blast"
+      ],
+      "baneKey": "Corpus"
+    },
+    "Infested": {
+      "vuln": [
+        "heat"
+      ],
+      "resist": [],
+      "baneKey": "Infested"
+    },
+    "Infested Deimos": {
+      "vuln": [
+        "slash",
+        "blast",
+        "gas"
+      ],
+      "resist": [
+        "viral"
+      ],
+      "baneKey": "Infested"
+    },
+    "Orokin (Corrupted)": {
+      "vuln": [
+        "puncture",
+        "viral"
+      ],
+      "resist": [
+        "radiation"
+      ],
+      "baneKey": "Corrupted",
+      "rivenKey": "Orokin"
+    },
+    "Sentient": {
+      "vuln": [
+        "cold",
+        "radiation"
+      ],
+      "resist": [
+        "corrosive"
+      ],
+      "baneKey": "Sentient"
+    },
+    "Narmer": {
+      "vuln": [
+        "slash",
+        "toxin"
+      ],
+      "resist": [
+        "magnetic"
+      ],
+      "baneKey": null
+    },
+    "The Murmur": {
+      "vuln": [
+        "electricity",
+        "radiation"
+      ],
+      "resist": [
+        "viral"
+      ],
+      "baneKey": "Murmur"
+    },
+    "Zariman": {
+      "vuln": [
+        "void"
+      ],
+      "resist": [],
+      "baneKey": null
+    },
+    "Scaldra": {
+      "vuln": [
+        "impact",
+        "corrosive"
+      ],
+      "resist": [
+        "gas"
+      ],
+      "baneKey": null,
+      "rivenKey": "Scaldra"
+    },
+    "Techrot": {
+      "vuln": [
+        "gas",
+        "magnetic"
+      ],
+      "resist": [
+        "cold"
+      ],
+      "baneKey": null,
+      "rivenKey": "Techrot"
+    },
+    "Anarchs": {
+      "vuln": [
+        "impact",
+        "electricity"
+      ],
+      "resist": [
+        "radiation"
+      ],
+      "baneKey": null
+    }
+  },
+  "armor": {
+    "cap": 2700,
+    "drMax": 0.9,
+    "overCapK": 300,
+    "minPerType": 1
+  },
+  "headshotDefault": 3,
+  "headshotByFaction": {
+    "The Murmur": 1.5,
+    "Techrot": 1.5
+  },
+  "headcritByFaction": {
+    "Corpus": false,
+    "Corpus Amalgam": false,
+    "The Murmur": false,
+    "Techrot": false
+  },
+  "headcritBonus": 2,
+  "dot": {
+    "slash": {
+      "pct": 0.35,
+      "duration": 6,
+      "delay": 1,
+      "bypassArmor": true
+    },
+    "heat": {
+      "pct": 0.5,
+      "duration": 6,
+      "delay": 1
+    },
+    "toxin": {
+      "pct": 0.5,
+      "duration": 6,
+      "delay": 1
+    },
+    "electricity": {
+      "pct": 0.5,
+      "duration": 6,
+      "delay": 0,
+      "lastTickNoDamage": true,
+      "aoe": true
+    },
+    "gas": {
+      "pct": 0.5,
+      "duration": 6,
+      "delay": 0,
+      "lastTickNoDamage": true,
+      "aoe": true
+    },
+    "blast": {
+      "pct": 0.3,
+      "duration": 1.5,
+      "delay": 1.5,
+      "fixedTicks": 1,
+      "noElementBonus": true
+    }
+  },
+  "status": {
+    "impact": {
+      "duration": 1,
+      "max": 5
+    },
+    "puncture": {
+      "duration": 10,
+      "max": 5
+    },
+    "slash": {
+      "duration": 6,
+      "max": null
+    },
+    "heat": {
+      "duration": 6,
+      "max": null
+    },
+    "cold": {
+      "duration": 6,
+      "max": 10
+    },
+    "electricity": {
+      "duration": 6,
+      "max": null
+    },
+    "toxin": {
+      "duration": 6,
+      "max": null
+    },
+    "blast": {
+      "duration": 1.5,
+      "max": 10
+    },
+    "radiation": {
+      "duration": 12,
+      "max": 10
+    },
+    "gas": {
+      "duration": 6,
+      "max": 10
+    },
+    "magnetic": {
+      "duration": 6,
+      "max": 10
+    },
+    "viral": {
+      "duration": 6,
+      "max": 10
+    },
+    "corrosive": {
+      "duration": 8,
+      "max": 10
+    },
+    "tau": {
+      "duration": 8,
+      "max": 10
+    },
+    "void": {
+      "duration": 3,
+      "max": 1,
+      "assumption": true
+    }
+  },
+  "viral": {
+    "first": 1,
+    "perExtra": 0.25,
+    "max": 10
+  },
+  "corrosive": {
+    "first": 0.26,
+    "perExtra": 0.06,
+    "max": 10
+  },
+  "heatStripMax": 0.5,
+  "blastBurst": 3,
+  "coldCd": {
+    "first": 0.1,
+    "perExtra": 0.05,
+    "max": 0.5
+  },
+  "punctureCc": 0.05,
+  "valence": {
+    "types": [
+      "impact",
+      "heat",
+      "cold",
+      "electricity",
+      "toxin",
+      "magnetic",
+      "radiation"
+    ],
+    "min": 0.25,
+    "max": 0.6,
+    "fuseMult": 1.1,
+    "snapFrom": 0.58,
+    "progenitors": {
+      "impact": [
+        "Baruuk",
+        "Dante",
+        "Gauss",
+        "Grendel",
+        "Rhino",
+        "Sevagoth",
+        "Sirius & Orion",
+        "Wukong",
+        "Zephyr"
+      ],
+      "heat": [
+        "Chroma",
+        "Ember",
+        "Inaros",
+        "Jade",
+        "Kullervo",
+        "Nezha",
+        "Protea",
+        "Temple",
+        "Uriel",
+        "Vauban",
+        "Wisp"
+      ],
+      "cold": [
+        "Frost",
+        "Gara",
+        "Hildryn",
+        "Koumei",
+        "Narin",
+        "Revenant",
+        "Styanax",
+        "Titania",
+        "Trinity"
+      ],
+      "electricity": [
+        "Banshee",
+        "Caliban",
+        "Excalibur",
+        "Follie",
+        "Gyre",
+        "Limbo",
+        "Nova",
+        "Valkyr",
+        "Volt"
+      ],
+      "toxin": [
+        "Atlas",
+        "Dagath",
+        "Ivara",
+        "Khora",
+        "Nekros",
+        "Nidus",
+        "Nokko",
+        "Oberon",
+        "Oraxia",
+        "Saryn"
+      ],
+      "magnetic": [
+        "Citrine",
+        "Cyte-09",
+        "Harrow",
+        "Hydroid",
+        "Lavos",
+        "Mag",
+        "Mesa",
+        "Xaku",
+        "Yareli"
+      ],
+      "radiation": [
+        "Ash",
+        "Equinox",
+        "Garuda",
+        "Loki",
+        "Mirage",
+        "Nyx",
+        "Octavia",
+        "Qorvex",
+        "Voruna"
+      ]
+    }
+  },
+  "abilities": [
+    {
+      "id": "roar",
+      "kind": "faction",
+      "value": 0.5,
+      "source": "https://wiki.warframe.com/w/Roar"
+    },
+    {
+      "id": "roar-helminth",
+      "kind": "faction",
+      "value": 0.3,
+      "source": "https://wiki.warframe.com/w/Roar"
+    },
+    {
+      "id": "eclipse",
+      "kind": "separate",
+      "value": 2,
+      "source": "https://wiki.warframe.com/w/Eclipse"
+    },
+    {
+      "id": "vex-armor",
+      "kind": "baseDamage",
+      "value": 2.75,
+      "source": "https://wiki.warframe.com/w/Vex_Armor"
+    },
+    {
+      "id": "xatas-whisper",
+      "kind": "voidExtra",
+      "value": 0.26,
+      "source": "https://wiki.warframe.com/w/Xata%27s_Whisper"
+    }
+  ]
+}

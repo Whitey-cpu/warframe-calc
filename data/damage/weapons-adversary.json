@@ -1,0 +1,2577 @@
+{
+  "meta": {
+    "purpose": "Adversary (Kuva/Tenet/Coda/Dual Coda) weapons only — valence-capable set.",
+    "count": 49,
+    "sources": [
+      "https://wiki.warframe.com/w/Kuva_Weapons",
+      "https://wiki.warframe.com/w/Dual_Coda_Torxica"
+    ]
+  },
+  "weapons": [
+    {
+      "name": "Coda Bassocyst",
+      "category": "Primary",
+      "type": "Shotgun",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 1.1666667,
+      "magazine": 24,
+      "reload": 2.5,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1.17,
+          "critChance": 0.18,
+          "critMult": 2.2,
+          "statusChance": 0.4,
+          "damage": {
+            "radiation": 19,
+            "blast": 789
+          },
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 35,
+            "end": 60,
+            "reduction": 0.6745
+          }
+        },
+        {
+          "name": "Alt-Fire",
+          "fireRate": 1.67,
+          "critChance": 0.18,
+          "critMult": 2.2,
+          "statusChance": 0.4,
+          "damage": {
+            "blast": 303
+          },
+          "shotType": "Projectile"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Bubonico",
+      "category": "Primary",
+      "type": "Shotgun",
+      "trigger": "Auto",
+      "multishot": 7,
+      "fireRate": 5.3333335,
+      "magazine": 36,
+      "reload": 5.5,
+      "attacks": [
+        {
+          "name": "Auto",
+          "fireRate": 5.33,
+          "critChance": 0.27,
+          "critMult": 2.3,
+          "statusChance": 0.1014,
+          "damage": {
+            "impact": 2,
+            "slash": 19,
+            "puncture": 13,
+            "toxin": 7
+          },
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 19,
+            "end": 41,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Burst",
+          "fireRate": 7,
+          "critChance": 0.05,
+          "critMult": 3.5,
+          "statusChance": 0.61,
+          "damage": {
+            "impact": 9
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Radial Attack",
+          "fireRate": 3.37,
+          "critChance": 0.05,
+          "critMult": 3.5,
+          "statusChance": 0.57,
+          "damage": {
+            "viral": 143
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 7,
+            "reduction": 0.5
+          }
+        }
+      ],
+      "adversary": true,
+      "battery": {
+        "rate": 9,
+        "delay": 1.5,
+        "emptyDelay": 0.1
+      }
+    },
+    {
+      "name": "Coda Catabolyst",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Held",
+      "multishot": 1,
+      "fireRate": 12.000001,
+      "magazine": 37,
+      "reload": 1.7,
+      "attacks": [
+        {
+          "name": "Primary",
+          "fireRate": 12,
+          "critChance": 0.11,
+          "critMult": 2.9,
+          "statusChance": 0.5,
+          "damage": {
+            "corrosive": 56
+          },
+          "shotType": "Hit-Scan",
+          "falloff": {
+            "start": 9,
+            "end": 19,
+            "reduction": 0.9811
+          }
+        },
+        {
+          "name": "Partial Reload Impact",
+          "fireRate": 12,
+          "critChance": 0.11,
+          "critMult": 2.9,
+          "statusChance": 0.43,
+          "damage": {
+            "impact": 11
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Partial Reload Explosion",
+          "fireRate": 12,
+          "critChance": 0.11,
+          "critMult": 2.9,
+          "statusChance": 0.43,
+          "damage": {
+            "corrosive": 74
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 3,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Reload From Empty Impact",
+          "fireRate": 12,
+          "critChance": 0.31,
+          "critMult": 2.9,
+          "statusChance": 0.59,
+          "damage": {
+            "impact": 11
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Reload From Empty Explosion",
+          "fireRate": 12,
+          "critChance": 0.31,
+          "critMult": 2.9,
+          "statusChance": 0.59,
+          "damage": {
+            "corrosive": 658
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 5,
+            "reduction": 0.5
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Caustacyst",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 1,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1,
+          "critChance": 0.19,
+          "critMult": 2.3,
+          "statusChance": 0.41,
+          "damage": {
+            "impact": 20,
+            "slash": 70,
+            "puncture": 75,
+            "corrosive": 120
+          }
+        },
+        {
+          "name": "Corrosive Wave",
+          "fireRate": 1,
+          "critChance": 0.09,
+          "critMult": 2,
+          "statusChance": 0.41,
+          "damage": {
+            "corrosive": 225
+          },
+          "chargeTime": 1,
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 0,
+            "end": 35,
+            "reduction": 1
+          }
+        },
+        {
+          "name": "Corrosive Pool",
+          "fireRate": 1,
+          "critChance": 0,
+          "critMult": 1,
+          "statusChance": 1,
+          "damage": {
+            "corrosive": 145
+          },
+          "chargeTime": 1,
+          "shotType": "AoE"
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1,
+          "critChance": 0.19,
+          "critMult": 2.3,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 570
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 8,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 1,
+          "critChance": 0.19,
+          "critMult": 2.3,
+          "statusChance": 0.1,
+          "damage": {
+            "blast": 855
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 9,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 1,
+          "critChance": 0.19,
+          "critMult": 2.3,
+          "statusChance": 0.41,
+          "damage": {
+            "impact": 120,
+            "slash": 420,
+            "puncture": 450,
+            "corrosive": 720
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Hema",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Burst",
+      "multishot": 1,
+      "fireRate": 6.1538458,
+      "magazine": 72,
+      "reload": 2,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 5.33,
+          "critChance": 0.2,
+          "critMult": 2.3,
+          "statusChance": 0.3,
+          "damage": {
+            "viral": 52
+          },
+          "shotType": "Projectile"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Hirudo",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 1,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1,
+          "critChance": 0.34,
+          "critMult": 3.1,
+          "statusChance": 0.18,
+          "damage": {
+            "impact": 26.25,
+            "slash": 8.75,
+            "puncture": 140
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1,
+          "critChance": 0.34,
+          "critMult": 3.1,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 350
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 7,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 1,
+          "critChance": 0.34,
+          "critMult": 3.1,
+          "statusChance": 0.1,
+          "damage": {
+            "blast": 525
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 8,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 1,
+          "critChance": 0.34,
+          "critMult": 3.1,
+          "statusChance": 0.18,
+          "damage": {
+            "impact": 170.7,
+            "slash": 56.9,
+            "puncture": 910.4
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Mire",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 1.0833334,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1.083,
+          "critChance": 0.18,
+          "critMult": 2.4,
+          "statusChance": 0.4,
+          "damage": {
+            "impact": 45,
+            "slash": 66,
+            "puncture": 45,
+            "toxin": 79
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1.08,
+          "critChance": 0.18,
+          "critMult": 2.4,
+          "statusChance": 0.31,
+          "damage": {
+            "toxin": 470
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 7,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 1.08,
+          "critChance": 0.18,
+          "critMult": 2.4,
+          "statusChance": 0.31,
+          "damage": {
+            "toxin": 705
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 8,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 1.083,
+          "critChance": 0.18,
+          "critMult": 2.4,
+          "statusChance": 0.4,
+          "damage": {
+            "impact": 225,
+            "slash": 330,
+            "puncture": 225,
+            "toxin": 395
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Motovore",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 1,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1,
+          "critChance": 0.25,
+          "critMult": 2.3,
+          "statusChance": 0.3,
+          "damage": {
+            "impact": 83.33,
+            "slash": 83.35,
+            "puncture": 83.33
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1,
+          "critChance": 0.25,
+          "critMult": 2.3,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 166.5,
+            "slash": 167,
+            "puncture": 166.5
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 9,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 1,
+          "critChance": 0.25,
+          "critMult": 2.3,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 249.75,
+            "slash": 250.5,
+            "puncture": 249.75
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 10,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 1,
+          "critChance": 0.25,
+          "critMult": 2.3,
+          "statusChance": 0.3,
+          "damage": {
+            "impact": 499.96,
+            "slash": 500.08,
+            "puncture": 499.96
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Pathocyst",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 0.66666669,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 0.667,
+          "critChance": 0.2,
+          "critMult": 2.3,
+          "statusChance": 0.35,
+          "damage": {
+            "impact": 58,
+            "slash": 65,
+            "puncture": 55,
+            "viral": 92
+          }
+        },
+        {
+          "name": "Throw",
+          "fireRate": 0.667,
+          "critChance": 0.22,
+          "critMult": 2.4,
+          "statusChance": 0.36,
+          "damage": {
+            "impact": 49,
+            "slash": 80,
+            "puncture": 45,
+            "viral": 123
+          },
+          "shotType": "Thrown"
+        },
+        {
+          "name": "Throw Bounce Explosion",
+          "fireRate": 0.667,
+          "critChance": 0.22,
+          "critMult": 2.4,
+          "statusChance": 0.36,
+          "damage": {
+            "viral": 405
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 4.9,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Throw Recall Explosion",
+          "fireRate": 0.667,
+          "critChance": 0.12,
+          "critMult": 2.4,
+          "statusChance": 0.36,
+          "damage": {
+            "viral": 810
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 4.9,
+            "reduction": 0
+          }
+        },
+        {
+          "name": "Charged Throw",
+          "fireRate": 0.833,
+          "critChance": 0.24,
+          "critMult": 2.5,
+          "statusChance": 0.38,
+          "damage": {
+            "impact": 131,
+            "slash": 137,
+            "puncture": 125,
+            "viral": 201
+          },
+          "chargeTime": 1.2,
+          "shotType": "Thrown"
+        },
+        {
+          "name": "Charged Throw Bounce Explosion",
+          "fireRate": 0.833,
+          "critChance": 0.24,
+          "critMult": 2.5,
+          "statusChance": 0.38,
+          "damage": {
+            "viral": 810
+          },
+          "chargeTime": 1.2,
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 4.9,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Charged Throw Recall Explosion",
+          "fireRate": 0.833,
+          "critChance": 0.24,
+          "critMult": 2.5,
+          "statusChance": 0.38,
+          "damage": {
+            "viral": 1620
+          },
+          "chargeTime": 1.2,
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 4.9,
+            "reduction": 0
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 0.667,
+          "critChance": 0.2,
+          "critMult": 2.3,
+          "statusChance": 0.3,
+          "damage": {
+            "viral": 540
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 5,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 0.667,
+          "critChance": 0.2,
+          "critMult": 2.3,
+          "statusChance": 0.3,
+          "damage": {
+            "viral": 810
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 6,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 0.667,
+          "critChance": 0.2,
+          "critMult": 2.3,
+          "statusChance": 0.35,
+          "damage": {
+            "impact": 58,
+            "slash": 65,
+            "puncture": 55,
+            "viral": 92
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Pox",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 2.0833335,
+      "magazine": 8,
+      "reload": 1,
+      "attacks": [
+        {
+          "name": "Spore Impact",
+          "fireRate": 2.08,
+          "critChance": 0.1,
+          "critMult": 2.2,
+          "statusChance": 0.45,
+          "damage": {
+            "toxin": 55
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Poison Cloud",
+          "fireRate": 1,
+          "critChance": 0.1,
+          "critMult": 2.2,
+          "statusChance": 0.45,
+          "damage": {
+            "toxin": 35
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 2.8,
+            "reduction": 0
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Sporothrix",
+      "category": "Primary",
+      "type": "Sniper",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 1.8333334,
+      "magazine": 11,
+      "reload": 2.5,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1.83,
+          "critChance": 0.05,
+          "critMult": 3,
+          "statusChance": 0.55,
+          "damage": {
+            "impact": 101.52,
+            "slash": 157.92,
+            "puncture": 116.56
+          },
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 400,
+            "end": 600,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "AoE",
+          "fireRate": 1.83,
+          "critChance": 0.05,
+          "critMult": 3,
+          "statusChance": 0.55,
+          "damage": {
+            "slash": 25,
+            "viral": 23
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 2,
+            "reduction": 0.1
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Synapse",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Held",
+      "multishot": 1,
+      "fireRate": 12.000001,
+      "magazine": 76,
+      "reload": 1.5,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 12,
+          "critChance": 0.4,
+          "critMult": 2.7,
+          "statusChance": 0.15,
+          "damage": {
+            "corrosive": 26
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Coda Tysis",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 2.5000002,
+      "magazine": 18,
+      "reload": 1.2,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 2.5,
+          "critChance": 0.13,
+          "critMult": 2,
+          "statusChance": 0.5,
+          "damage": {
+            "impact": 18,
+            "slash": 26,
+            "puncture": 32
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Corrosive DoT",
+          "fireRate": 0,
+          "critChance": 0.13,
+          "critMult": 2,
+          "statusChance": 0.5,
+          "damage": {
+            "corrosive": 59
+          },
+          "shotType": "DoT"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Dual Coda Torxica",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 6.0000005,
+      "magazine": 160,
+      "reload": 2.3299999,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 6,
+          "critChance": 0.25,
+          "critMult": 2.4,
+          "statusChance": 0.28,
+          "damage": {
+            "slash": 32.5,
+            "puncture": 17.5
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Brakk",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Semi",
+      "multishot": 10,
+      "fireRate": 5.0000005,
+      "magazine": 11,
+      "reload": 1.1,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 5,
+          "critChance": 0.29,
+          "critMult": 2,
+          "statusChance": 0.111,
+          "damage": {
+            "impact": 6.75,
+            "slash": 4.5,
+            "puncture": 3.75
+          },
+          "shotType": "Hit-Scan",
+          "falloff": {
+            "start": 10,
+            "end": 20,
+            "reduction": 0.96
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Bramma",
+      "category": "Primary",
+      "type": "Bow",
+      "trigger": "Charge",
+      "multishot": 1,
+      "fireRate": 0.66666669,
+      "magazine": 1,
+      "reload": 0.60000002,
+      "attacks": [
+        {
+          "name": "Charged Shot",
+          "fireRate": 0.667,
+          "critChance": 0.35,
+          "critMult": 2.1,
+          "statusChance": 0.21,
+          "damage": {
+            "impact": 187
+          },
+          "chargeTime": 0.4,
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Radial Attack",
+          "fireRate": 0.667,
+          "critChance": 0.35,
+          "critMult": 2.1,
+          "statusChance": 0.21,
+          "damage": {
+            "blast": 839
+          },
+          "chargeTime": 0.4,
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 8.3,
+            "reduction": 0.9
+          }
+        },
+        {
+          "name": "Cluster Bomb Contact",
+          "fireRate": 1,
+          "critChance": 0.35,
+          "critMult": 2.1,
+          "statusChance": 0.21,
+          "damage": {
+            "impact": 49
+          },
+          "chargeTime": 0.4,
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Cluster Bomb Explosion",
+          "fireRate": 1,
+          "critChance": 0.35,
+          "critMult": 2.1,
+          "statusChance": 0.21,
+          "damage": {
+            "blast": 57
+          },
+          "chargeTime": 0.4,
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 3.5,
+            "reduction": 0.5
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Chakkhurr",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 1.1666667,
+      "magazine": 11,
+      "reload": 3.3,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1.17,
+          "critChance": 0.5,
+          "critMult": 2.3,
+          "statusChance": 0.27,
+          "damage": {
+            "impact": 260
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Explosion",
+          "fireRate": 1.17,
+          "critChance": 0.5,
+          "critMult": 2.3,
+          "statusChance": 0.27,
+          "damage": {
+            "slash": 29,
+            "puncture": 52,
+            "blast": 25
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 2.9,
+            "reduction": 0.3
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Drakgoon",
+      "category": "Primary",
+      "type": "Shotgun",
+      "trigger": "Charge",
+      "multishot": 10,
+      "fireRate": 3.3333335,
+      "magazine": 11,
+      "reload": 2,
+      "attacks": [
+        {
+          "name": "Uncharged Shot",
+          "fireRate": 3.33,
+          "critChance": 0.19,
+          "critMult": 2.1,
+          "statusChance": 0.09,
+          "damage": {
+            "impact": 4.6,
+            "slash": 13.8,
+            "puncture": 4.6
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Charged Shot",
+          "fireRate": 3.33,
+          "critChance": 0.21,
+          "critMult": 2.5,
+          "statusChance": 0.09,
+          "damage": {
+            "impact": 4.6,
+            "slash": 36.8,
+            "puncture": 4.6
+          },
+          "chargeTime": 0.3,
+          "shotType": "Projectile"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Ghoulsaw",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 1.2,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1.2,
+          "critChance": 0.25,
+          "critMult": 2.1,
+          "statusChance": 0.32,
+          "damage": {
+            "impact": 40.09,
+            "slash": 122.38,
+            "puncture": 48.53
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1.2,
+          "critChance": 0.25,
+          "critMult": 2.1,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 422
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 7,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 1.2,
+          "critChance": 0.25,
+          "critMult": 2.1,
+          "statusChance": 0.1,
+          "damage": {
+            "blast": 633
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 9,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 1.2,
+          "critChance": 0.25,
+          "critMult": 2.1,
+          "statusChance": 0.32,
+          "damage": {
+            "impact": 240.54,
+            "slash": 734.28,
+            "puncture": 291.18
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Hek",
+      "category": "Primary",
+      "type": "Shotgun",
+      "trigger": "Semi",
+      "multishot": 7,
+      "fireRate": 2.1666667,
+      "magazine": 4,
+      "reload": 1.9,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 2.17,
+          "critChance": 0.23,
+          "critMult": 2.1,
+          "statusChance": 0.133,
+          "damage": {
+            "impact": 13.05,
+            "slash": 17.4,
+            "puncture": 56.55
+          },
+          "shotType": "Hit-Scan",
+          "falloff": {
+            "start": 15,
+            "end": 30,
+            "reduction": 0.828
+          }
+        },
+        {
+          "name": "Alt-Fire",
+          "fireRate": 1.17,
+          "critChance": 0.23,
+          "critMult": 2.1,
+          "statusChance": 0.0332,
+          "damage": {
+            "impact": 13.05,
+            "slash": 17.4,
+            "puncture": 56.55
+          },
+          "shotType": "Hit-Scan",
+          "falloff": {
+            "start": 15,
+            "end": 30,
+            "reduction": 0.989
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Hind",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Burst",
+      "multishot": 1,
+      "fireRate": 9.09091,
+      "magazine": 90,
+      "reload": 2.3,
+      "attacks": [
+        {
+          "name": "Burst",
+          "fireRate": 5,
+          "critChance": 0.25,
+          "critMult": 2.1,
+          "statusChance": 0.33,
+          "damage": {
+            "impact": 7.5,
+            "slash": 15,
+            "puncture": 7.5
+          },
+          "shotType": "Hit-Scan"
+        },
+        {
+          "name": "Semi-Auto",
+          "fireRate": 2.5,
+          "critChance": 0.37,
+          "critMult": 2.9,
+          "statusChance": 0.21,
+          "damage": {
+            "impact": 18,
+            "slash": 54,
+            "puncture": 18
+          },
+          "shotType": "Hit-Scan"
+        },
+        {
+          "name": "Auto",
+          "fireRate": 10,
+          "critChance": 0.21,
+          "critMult": 1.9,
+          "statusChance": 0.33,
+          "damage": {
+            "impact": 6,
+            "slash": 18,
+            "puncture": 6
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Karak",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 11.666667,
+      "magazine": 70,
+      "reload": 1.7,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 11.67,
+          "critChance": 0.23,
+          "critMult": 2.1,
+          "statusChance": 0.31,
+          "damage": {
+            "impact": 7.13,
+            "slash": 9.66,
+            "puncture": 6.21
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Kohm",
+      "category": "Primary",
+      "type": "Shotgun",
+      "trigger": "Auto",
+      "multishot": 9,
+      "fireRate": 4.166667,
+      "magazine": 209,
+      "reload": 2,
+      "attacks": [
+        {
+          "name": "Single Pellet",
+          "fireRate": 0.8333,
+          "critChance": 0.19,
+          "critMult": 2.3,
+          "statusChance": 0.9,
+          "damage": {
+            "impact": 4,
+            "slash": 12,
+            "puncture": 4
+          },
+          "shotType": "Hit-Scan",
+          "falloff": {
+            "start": 13,
+            "end": 26,
+            "reduction": 0.9
+          }
+        },
+        {
+          "name": "Fully Spooled",
+          "fireRate": 4.17,
+          "critChance": 0.19,
+          "critMult": 2.3,
+          "statusChance": 0.075,
+          "damage": {
+            "impact": 4,
+            "slash": 12,
+            "puncture": 4
+          },
+          "shotType": "Hit-Scan",
+          "falloff": {
+            "start": 13,
+            "end": 26,
+            "reduction": 0.9
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Kraken",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Burst",
+      "multishot": 1,
+      "fireRate": 6.7729087,
+      "magazine": 21,
+      "reload": 1.5,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 2.83,
+          "critChance": 0.21,
+          "critMult": 2.3,
+          "statusChance": 0.29,
+          "damage": {
+            "impact": 32.25,
+            "slash": 5.38,
+            "puncture": 5.38
+          },
+          "shotType": "Hit-Scan"
+        },
+        {
+          "name": "Alt-Fire",
+          "fireRate": 4.17,
+          "critChance": 0.21,
+          "critMult": 2.3,
+          "statusChance": 0.29,
+          "damage": {
+            "impact": 32.25,
+            "slash": 5.38,
+            "puncture": 5.38
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Nukor",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Held",
+      "multishot": 1,
+      "fireRate": 10.000001,
+      "magazine": 77,
+      "reload": 2,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 10,
+          "critChance": 0.07,
+          "critMult": 5,
+          "statusChance": 0.5,
+          "damage": {
+            "radiation": 21
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Ogris",
+      "category": "Primary",
+      "type": "Launcher",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 1.5000001,
+      "magazine": 3,
+      "reload": 2.0999999,
+      "attacks": [
+        {
+          "name": "Rocket Impact",
+          "fireRate": 1.5,
+          "critChance": 0.09,
+          "critMult": 2,
+          "statusChance": 0.47,
+          "damage": {
+            "impact": 18.9,
+            "puncture": 8.1
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Rocket Explosion",
+          "fireRate": 1.5,
+          "critChance": 0.09,
+          "critMult": 2,
+          "statusChance": 0.47,
+          "damage": {
+            "slash": 155,
+            "puncture": 183,
+            "blast": 349
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 7.9,
+            "reduction": 0.8
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Quartakk",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 4.8333335,
+      "magazine": 88,
+      "reload": 1.7,
+      "attacks": [
+        {
+          "name": "Full-Auto",
+          "fireRate": 4.83,
+          "critChance": 0.21,
+          "critMult": 1.9,
+          "statusChance": 0.33,
+          "damage": {
+            "impact": 19.98,
+            "slash": 18.36,
+            "puncture": 15.66
+          },
+          "shotType": "Hit-Scan"
+        },
+        {
+          "name": "Burst-Fire While Aiming",
+          "fireRate": 1.58,
+          "critChance": 0.31,
+          "critMult": 2.3,
+          "statusChance": 0.27,
+          "damage": {
+            "impact": 19.98,
+            "slash": 18.36,
+            "puncture": 15.66
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Seer",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 2.5000002,
+      "magazine": 9,
+      "reload": 2.3,
+      "attacks": [
+        {
+          "name": "Projectile Impact",
+          "fireRate": 2.5,
+          "critChance": 0.21,
+          "critMult": 1.9,
+          "statusChance": 0.33,
+          "damage": {
+            "impact": 26.2,
+            "slash": 36.68,
+            "puncture": 68.12
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Explosion",
+          "fireRate": 2.5,
+          "critChance": 0.21,
+          "critMult": 1.9,
+          "statusChance": 0.33,
+          "damage": {
+            "corrosive": 69
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 2.3,
+            "reduction": 0.3
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Shildeg",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 0.91666669,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 0.917,
+          "critChance": 0.31,
+          "critMult": 2.7,
+          "statusChance": 0.27,
+          "damage": {
+            "impact": 75.85,
+            "slash": 28.7,
+            "puncture": 100.45
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 0.917,
+          "critChance": 0.31,
+          "critMult": 2.7,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 410
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 9,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 0.917,
+          "critChance": 0.31,
+          "critMult": 2.7,
+          "statusChance": 0.1,
+          "damage": {
+            "blast": 615
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 9,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 0.917,
+          "critChance": 0.31,
+          "critMult": 2.7,
+          "statusChance": 0.27,
+          "damage": {
+            "impact": 455.1,
+            "slash": 172.2,
+            "puncture": 602.7
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Sobek",
+      "category": "Primary",
+      "type": "Shotgun",
+      "trigger": "Auto",
+      "multishot": 5,
+      "fireRate": 2.5000002,
+      "magazine": 20,
+      "reload": 2.0999999,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 2.5,
+          "critChance": 0.21,
+          "critMult": 2.3,
+          "statusChance": 0.21,
+          "damage": {
+            "impact": 57.75,
+            "slash": 9.63,
+            "puncture": 9.63
+          },
+          "shotType": "Hit-Scan",
+          "falloff": {
+            "start": 25,
+            "end": 40,
+            "reduction": 0.4805
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Tonkor",
+      "category": "Primary",
+      "type": "Launcher",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 3.1666667,
+      "magazine": 1,
+      "reload": 1.5,
+      "attacks": [
+        {
+          "name": "Grenade Impact",
+          "fireRate": 3.17,
+          "critChance": 0.3,
+          "critMult": 2.5,
+          "statusChance": 0.17,
+          "damage": {
+            "puncture": 59
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Grenade Explosion",
+          "fireRate": 3.17,
+          "critChance": 0.3,
+          "critMult": 2.5,
+          "statusChance": 0.17,
+          "damage": {
+            "slash": 204,
+            "puncture": 168,
+            "blast": 302
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 7,
+            "reduction": 0.7
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Twin Stubbas",
+      "category": "Secondary",
+      "type": "Dual Pistols",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 10.000001,
+      "magazine": 114,
+      "reload": 2.7,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 10,
+          "critChance": 0.23,
+          "critMult": 1.9,
+          "statusChance": 0.31,
+          "damage": {
+            "impact": 11.61,
+            "slash": 12.69,
+            "puncture": 2.7
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Kuva Zarr",
+      "category": "Primary",
+      "type": "Launcher",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 2.1666667,
+      "magazine": 5,
+      "reload": 4.8000002,
+      "attacks": [
+        {
+          "name": "Cannon Mode Projectile",
+          "fireRate": 2.17,
+          "critChance": 0.25,
+          "critMult": 2.5,
+          "statusChance": 0.31,
+          "damage": {
+            "impact": 50
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Cannon Mode Explosion",
+          "fireRate": 2.17,
+          "critChance": 0.25,
+          "critMult": 2.5,
+          "statusChance": 0.31,
+          "damage": {
+            "blast": 673
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 7,
+            "reduction": 0.7
+          }
+        },
+        {
+          "name": "Cannon Mode Cluster Bomb Contact",
+          "fireRate": 2.17,
+          "critChance": 0.25,
+          "critMult": 2.5,
+          "statusChance": 0.31,
+          "damage": {
+            "impact": 15
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Cannon Mode Cluster Bomb Explosion",
+          "fireRate": 2.17,
+          "critChance": 0.25,
+          "critMult": 2.5,
+          "statusChance": 0.31,
+          "damage": {
+            "blast": 50
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 3,
+            "reduction": 0.1
+          }
+        },
+        {
+          "name": "Barrage Mode",
+          "fireRate": 2.17,
+          "critChance": 0.37,
+          "critMult": 2.5,
+          "statusChance": 0.09699999999999999,
+          "damage": {
+            "impact": 15,
+            "slash": 10,
+            "puncture": 25
+          },
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 20,
+            "end": 40,
+            "reduction": 0.98
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Agendus",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 0.91666669,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 0.917,
+          "critChance": 0.24,
+          "critMult": 2,
+          "statusChance": 0.28,
+          "damage": {
+            "impact": 120,
+            "electricity": 140
+          }
+        },
+        {
+          "name": "Energy Disk",
+          "fireRate": 1,
+          "critChance": 0.24,
+          "critMult": 2,
+          "statusChance": 0.28,
+          "damage": {
+            "electricity": 2880
+          },
+          "chargeTime": 1,
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 10,
+            "end": 20,
+            "reduction": 0.9305
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1.08,
+          "critChance": 0.24,
+          "critMult": 2,
+          "statusChance": 0.3,
+          "damage": {
+            "electricity": 520
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 6,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 0.917,
+          "critChance": 0.24,
+          "critMult": 2,
+          "statusChance": 0.3,
+          "damage": {
+            "electricity": 780
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 10,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 0.917,
+          "critChance": 0.24,
+          "critMult": 2,
+          "statusChance": 0.28,
+          "damage": {
+            "impact": 480,
+            "electricity": 560
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Arca Plasmor",
+      "category": "Primary",
+      "type": "Shotgun",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 1,
+      "magazine": 10,
+      "reload": 3,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1,
+          "critChance": 0.22,
+          "critMult": 2,
+          "statusChance": 0.34,
+          "damage": {
+            "radiation": 760
+          },
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 18,
+            "end": 36,
+            "reduction": 0.5
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Cycron",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Held",
+      "multishot": 1,
+      "fireRate": 12.000001,
+      "magazine": 40,
+      "reload": 1.5,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 12,
+          "critChance": 0.2,
+          "critMult": 1.8,
+          "statusChance": 0.4,
+          "damage": {
+            "heat": 22
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true,
+      "battery": {
+        "rate": 40,
+        "delay": 0.5
+      }
+    },
+    {
+      "name": "Tenet Detron",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Semi",
+      "multishot": 10,
+      "fireRate": 3.3333335,
+      "magazine": 6,
+      "reload": 1,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 3.33,
+          "critChance": 0.18,
+          "critMult": 2,
+          "statusChance": 0.1,
+          "damage": {
+            "radiation": 26
+          },
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 26,
+            "end": 52,
+            "reduction": 0.3077
+          }
+        },
+        {
+          "name": "Burst Shot",
+          "fireRate": 2,
+          "critChance": 0.18,
+          "critMult": 2,
+          "statusChance": 0.1,
+          "damage": {
+            "radiation": 26
+          },
+          "shotType": "Projectile",
+          "falloff": {
+            "start": 26,
+            "end": 52,
+            "reduction": 0.3077
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Diplos",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 9.666667,
+      "magazine": 92,
+      "reload": 2.8,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 9.67,
+          "critChance": 0.36,
+          "critMult": 2.2,
+          "statusChance": 0.14,
+          "damage": {
+            "impact": 11.2,
+            "slash": 7.8,
+            "puncture": 9
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Lock-on Mode",
+          "fireRate": 1,
+          "critChance": 0.36,
+          "critMult": 2.2,
+          "statusChance": 0.14,
+          "damage": {
+            "impact": 11.2,
+            "slash": 7.8,
+            "puncture": 9
+          },
+          "shotType": "Projectile"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Envoy",
+      "category": "Primary",
+      "type": "Launcher",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 0.83333337,
+      "magazine": 8,
+      "reload": 4,
+      "attacks": [
+        {
+          "name": "Grenade Impact",
+          "fireRate": 0.83,
+          "critChance": 0.28,
+          "critMult": 2.6,
+          "statusChance": 0.24,
+          "damage": {
+            "impact": 100
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Rocket Explosion",
+          "fireRate": 0.83,
+          "critChance": 0.28,
+          "critMult": 2.6,
+          "statusChance": 0.24,
+          "damage": {
+            "cold": 640
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 8,
+            "reduction": 0.8
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Exec",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 1,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1,
+          "critChance": 0.38,
+          "critMult": 2.4,
+          "statusChance": 0.22,
+          "damage": {
+            "impact": 102.6,
+            "slash": 87.4
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1,
+          "critChance": 0.38,
+          "critMult": 2.4,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 380
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 4,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 1,
+          "critChance": 0.38,
+          "critMult": 2.4,
+          "statusChance": 0,
+          "damage": {
+            "impact": 570
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 4,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 1,
+          "critChance": 0.38,
+          "critMult": 2.4,
+          "statusChance": 0.22,
+          "damage": {
+            "impact": 615.6,
+            "slash": 524.4
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Ferrox",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Charge",
+      "multishot": 1,
+      "fireRate": 2.6666667,
+      "magazine": 20,
+      "reload": 1.8,
+      "attacks": [
+        {
+          "name": "Charged Shot",
+          "fireRate": 2.67,
+          "critChance": 0.34,
+          "critMult": 3,
+          "statusChance": 0.26,
+          "damage": {
+            "impact": 20,
+            "slash": 40,
+            "puncture": 140
+          },
+          "chargeTime": 0.4,
+          "shotType": "Hit-Scan"
+        },
+        {
+          "name": "Radial Attack",
+          "fireRate": 2.67,
+          "critChance": 0.34,
+          "critMult": 3,
+          "statusChance": 0.26,
+          "damage": {
+            "impact": 6,
+            "slash": 12,
+            "puncture": 42
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 4,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Spear Throw",
+          "fireRate": 1,
+          "critChance": 0.04,
+          "critMult": 2,
+          "statusChance": 0.4,
+          "damage": {
+            "impact": 35,
+            "slash": 10,
+            "puncture": 5
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Attraction Field",
+          "fireRate": 0.5,
+          "critChance": 0.04,
+          "critMult": 2,
+          "statusChance": 0.5,
+          "damage": {
+            "electricity": 150
+          },
+          "shotType": "AoE"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Flux Rifle",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 15.000001,
+      "magazine": 120,
+      "reload": 1.8,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 15,
+          "critChance": 0.2,
+          "critMult": 1.8,
+          "statusChance": 0.26,
+          "damage": {
+            "slash": 17.16,
+            "puncture": 4.84
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Glaxion",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Held",
+      "multishot": 1,
+      "fireRate": 12.000001,
+      "magazine": 90,
+      "reload": 2,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 12,
+          "critChance": 0.2,
+          "critMult": 2.2,
+          "statusChance": 0.4,
+          "damage": {
+            "cold": 34
+          },
+          "shotType": "Hit-Scan"
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Grigori",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 1.0833334,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1.08,
+          "critChance": 0.24,
+          "critMult": 1.6,
+          "statusChance": 0.38,
+          "damage": {
+            "impact": 9.1,
+            "slash": 136.8,
+            "puncture": 82.1
+          }
+        },
+        {
+          "name": "Energy Disk",
+          "fireRate": 1,
+          "critChance": 0.24,
+          "critMult": 1.6,
+          "statusChance": 0.38,
+          "damage": {
+            "impact": 1360,
+            "slash": 1360,
+            "puncture": 1360
+          },
+          "chargeTime": 1,
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1.08,
+          "critChance": 0.24,
+          "critMult": 1.6,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 456
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 8,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 1.08,
+          "critChance": 0.24,
+          "critMult": 1.6,
+          "statusChance": 0.1,
+          "damage": {
+            "blast": 684
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 9,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 1.08,
+          "critChance": 0.24,
+          "critMult": 1.6,
+          "statusChance": 0.38,
+          "damage": {
+            "impact": 54.6,
+            "slash": 820.8,
+            "puncture": 492.6
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Livia",
+      "category": "Melee",
+      "type": "Melee",
+      "trigger": null,
+      "multishot": 1,
+      "fireRate": 1.0833334,
+      "magazine": 0,
+      "reload": 0,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 1.08,
+          "critChance": 0.28,
+          "critMult": 2.2,
+          "statusChance": 0.28,
+          "damage": {
+            "impact": 9.9,
+            "slash": 178.2,
+            "puncture": 9.9
+          }
+        },
+        {
+          "name": "Slam Attack",
+          "fireRate": 1.08,
+          "critChance": 0.28,
+          "critMult": 2.2,
+          "statusChance": 0.1,
+          "damage": {
+            "impact": 396
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 7,
+            "reduction": 0.5
+          }
+        },
+        {
+          "name": "Heavy Slam Attack",
+          "fireRate": 1.08,
+          "critChance": 0.28,
+          "critMult": 2.2,
+          "statusChance": 0.1,
+          "damage": {
+            "blast": 594
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 8,
+            "reduction": 0.3
+          }
+        },
+        {
+          "name": "Heavy Attack",
+          "fireRate": 1.08,
+          "critChance": 0.28,
+          "critMult": 2.2,
+          "statusChance": 0.28,
+          "damage": {
+            "impact": 59.4,
+            "slash": 1069.2,
+            "puncture": 59.4
+          },
+          "heavy": true
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Plinx",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 3.3333335,
+      "magazine": 10,
+      "reload": 1.3,
+      "attacks": [
+        {
+          "name": "Semi-Auto",
+          "fireRate": 3.33,
+          "critChance": 0.44,
+          "critMult": 3,
+          "statusChance": 0.12,
+          "damage": {
+            "puncture": 40,
+            "heat": 30
+          },
+          "shotType": "Hit-Scan"
+        },
+        {
+          "name": "Alt-Fire",
+          "fireRate": 1,
+          "critChance": 0.4,
+          "critMult": 3,
+          "statusChance": 0.2,
+          "damage": {
+            "impact": 100
+          },
+          "chargeTime": 0.8,
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Alt-Fire AoE",
+          "fireRate": 1,
+          "critChance": 0.4,
+          "critMult": 3,
+          "statusChance": 0.5,
+          "damage": {
+            "radiation": 100
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 6,
+            "reduction": 0.4
+          }
+        }
+      ],
+      "adversary": true,
+      "battery": {
+        "rate": 20,
+        "delay": 0.8
+      }
+    },
+    {
+      "name": "Tenet Quanta",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Held",
+      "multishot": 2,
+      "fireRate": 10.000001,
+      "magazine": 100,
+      "reload": 2,
+      "attacks": [
+        {
+          "name": "Beam",
+          "fireRate": 10,
+          "critChance": 0.31,
+          "critMult": 2.5,
+          "statusChance": 0.26,
+          "damage": {
+            "electricity": 18
+          },
+          "shotType": "Hit-Scan"
+        },
+        {
+          "name": "Cube (direct hit)",
+          "fireRate": 4,
+          "critChance": 0.05,
+          "critMult": 1.5,
+          "statusChance": 1,
+          "damage": {
+            "electricity": 180
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Cube Explosion",
+          "fireRate": 4,
+          "critChance": 0.05,
+          "critMult": 1.5,
+          "statusChance": 0.26,
+          "damage": {
+            "blast": 150
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 0.5,
+            "reduction": 0
+          }
+        },
+        {
+          "name": "Cube (shot by player)",
+          "fireRate": 4,
+          "critChance": 0.05,
+          "critMult": 1.5,
+          "statusChance": 0.26,
+          "damage": {
+            "blast": 600
+          },
+          "falloff": {
+            "start": 0,
+            "end": 6,
+            "reduction": 0
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Spirex",
+      "category": "Secondary",
+      "type": "Pistol",
+      "trigger": "Semi",
+      "multishot": 1,
+      "fireRate": 2.3333335,
+      "magazine": 8,
+      "reload": 2.4000001,
+      "attacks": [
+        {
+          "name": "Slug Impact",
+          "fireRate": 2.33,
+          "critChance": 0.26,
+          "critMult": 2.4,
+          "statusChance": 0.4,
+          "damage": {
+            "impact": 40,
+            "puncture": 20,
+            "heat": 60
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Explosion",
+          "fireRate": 2.33,
+          "critChance": 0.26,
+          "critMult": 2.4,
+          "statusChance": 0.4,
+          "damage": {
+            "heat": 80
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 2,
+            "reduction": 0.2
+          }
+        }
+      ],
+      "adversary": true
+    },
+    {
+      "name": "Tenet Tetra",
+      "category": "Primary",
+      "type": "Rifle",
+      "trigger": "Auto",
+      "multishot": 1,
+      "fireRate": 5.0000005,
+      "magazine": 80,
+      "reload": 2.2,
+      "attacks": [
+        {
+          "name": "Normal Attack",
+          "fireRate": 5,
+          "critChance": 0.28,
+          "critMult": 2.2,
+          "statusChance": 0.3,
+          "damage": {
+            "impact": 13.2,
+            "slash": 13.2,
+            "puncture": 33.6
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Grenade Impact",
+          "fireRate": 1.33,
+          "critChance": 0.28,
+          "critMult": 2.2,
+          "statusChance": 0.3,
+          "damage": {
+            "impact": 200
+          },
+          "shotType": "Projectile"
+        },
+        {
+          "name": "Grenade AoE",
+          "fireRate": 1.33,
+          "critChance": 0.28,
+          "critMult": 2.2,
+          "statusChance": 0.3,
+          "damage": {
+            "blast": 1000
+          },
+          "shotType": "AoE",
+          "falloff": {
+            "start": 0,
+            "end": 8,
+            "reduction": 0.6
+          }
+        }
+      ],
+      "adversary": true
+    }
+  ]
+}

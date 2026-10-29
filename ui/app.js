@@ -186,6 +186,44 @@
   }
   renderShards();
 
+  // Valence / Valence Fusion (adversary weapons). Sources: wiki Valence_Fusion, Kuva_Weapons, Progenitor.
+  function updateValenceHint() {
+    const hint = $('valenceHint');
+    if (!hint || !state.weapon) return;
+    const el = $('valenceEl').value;
+    const pct = S.normalizeValencePct(parseFloat($('valencePct').value) || 0);
+    if (!el || !(pct > 0)) { hint.hidden = true; hint.textContent = ''; return; }
+    const atk = state.weapon.attacks[$('attack').value] || state.weapon.attacks[0];
+    const base = Object.values(atk.damage || {}).reduce((a, b) => a + b, 0);
+    const extra = base * pct;
+    hint.hidden = false;
+    hint.textContent = `+${fmt(extra)} ${el} base on this attack (${Math.round(pct * 1000) / 10}% of ${fmt(base)})`;
+  }
+  function updateValenceFuse() {
+    const out = $('valenceFuseOut');
+    if (!out) return;
+    const a = parseFloat($('valenceFuseA').value) || 0;
+    const b = parseFloat($('valenceFuseB').value) || 0;
+    const r = S.valenceFusion(a, b);
+    const pct = Math.round(r * 1000) / 10;
+    out.textContent = `→ ${pct}%${pct >= 60 ? ' (capped)' : ''}`;
+  }
+  function wireValence() {
+    const refresh = () => { updateValenceHint(); updateValenceFuse(); };
+    ['valenceEl', 'valencePct'].forEach(id => { const n = $(id); if (n) n.addEventListener('input', refresh); });
+    ['valenceFuseA', 'valenceFuseB'].forEach(id => { const n = $(id); if (n) n.addEventListener('input', updateValenceFuse); });
+    const apply = $('valenceFuseApply');
+    if (apply) apply.addEventListener('click', () => {
+      const a = parseFloat($('valenceFuseA').value) || 0;
+      const b = parseFloat($('valenceFuseB').value) || 0;
+      $('valencePct').value = Math.round(S.valenceFusion(a, b) * 1000) / 10;
+      updateValenceHint();
+      update();
+    });
+    updateValenceFuse();
+  }
+  wireValence();
+
   function renderWeapon() {
     const w = state.weapon;
     const im = $('weaponImg');
@@ -202,7 +240,9 @@
       w.magazine ? ['Mag', w.magazine] : null, w.reload ? ['Reload', +(+w.reload).toFixed(2) + 's'] : null, ['MR', w.mastery],
       w.disposition ? ['Riven', R.DISPOSITION + 'x'] : null
     ].filter(Boolean).map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
-    $('valenceRow').hidden = !S.isAdversaryWeapon(w.name);
+    const adv = S.isAdversaryWeapon(w.name);
+    $('valenceRow').hidden = !adv;
+    if (adv) updateValenceHint();
     renderStance();
     const pas = S.WEAPON_PASSIVES[w.name];
     $('passiveNote').hidden = !pas;
@@ -614,7 +654,7 @@
       slotRanks: state.ranks.slice(),
       slotPolarities: state.pols.slice(),
       incarnon: Object.keys(state.incarnon).length ? Object.assign({}, state.incarnon) : undefined,
-      valence: S.isAdversaryWeapon(state.weapon.name) && $('valenceEl').value ? { element: $('valenceEl').value, pct: Math.min(60, Math.max(25, parseFloat($('valencePct').value) || 60)) / 100 } : undefined,
+      valence: S.isAdversaryWeapon(state.weapon.name) && $('valenceEl').value ? { element: $('valenceEl').value, pct: S.normalizeValencePct(parseFloat($('valencePct').value) || 60) } : undefined,
       arcanes: state.arcanes.filter(Boolean),
       arcaneSlots: state.arcanes.slice(),
       shards: readShards(),
@@ -682,7 +722,10 @@
     if (b.slotPolarities) b.slotPolarities.slice(0, SLOT_COUNT + 1).forEach((p, i) => { state.pols[i] = p || null; });
     else if (w) { (w.polarities || []).slice(0, SLOT_COUNT).forEach((p, i) => { state.pols[i] = p; }); state.pols[SLOT_COUNT] = w.exilusPolarity || null; }
     state.incarnon = Object.assign({}, b.incarnon || {});
-    $('valenceEl').value = (b.valence && b.valence.element) || ''; $('valencePct').value = b.valence && b.valence.pct ? Math.round(b.valence.pct * 1000) / 10 : 60;
+    $('valenceEl').value = (b.valence && b.valence.element) || '';
+    $('valencePct').value = b.valence && b.valence.pct ? Math.round(S.normalizeValencePct(b.valence.pct) * 1000) / 10 : 60;
+    updateValenceHint();
+    updateValenceFuse();
     if (b.arcaneSlots) state.arcanes = [b.arcaneSlots[0] || null, b.arcaneSlots[1] || null];
     else {
       const arcs = (b.arcanes || []).map(n => E.findArcane(D, n)).filter(Boolean);

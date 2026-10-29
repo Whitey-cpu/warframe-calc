@@ -48,8 +48,8 @@
   </ol></nav>
 
   <h2 id="base">1. Base damage</h2>
-  <p>Every attack lists damage split into types: Impact, Puncture and Slash (physical) and sometimes an element. Kuva, Tenet and Coda weapons add a Valence bonus: 25 to 60% of base damage as one extra type, counted as base damage.</p>
-  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Damage" target="_blank" rel="noopener">Damage</a>, <a href="https://wiki.warframe.com/w/Kuva_Weapons" target="_blank" rel="noopener">Kuva Weapons</a></p>
+  <p>Every attack lists damage split into types: Impact, Puncture and Slash (physical) and sometimes an element. Kuva, Tenet, Coda and Dual Coda weapons add a Valence bonus: 25 to 60% of base damage as one extra type (Impact, Heat, Cold, Electricity, Toxin, Magnetic or Radiation), counted as base damage. Elemental mods scale from that raised base. For combining, a Valence primary is treated as innate and joins after mod slots in HCET order (Heat → Cold → Electricity → Toxin). Valence Fusion raises the percent: <code>min(1.1 × max(A, B), 60%)</code>, floored to 0.1%, then ≥58% snaps to 60%.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Damage" target="_blank" rel="noopener">Damage</a>, <a href="https://wiki.warframe.com/w/Kuva_Weapons" target="_blank" rel="noopener">Kuva Weapons</a>, <a href="https://wiki.warframe.com/w/Valence_Fusion" target="_blank" rel="noopener">Valence Fusion</a>, <a href="https://wiki.warframe.com/w/Progenitor" target="_blank" rel="noopener">Progenitor</a></p>
 
   <h2 id="mods">2. Damage mods</h2>
   <p>Base damage mods (Serration, Point Blank, Primary Merciless stacks) add together into one pool, then multiply every damage type:</p>
@@ -64,8 +64,8 @@
     <tr><td>Heat + Toxin</td><td>Gas</td></tr><tr><td>Cold + Electricity</td><td>Magnetic</td></tr>
     <tr><td>Cold + Toxin</td><td>Viral</td></tr><tr><td>Electricity + Toxin</td><td>Corrosive</td></tr>
   </tbody></table>
-  <p>A weapon's own innate element joins the combination last.</p>
-  <p class="src">Source: <a href="https://wiki.warframe.com/w/Damage/Overview_Table" target="_blank" rel="noopener">Damage overview</a></p>
+  <p>A weapon's own innate primary elements and any Valence primary join after the mod slots, in HCET order (Heat, Cold, Electricity, Toxin). Matching a modded primary merges into that mod's type instead of opening a new slot.</p>
+  <p class="src">Sources: <a href="https://wiki.warframe.com/w/Damage/Overview_Table" target="_blank" rel="noopener">Damage overview</a>, <a href="https://wiki.warframe.com/w/Dual_Coda_Torxica" target="_blank" rel="noopener">Dual Coda Torxica (HCET table)</a></p>
 
   <h2 id="quant">4. Quantization</h2>
   <p>The game rounds each damage type to a multiple of 1/32 of the attack's base damage. Small elemental bonuses can round away; that is why the arsenal screen and the actual hit can differ slightly.</p>
