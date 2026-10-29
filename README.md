@@ -171,4 +171,5 @@ scripts/sync-data.js   Data download/build
 scripts/scrape-patches.js, scripts/patch-notes.js   Game updates feed (data/game-updates.json/.js)
 data/                  Generated game data (game-data.json for CLI, game-data.js for UI), changelog.js
 examples/, test/       Sample builds, wiki-based tests
+.cursor/skills/        Cursor Agent Skills for calculator UX and Warframe-toned web design
 ```
