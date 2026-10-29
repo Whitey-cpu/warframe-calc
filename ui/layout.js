@@ -52,8 +52,28 @@
   window.WFSelectTab = selectTab;
 
   // ---------------- phone: bottom bar views + mod browser sheet ----------------
+  // Desktop: the mod browser stays collapsed until Browse mods / an empty slot (progressive disclosure).
   let mview = 'mods';
   const GROUP_FIRST = { stats: 'arsenal', enemy: 'enemy', more: 'optimize' };
+  const BROWSER_KEY = 'wfcalc.browserOpen';
+  function browserOpen() { return root.dataset.browser === 'open'; }
+  function refreshBrowserBtn() {
+    const btn = $('openBrowser');
+    if (!btn) return;
+    const on = isMobile() ? document.body.classList.contains('sheet-open') : browserOpen();
+    btn.setAttribute('aria-expanded', String(on));
+    btn.textContent = isMobile() ? 'Browse mods' : (on ? 'Hide mods' : 'Browse mods');
+  }
+  function setBrowserOpen(open, opts) {
+    const on = !!open;
+    root.dataset.browser = on ? 'open' : 'closed';
+    if (!opts || opts.save !== false) store.set(BROWSER_KEY, on);
+    refreshBrowserBtn();
+    if (on && !isMobile() && (!opts || opts.scroll !== false)) {
+      const br = $('browser');
+      if (br && typeof br.scrollIntoView === 'function') br.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
   function applyMobileView() {
     const mobile = isMobile();
     if (mobile) root.dataset.mv = mview; else delete root.dataset.mv;
@@ -65,6 +85,7 @@
       if (!cur || cur.dataset.mgroup !== mview) selectTab(GROUP_FIRST[mview]);
     }
     if (!mobile) closeSheet(true);
+    refreshBrowserBtn();
   }
   $('bottomBar').addEventListener('click', e => {
     const b = e.target.closest('[data-mv]'); if (!b) return;
@@ -89,6 +110,7 @@
     [...appMain.children].forEach(el => { if (el.id !== 'browser') el.inert = true; });
     $('bottomBar').inert = true;
     history.pushState({ wfSheet: 1 }, '');
+    refreshBrowserBtn();
     $('modSearch').focus({ preventScroll: true });
   }
   function closeSheet(silent) {
@@ -98,19 +120,87 @@
     $('browser').removeAttribute('aria-modal');
     [...appMain.children].forEach(el => { el.inert = false; });
     $('bottomBar').inert = false;
+    refreshBrowserBtn();
     if (!silent && history.state && history.state.wfSheet) history.back();
     if (!silent) $('openBrowser').focus({ preventScroll: true });
   }
-  $('openBrowser').addEventListener('click', openSheet);
+  function openBrowserUI() {
+    if (isMobile()) openSheet();
+    else setBrowserOpen(true);
+  }
+  function toggleBrowserUI() {
+    if (isMobile()) {
+      if (document.body.classList.contains('sheet-open')) closeSheet();
+      else openSheet();
+      return;
+    }
+    setBrowserOpen(!browserOpen());
+  }
+  $('openBrowser').addEventListener('click', toggleBrowserUI);
   $('closeBrowser').addEventListener('click', () => closeSheet());
   window.addEventListener('popstate', () => closeSheet(true));
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('sheet-open')) closeSheet(); });
-  // tapping an empty slot on a phone opens the browser
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (document.body.classList.contains('sheet-open')) closeSheet();
+    else if (!isMobile() && browserOpen()) setBrowserOpen(false);
+  });
+  // empty slot: open the browser (sheet on phones, expand on desktop)
   $('slots').addEventListener('click', e => {
     const slot = e.target.closest('.slot');
-    if (slot && !slot.querySelector('.mod') && !e.target.closest('button')) openSheet();
+    if (slot && !slot.querySelector('.mod') && !e.target.closest('button')) openBrowserUI();
+  });
+  window.WFOpenBrowser = openBrowserUI;
+
+  // ---------------- build path (weapon → mods → results) ----------------
+  function goBuildStep(step) {
+    if (step === 'weapon') { $('pickWeapon').click(); return; }
+    if (step === 'mods') {
+      if (isMobile()) { mview = 'mods'; applyMobileView(); window.scrollTo({ top: 0 }); }
+      openBrowserUI();
+      return;
+    }
+    if (step === 'results') {
+      if (isMobile()) { mview = 'stats'; applyMobileView(); }
+      selectTab('dps', true);
+      const pane = $('pane-dps');
+      if (pane && typeof pane.scrollIntoView === 'function') pane.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+  $('buildPath').addEventListener('click', e => {
+    const b = e.target.closest('[data-bp] button, [data-bp]');
+    const li = e.target.closest('[data-bp]');
+    if (!li) return;
+    goBuildStep(li.dataset.bp);
+  });
+  window.WFSetBuildPath = function (state) {
+    const hasWeapon = !!(state && state.weapon);
+    const hasMods = !!(state && state.mods && state.mods.some(Boolean));
+    const items = [...document.querySelectorAll('#buildPath [data-bp]')];
+    items.forEach(li => {
+      const step = li.dataset.bp;
+      let cls = 'todo';
+      if (step === 'weapon') cls = hasWeapon ? 'done' : 'current';
+      else if (step === 'mods') cls = !hasWeapon ? 'todo' : (hasMods ? 'done' : 'current');
+      else if (step === 'results') cls = hasWeapon && hasMods ? 'current' : (hasWeapon ? 'todo' : 'todo');
+      li.className = cls;
+      if (cls === 'current') li.setAttribute('aria-current', 'step');
+      else li.removeAttribute('aria-current');
+    });
+    const hint = $('buildPathHint');
+    if (!hint) return;
+    if (!hasWeapon) hint.textContent = 'Start by choosing a weapon.';
+    else if (!hasMods) hint.textContent = 'Fit mods into the slots, then check Results.';
+    else hint.textContent = 'Tune the build and read DPS & time to kill.';
+  };
+
+  // close the More / Edit menus when clicking outside
+  document.addEventListener('click', e => {
+    document.querySelectorAll('.top-more[open], .cfg-more[open]').forEach(d => {
+      if (!d.contains(e.target)) d.removeAttribute('open');
+    });
   });
 
+  setBrowserOpen(store.get(BROWSER_KEY, false), { save: false, scroll: false });
   setLayout(root.dataset.layout === 'classic' ? 'classic' : 'arsenal');
 
   // ======================================================================
@@ -337,7 +427,12 @@
     UI.isConfigBuild = name => name.startsWith(CLOUD_PREFIX);
 
     // ---------------- hook into results ----------------
-    UI.hooks.push((b, r) => { renderGameStats(b, r); renderCombat(b, r); });
+    UI.hooks.push((b, r) => {
+      renderGameStats(b, r);
+      renderCombat(b, r);
+      if (window.WFSetBuildPath) window.WFSetBuildPath({ weapon: state.weapon, mods: state.mods });
+    });
+    if (window.WFSetBuildPath) window.WFSetBuildPath({ weapon: state.weapon, mods: state.mods });
     renderCfgTabs();
     renderCapHead();
     applyMobileView();

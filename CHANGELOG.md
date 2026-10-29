@@ -4,9 +4,24 @@ Newest first. The site shows the same list under "What's new". Game data refresh
 
 ## TL;DR
 
+- **UX declutter**: One quieter first view — collapsed mod browser, Weapon → Mods → Results path, thinner chrome.
 - **v0.15.0**: Rivens follow Hotfix 44.1.3, with a new crafting suite and a build importer that reads screenshots.
 - **v0.14.0**: The Windows app now updates itself.
 - **v0.13.1**: More accurate critical headshots, Heat damage and armor, with a Critical headshots setting on the Enemy tab.
+
+## UX declutter (unreleased)
+
+**TL;DR:** The arsenal view shows less at once. Pick a weapon, open mods when you need them, then check results.
+
+### Changed
+
+- Desktop mod browser stays closed until you press Browse mods or click an empty slot (same idea as the phone sheet). Your choice is remembered.
+- A short Weapon → Mods → Results path sits under the top bar and jumps to each step.
+- Secondary top-bar actions (background, layout, feedback, download, data line) sit under More.
+- Config undo / redo / clear sit under Edit; Ask Teshin stays visible.
+- Arsenal stat list is behind a disclosure so the combat headline can lead.
+- Incarnon evolutions stay collapsed until opened (auto-open if any perk is picked).
+- Service worker cache bumped to wfcalc-v28.
 
 ## v0.15.0 (2026-10-22)
 
