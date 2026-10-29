@@ -5,6 +5,19 @@
  */
 window.WF_CHANGELOG = [
   {
+    version: '0.15.1', date: '2026-10-29',
+    tldr: 'Quieter first view: collapsed mod browser, Weapon → Mods → Results path, thinner chrome.',
+    sections: [
+      { title: 'Changed', items: [
+        'On desktop the mod browser stays closed until you press Browse mods or click an empty slot. The phone sheet is unchanged.',
+        'A short Weapon → Mods → Results path under the top bar jumps to each step.',
+        'Background, layout, feedback and download sit under More; config undo/redo/clear sit under Edit.',
+        'Arsenal stats and Incarnon evolutions stay collapsed so the combat headline and mod board can lead.',
+        'Service worker cache bumped to wfcalc-v28.'
+      ] }
+    ]
+  },
+  {
     version: '0.15.0', date: '2026-10-22',
     tldr: 'Rivens follow Hotfix 44.1.3, with a new crafting suite and a build importer that reads screenshots.',
     sections: [

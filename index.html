@@ -14,7 +14,8 @@
 <meta name="description" content="Free Warframe damage calculator and build optimizer: mods, arcanes, Warframe buffs, enemy scaling, time to kill.">
 <link rel="stylesheet" href="ui/style.css">
 <script>try { document.documentElement.dataset.layout = localStorage.getItem('wfcalc.layout') || 'arsenal'; } catch (e) { document.documentElement.dataset.layout = 'arsenal'; }
-try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.dataset.mode = m === 'beginner' || m === 'advanced' ? m : (localStorage.getItem('wfcalc.last.v1') ? 'advanced' : 'beginner'); } catch (e) { document.documentElement.dataset.mode = 'beginner'; }</script>
+try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.dataset.mode = m === 'beginner' || m === 'advanced' ? m : (localStorage.getItem('wfcalc.last.v1') ? 'advanced' : 'beginner'); } catch (e) { document.documentElement.dataset.mode = 'beginner'; }
+try { document.documentElement.dataset.browser = localStorage.getItem('wfcalc.browserOpen') === 'true' ? 'open' : 'closed'; } catch (e) { document.documentElement.dataset.browser = 'closed'; }</script>
 </head>
 <body>
 <div id="bgArt" aria-hidden="true"></div>
@@ -23,7 +24,6 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
     <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="16" cy="16" r="2.5" fill="currentColor"/><path d="M16 1v8M16 23v8M1 16h8M23 16h8" stroke="currentColor" stroke-width="2.5"/></svg>
     <h1>Warframe Damage Calc</h1>
   </div>
-  <a id="dataInfo" class="muted small" href="#dataSources"></a>
   <span class="spacer"></span>
   <div class="mode-switch" role="group" aria-label="Detail level" title="Beginner shows the essentials; Advanced shows every setting, the Simulacrum and full breakdowns">
     <button type="button" class="btn ghost sm" data-mode="beginner" aria-pressed="true">Beginner</button>
@@ -31,14 +31,29 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
   </div>
   <a class="btn ghost sm" href="learn.html" title="How the damage math works">Learn</a>
   <button type="button" id="whatsNew" class="btn ghost sm" title="Game updates, live events and site changes">What's new</button>
-  <button type="button" id="bgButton" class="btn ghost sm" title="Choose a background from the official Warframe Fansite Kit">Background</button>
-  <button type="button" id="layoutToggle" class="btn ghost sm" title="Switch between the arsenal layout and the classic layout">Classic view</button>
   <button type="button" id="themeToggle" class="btn ghost sm" title="Switch light/dark theme" aria-label="Switch theme">&#9680;</button>
-  <a id="feedbackLink" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/issues/new" target="_blank" rel="noopener" title="Report a bug or wrong number">Feedback</a>
-  <a id="downloadApp" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Download Windows app</a>
+  <details class="top-more">
+    <summary class="btn ghost sm" title="Background, layout, feedback and more">More</summary>
+    <div class="top-more-panel" role="group" aria-label="More tools">
+      <a id="dataInfo" class="muted small" href="#dataSources"></a>
+      <button type="button" id="bgButton" class="btn ghost sm" title="Choose a background from the official Warframe Fansite Kit">Background</button>
+      <button type="button" id="layoutToggle" class="btn ghost sm" title="Switch between the arsenal layout and the classic layout">Classic view</button>
+      <a id="feedbackLink" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/issues/new" target="_blank" rel="noopener" title="Report a bug or wrong number">Feedback</a>
+      <a id="downloadApp" class="btn ghost sm" href="https://github.com/Whitey-cpu/warframe-calc/releases/latest" target="_blank" rel="noopener">Download Windows app</a>
+    </div>
+  </details>
   <button type="button" id="updateData" class="btn ghost" hidden>Update game data</button>
   <div id="account"></div>
 </header>
+
+<nav class="build-path" id="buildPath" aria-label="Build steps">
+  <ol>
+    <li data-bp="weapon"><button type="button" id="bpWeapon">1. Weapon</button></li>
+    <li data-bp="mods" aria-current="step"><button type="button" id="bpMods">2. Mods</button></li>
+    <li data-bp="results"><button type="button" id="bpResults">3. Results</button></li>
+  </ol>
+  <p class="build-path-hint muted small" id="buildPathHint">Pick a weapon, fit mods, then check DPS.</p>
+</nav>
 
 <div id="updateBanner" class="banner" role="status" hidden></div>
 <div id="patchBanner" class="banner" hidden></div>
@@ -64,10 +79,15 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
     <div class="ars-configs">
       <div class="cfg-tabs" id="cfgTabs" role="tablist" aria-label="Build configs for this weapon"></div>
       <div class="cfg-tools">
-        <button type="button" class="btn ghost sm" id="undoBtn" title="Undo (Ctrl+Z)" disabled>&#8630;<span class="lbl"> Undo</span></button>
-        <button type="button" class="btn ghost sm" id="redoBtn" title="Redo (Ctrl+Y)" disabled>&#8631;<span class="lbl"> Redo</span></button>
-        <button type="button" class="btn ghost sm" id="clearMods" title="Remove all mods">Remove all</button>
         <button type="button" class="btn sm teshin-btn" id="askTeshin" title="Does this weapon lean crit, status or hybrid? Plus patch ideas and sleepers">Ask Teshin</button>
+        <details class="cfg-more">
+          <summary class="btn ghost sm" title="Undo, redo and clear mods">Edit</summary>
+          <div class="cfg-more-panel">
+            <button type="button" class="btn ghost sm" id="undoBtn" title="Undo (Ctrl+Z)" disabled>&#8630;<span class="lbl"> Undo</span></button>
+            <button type="button" class="btn ghost sm" id="redoBtn" title="Redo (Ctrl+Y)" disabled>&#8631;<span class="lbl"> Redo</span></button>
+            <button type="button" class="btn ghost sm" id="clearMods" title="Remove all mods">Remove all</button>
+          </div>
+        </details>
       </div>
     </div>
   </section>
@@ -104,7 +124,10 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
         <details id="weaponNotesFull" class="muted small data-notes-full" hidden></details>
       </div>
       <div id="combatHead" class="combat-head"></div>
-      <div id="gameStats" class="game-stats"></div>
+      <details class="arsenal-stats-box" id="arsenalStatsBox">
+        <summary>Arsenal stats <span class="muted">(in-game Upgrade numbers)</span></summary>
+        <div id="gameStats" class="game-stats"></div>
+      </details>
       <details class="ov" data-adv>
         <summary>Base stat overrides</summary>
         <div class="grid4">
@@ -350,10 +373,10 @@ try { var m = localStorage.getItem('wfcalc.mode'); document.documentElement.data
       <span class="muted small" id="drainInfo"></span>
       <span class="spacer"></span>
       <label class="check small"><input type="checkbox" id="showDelta" checked> Show mod value</label>
-      <button type="button" class="btn sm only-mobile" id="openBrowser">+ Add mods</button>
+      <button type="button" class="btn sm" id="openBrowser" aria-expanded="false" aria-controls="browser">Browse mods</button>
     </div>
-    <p class="hint only-desktop">Drag mods into slots or click to add. Drag slots to reorder (element order matters: first slot combines first). Right-click a slot to remove.</p>
-    <p class="hint only-mobile">Tap a mod to add it. To move one, tap its slot, then tap the slot to move it to (element order matters: first slot combines first).</p>
+    <p class="hint only-desktop" id="boardHint">Use Browse mods, or click an empty slot. Drag slots to reorder (element order matters). Right-click a slot to remove.</p>
+    <p class="hint only-mobile">Tap Browse mods or an empty slot. To move one, tap its slot, then the destination (element order matters).</p>
     <div id="incarnonPanel" class="panel inc-panel" hidden></div>
   </section>
 
