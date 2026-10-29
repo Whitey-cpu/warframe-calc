@@ -9,6 +9,9 @@
   const pct = n => (n * 100).toFixed(1) + '%';
   const IMG = name => name ? 'https://cdn.warframestat.us/img/' + encodeURIComponent(name) : '';
   const SLOT_COUNT = 8;
+  // touch reordering: tap a filled slot to pick it up, then tap a slot to move or swap it (see the slots click handler)
+  const coarsePointer = window.matchMedia('(pointer: coarse)');
+  let picked = null;
   const STORE_KEY = 'wfcalc.builds.v1';
   const LAST_KEY = 'wfcalc.last.v1';
   const OWNED_KEY = 'wfcalc.owned.v1';
@@ -281,6 +284,7 @@
     }).join('');
     const total = state.mods.reduce((t, n, i) => { const m = n && findModByName(n); return t + (m ? modDrain(m, slotRank(i, m)) : 0); }, 0);
     $('drainInfo').textContent = names.length ? `${names.length} mods, ${total} drain before polarity` : '';
+    setPicked(picked);
     if (window.WFUI && WFUI.onSlots) WFUI.onSlots();
     renderStacks();
     markUsed();
@@ -307,6 +311,22 @@
     clearTimeout(flash.t); flash.t = setTimeout(() => { el.textContent = el.dataset.prev; el.style.color = ''; delete el.dataset.prev; }, 2500);
   }
 
+  // move or swap a mod between two slots: the rules for drag and drop and for tap-to-place
+  function moveSlot(from, to) {
+    const name = state.mods[from];
+    if (to === SLOT_COUNT && !(findModByName(name) || {}).exilus) { flash(`${name} cannot go in the exilus slot.`); return false; }
+    if (from === SLOT_COUNT && state.mods[to] && !(findModByName(state.mods[to]) || {}).exilus) { flash('That mod cannot go in the exilus slot.'); return false; }
+    [state.mods[from], state.mods[to]] = [state.mods[to], state.mods[from]];
+    if (from < SLOT_COUNT && to < SLOT_COUNT) [state.locks[from], state.locks[to]] = [state.locks[to], state.locks[from]];
+    renderSlots(); update();
+    return true;
+  }
+  function setPicked(i) {
+    picked = i;
+    document.querySelectorAll('#slots .slot.picked').forEach(s => s.classList.remove('picked'));
+    const s = i != null && document.querySelector(`#slots .slot[data-slot="${i}"]`); if (s) s.classList.add('picked');
+  }
+
   // slot interactions
   $('slots').addEventListener('click', e => {
     if (e.target.closest('.mod.riven') && !e.target.closest('button') && window.WFUI && WFUI.openRiven) { WFUI.openRiven(); return; }
@@ -327,6 +347,19 @@
     if (lock) { const i = +lock.dataset.lock; state.locks[i] = !state.locks[i]; lock.setAttribute('aria-pressed', state.locks[i]); return; }
     const rm = e.target.closest('[data-remove]');
     if (rm) { const i = +rm.dataset.remove; state.mods[i] = null; state.ranks[i] = null; if (i < SLOT_COUNT) state.locks[i] = false; renderSlots(); update(); return; }
+    // touch (coarse pointer): tap a filled slot to pick it up, then tap a slot to move or swap it; drag and drop needs a mouse
+    const tapSlot = e.target.closest('.slot');
+    if (tapSlot && coarsePointer.matches) {
+      if (picked != null && !state.mods[picked]) setPicked(null);
+      const i = +tapSlot.dataset.slot;
+      if (picked != null || state.mods[i]) {
+        if (picked == null) { setPicked(i); flashMsg(`Picked ${state.mods[i]}. Tap a slot to move it there, or tap it again to cancel.`); return; }
+        const from = picked; setPicked(null);
+        if (from === i) { flashMsg('Cancelled.'); return; }
+        moveSlot(from, i);
+        return;
+      }
+    }
     const slot = e.target.closest('.slot');
     if (slot && !state.mods[+slot.dataset.slot] && !window.matchMedia('(max-width: 760px)').matches) { $('modSearch').focus(); $('modSearch').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   });
@@ -353,13 +386,8 @@
     const s = e.target.closest('.slot'); if (!s || !dragName) return;
     e.preventDefault(); s.classList.remove('over');
     const to = +s.dataset.slot;
-    if (dragFrom != null) {
-      if (to === SLOT_COUNT && !(findModByName(dragName) || {}).exilus) { flash(`${dragName} cannot go in the exilus slot.`); return; }
-      if (dragFrom === SLOT_COUNT && state.mods[to] && !(findModByName(state.mods[to]) || {}).exilus) { flash('That mod cannot go in the exilus slot.'); return; }
-      [state.mods[dragFrom], state.mods[to]] = [state.mods[to], state.mods[dragFrom]];
-      if (dragFrom < SLOT_COUNT && to < SLOT_COUNT) [state.locks[dragFrom], state.locks[to]] = [state.locks[to], state.locks[dragFrom]];
-      renderSlots(); update();
-    } else addMod(dragName, to);
+    if (dragFrom != null) moveSlot(dragFrom, to);
+    else addMod(dragName, to);
     dragName = dragFrom = null;
   });
   document.addEventListener('dragend', () => { dragName = dragFrom = null; document.querySelectorAll('.slot.over').forEach(s => s.classList.remove('over')); });
