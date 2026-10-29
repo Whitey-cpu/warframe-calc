@@ -330,6 +330,7 @@ details.lb > summary::after { content: ' \25BE'; color: var(--muted); }
 .btn.liked { color: light-dark(#b0234f, #ff6b8a); border-color: light-dark(#b0234f, #ff6b8a); }
 @media (max-width: 480px) { .pub { grid-template-columns: 1fr auto auto; } .pub-img { display: none; } }
 .slot .slot-n { left: 30px; }
+.slot.picked { outline: 2px solid var(--accent); outline-offset: 2px; }
 .extra-attacks { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; margin: -4px 0 6px; }
 .extra-attacks label { margin: 0; }
 #selfStatusBox:empty { display: none; }
