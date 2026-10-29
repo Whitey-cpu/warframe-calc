@@ -425,6 +425,9 @@
     renderModBrowser();
   });
   const RANK = { Common: 0, Uncommon: 1, Rare: 2, Legendary: 3 };
+  // The browser shows a page of mods at a time; a new search, filter or weapon starts again from the first page.
+  const MOD_PAGE = 24;
+  let modLimit = MOD_PAGE, modFilterKey = '';
   function renderModBrowser() {
     if (!state.weapon) { $('modGrid').innerHTML = ''; $('modCount').textContent = 'Choose a weapon to see mods that fit it.'; return; }
     const q = $('modSearch').value.trim().toLowerCase();
@@ -433,10 +436,23 @@
     let list = compatMods.filter(m => modInCat(m, modCat) && (!rar || m.rarity === rar) &&
       (!q || m.name.toLowerCase().includes(q) || modFx(m).toLowerCase().includes(q)));
     list.sort((a, b) => sort === 'drain' ? modDrain(b) - modDrain(a) : sort === 'rarity' ? (RANK[b.rarity] || 0) - (RANK[a.rarity] || 0) || a.name.localeCompare(b.name) : a.name.localeCompare(b.name));
+    const filterKey = [state.weapon.name, modCat, q, rar, sort].join('|');
+    if (filterKey !== modFilterKey) { modFilterKey = filterKey; modLimit = MOD_PAGE; }
     $('modCount').textContent = `${list.length} of ${compatMods.length} mods for ${state.weapon.name}. Click or press Enter to add, or drag onto a slot.`;
     const showRiven = (modCat === 'all' || modCat === 'other') && (!q || 'riven mod'.includes(q) || q.includes('riven'));
-    $('modGrid').innerHTML = (showRiven ? modCard(R.synthMod(state.riven, state.weapon), { cls: 'riven-pick', addable: true }) : '') + list.map(m => modCard(m, { own: true, addable: true })).join('');
+    const shown = list.slice(0, modLimit);
+    $('modGrid').innerHTML = (showRiven ? modCard(R.synthMod(state.riven, state.weapon), { cls: 'riven-pick', addable: true }) : '') + shown.map(m => modCard(m, { own: true, addable: true })).join('');
+    renderMore(list.length, shown.length);
     markUsed();
+  }
+  function renderMore(total, shown) {
+    const wrap = $('modMore');
+    const hadFocus = document.activeElement && document.activeElement.id === 'modMoreBtn';
+    if (total <= shown) { wrap.innerHTML = ''; return; }
+    const next = Math.min(MOD_PAGE, total - shown);
+    wrap.innerHTML = `<button type="button" class="btn ghost sm" id="modMoreBtn">Show ${next} more mods (${total - shown} left)</button>`;
+    $('modMoreBtn').onclick = () => { modLimit += MOD_PAGE; renderModBrowser(); };
+    if (hadFocus) $('modMoreBtn').focus();
   }
   function markUsed() {
     const used = new Set(state.mods.filter(Boolean));
